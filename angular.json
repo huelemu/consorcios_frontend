@@ -59,10 +59,23 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "port": 7200
+          },
           "configurations": {
-            "production": {
-              "buildTarget": "consorcios-frontend:build:production"
-            },
+          "production": {
+            "budgets": [
+              { "type": "initial", "maximumWarning": "500kB", "maximumError": "1MB" },
+              { "type": "anyComponentStyle", "maximumWarning": "4kB", "maximumError": "8kB" }
+            ],
+            "outputHashing": "all",
+            "fileReplacements": [
+              {
+                "replace": "src/environments/environment.ts",
+                "with": "src/environments/environment.prod.ts"
+              }
+            ]
+          },
             "development": {
               "buildTarget": "consorcios-frontend:build:development"
             }
@@ -94,5 +107,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }
