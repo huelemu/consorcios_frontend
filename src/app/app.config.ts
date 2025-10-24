@@ -2,16 +2,17 @@ import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { appRoutes } from './app.routes';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-import { provideAnimations } from '@angular/platform-browser/animations';
-import { importProvidersFrom } from '@angular/core';
-import { SocialLoginModule, SocialAuthServiceConfig, GoogleLoginProvider } from '@abacritt/angularx-social-login';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { 
+  SocialAuthServiceConfig, 
+  GoogleLoginProvider 
+} from '@abacritt/angularx-social-login';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(appRoutes),
     provideHttpClient(withInterceptorsFromDi()),
-    provideAnimations(),
-    importProvidersFrom(SocialLoginModule),
+    provideAnimationsAsync(),
     {
       provide: 'SocialAuthServiceConfig',
       useValue: {
@@ -22,6 +23,9 @@ export const appConfig: ApplicationConfig = {
             provider: new GoogleLoginProvider('214922698115-lsq51vuo1k32l9nknl96nu6bccrlfb48.apps.googleusercontent.com'),
           },
         ],
+        onError: (err: any) => {
+          console.error('Error en Social Auth:', err);
+        }
       } as SocialAuthServiceConfig,
     },
   ],
