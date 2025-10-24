@@ -47,7 +47,13 @@
                   "maximumError": "8kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ]
             },
             "development": {
               "optimization": false,
@@ -63,19 +69,9 @@
             "port": 7200
           },
           "configurations": {
-          "production": {
-            "budgets": [
-              { "type": "initial", "maximumWarning": "500kB", "maximumError": "1MB" },
-              { "type": "anyComponentStyle", "maximumWarning": "4kB", "maximumError": "8kB" }
-            ],
-            "outputHashing": "all",
-            "fileReplacements": [
-              {
-                "replace": "src/environments/environment.ts",
-                "with": "src/environments/environment.prod.ts"
-              }
-            ]
-          },
+            "production": {
+              "buildTarget": "consorcios-frontend:build:production"
+            },
             "development": {
               "buildTarget": "consorcios-frontend:build:development"
             }
