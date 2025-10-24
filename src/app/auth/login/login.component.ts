@@ -1,8 +1,7 @@
-import { Component } from '@angular/core';
-import { SocialAuthService, GoogleLoginProvider } from '@abacritt/angularx-social-login';
-import { AuthService } from '../auth.service';
+import { Component, OnInit, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { GoogleAuthService } from '../google-auth.service';
 
 @Component({
   selector: 'app-login',
@@ -11,22 +10,50 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './login.component.html',
   styleUrls: []
 })
+export class LoginComponent implements OnInit, AfterViewInit {
+  @ViewChild('googleButton', { static: false }) googleButton!: ElementRef;
+  loading = false;
+  error = '';
 
-export class LoginComponent {
-  constructor(private socialAuthService: SocialAuthService, private authService: AuthService) {}
+  constructor(
+    private googleAuthService: GoogleAuthService,
+    private router: Router
+  ) {}
 
-  loginWithGoogle() {
-    this.socialAuthService.signIn(GoogleLoginProvider.PROVIDER_ID).then((user: any) => {
-      this.authService.googleLogin(user.idToken).subscribe({
-        next: (res: any) => {
-          localStorage.setItem('token', res.token);
-          window.location.href = '/dashboard';
-        },
-        error: (err: any) => {
-          console.error('Error login:', err);
-          alert('Error en el login');
-        },
-      });
+  ngOnInit(): void {
+    // Inicializar Google Sign-In
+    this.googleAuthService.initializeGoogleSignIn(
+      (response: any) => this.handleGoogleResponse(response)
+    );
+  }
+
+  ngAfterViewInit(): void {
+    // Renderizar el botón de Google después de que la vista esté lista
+    if (this.googleButton) {
+      this.googleAuthService.renderButton(this.googleButton.nativeElement);
+    }
+  }
+
+  handleGoogleResponse(response: any): void {
+    this.loading = true;
+    this.error = '';
+
+    // Enviar el credential al backend
+    this.googleAuthService.loginWithGoogle(response.credential).subscribe({
+      next: (res: any) => {
+        console.log('Login exitoso:', res);
+        
+        // Guardar token y usuario
+        this.googleAuthService.saveSession(res.token, res.user);
+        
+        // Redirigir al dashboard
+        this.router.navigate(['/dashboard']);
+      },
+      error: (err: any) => {
+        console.error('Error en login:', err);
+        this.error = 'Error al iniciar sesión. Por favor intenta nuevamente.';
+        this.loading = false;
+      }
     });
   }
 }
