@@ -1,0 +1,344 @@
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="bg-white rounded-2xl shadow-lg p-8 mb-6">
+      <button
+        (click)="goBack()"
+        class="flex items-center text-blue-600 hover:text-blue-800 mb-4 transition"
+      >
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        Volver
+      </button>
+      
+      <h1 class="text-4xl font-bold text-gray-900 mb-2">Términos de Servicio</h1>
+      <p class="text-gray-600">Última actualización: 24 de Octubre, 2025</p>
+    </div>
+
+    <!-- Contenido -->
+    <div class="bg-white rounded-2xl shadow-lg p-8 prose prose-blue max-w-none">
+      
+      <!-- Introducción -->
+      <section class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">1. Aceptación de los Términos</h2>
+        <p class="text-gray-700 leading-relaxed">
+          Bienvenido a Consorcios. Estos Términos de Servicio ("Términos") constituyen un acuerdo legal vinculante entre 
+          tú ("Usuario", "tú" o "tu") y Consorcios SRL ("Consorcios", "nosotros", "nuestro" o "nos") que rige tu acceso 
+          y uso de nuestra plataforma de gestión de consorcios.
+        </p>
+        <p class="text-gray-700 leading-relaxed mt-4">
+          Al acceder o usar nuestros servicios, aceptas estar sujeto a estos Términos. Si no estás de acuerdo con alguna 
+          parte de estos términos, no podrás acceder al servicio.
+        </p>
+        <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 my-4 rounded">
+          <p class="text-yellow-800">
+            <strong>Importante:</strong> Debes tener al menos 18 años para utilizar este servicio. Al usar nuestros servicios, 
+            declaras que tienes la capacidad legal para celebrar este acuerdo.
+          </p>
+        </div>
+      </section>
+
+      <!-- Descripción del servicio -->
+      <section class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">2. Descripción del Servicio</h2>
+        <p class="text-gray-700 mb-4">Consorcios proporciona una plataforma digital para:</p>
+        <ul class="list-disc pl-6 text-gray-700 space-y-2">
+          <li>Gestión administrativa de edificios y consorcios</li>
+          <li>Administración de unidades funcionales</li>
+          <li>Gestión de expensas y pagos</li>
+          <li>Sistema de tickets y reclamos</li>
+          <li>Comunicación entre administradores, propietarios e inquilinos</li>
+          <li>Gestión de proveedores y servicios</li>
+          <li>Reportes y estadísticas</li>
+        </ul>
+        <p class="text-gray-700 mt-4">
+          Nos reservamos el derecho de modificar, suspender o discontinuar cualquier aspecto del servicio en cualquier momento, 
+          con o sin previo aviso.
+        </p>
+      </section>
+
+      <!-- Registro y cuenta -->
+      <section class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">3. Registro y Cuenta de Usuario</h2>
+        
+        <h3 class="text-xl font-semibold text-gray-800 mb-3">3.1 Creación de Cuenta</h3>
+        <p class="text-gray-700 mb-4">Para utilizar nuestros servicios, debes:</p>
+        <ul class="list-disc pl-6 text-gray-700 space-y-2">
+          <li>Proporcionar información precisa, actual y completa durante el registro</li>
+          <li>Mantener y actualizar tu información para que siga siendo precisa</li>
+          <li>Ser responsable de mantener la seguridad de tu cuenta y contraseña</li>
+          <li>Notificarnos inmediatamente sobre cualquier uso no autorizado de tu cuenta</li>
+        </ul>
+
+        <h3 class="text-xl font-semibold text-gray-800 mb-3 mt-6">3.2 Responsabilidad de la Cuenta</h3>
+        <p class="text-gray-700">
+          Eres totalmente responsable de todas las actividades que ocurran bajo tu cuenta. No compartiremos tu contraseña 
+          con terceros ni te solicitaremos tu contraseña por email o teléfono. Consorcios no se hace responsable por pérdidas 
+          derivadas del uso no autorizado de tu cuenta.
+        </p>
+
+        <h3 class="text-xl font-semibold text-gray-800 mb-3 mt-6">3.3 Tipos de Cuentas</h3>
+        <ul class="list-disc pl-6 text-gray-700 space-y-2">
+          <li><strong>Administrador Global:</strong> Control total del sistema (solo personal de Consorcios)</li>
+          <li><strong>Administrador de Consorcio:</strong> Gestión de uno o varios consorcios</li>
+          <li><strong>Propietario:</strong> Acceso a información de sus unidades</li>
+          <li><strong>Inquilino:</strong> Acceso limitado a información de la unidad que ocupa</li>
+          <li><strong>Proveedor:</strong> Acceso a tickets y servicios asignados</li>
+        </ul>
+      </section>
+
+      <!-- Uso aceptable -->
+      <section class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">4. Uso Aceptable</h2>
+        
+        <h3 class="text-xl font-semibold text-gray-800 mb-3">4.1 Prohibiciones</h3>
+        <p class="text-gray-700 mb-4">Al usar nuestros servicios, aceptas NO:</p>
+        <ul class="list-disc pl-6 text-gray-700 space-y-2">
+          <li>Violar ninguna ley, reglamento o regulación aplicable</li>
+          <li>Infringir derechos de propiedad intelectual de terceros</li>
+          <li>Transmitir virus, malware o código malicioso</li>
+          <li>Intentar obtener acceso no autorizado a sistemas o cuentas</li>
+          <li>Interferir con el funcionamiento normal del servicio</li>
+          <li>Realizar ingeniería inversa o descompilar el software</li>
+          <li>Usar el servicio para actividades fraudulentas o ilegales</li>
+          <li>Hostigar, abusar, amenazar o difamar a otros usuarios</li>
+          <li>Recopilar información de otros usuarios sin consentimiento</li>
+          <li>Crear múltiples cuentas para evadir restricciones</li>
+          <li>Usar bots, scripts o automatización sin autorización</li>
+          <li>Revender o redistribuir el servicio sin permiso</li>
+        </ul>
+
+        <h3 class="text-xl font-semibold text-gray-800 mb-3 mt-6">4.2 Contenido del Usuario</h3>
+        <p class="text-gray-700">
+          Eres responsable del contenido que publicas, compartes o transmites a través de nuestros servicios. 
+          Garantizas que tienes todos los derechos necesarios sobre ese contenido y que no infringe derechos de terceros.
+        </p>
+      </section>
+
+      <!-- Propiedad intelectual -->
+      <section class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">5. Propiedad Intelectual</h2>
+        
+        <h3 class="text-xl font-semibold text-gray-800 mb-3">5.1 Nuestros Derechos</h3>
+        <p class="text-gray-700 mb-4">
+          Todo el contenido, características y funcionalidad de nuestros servicios (incluyendo pero no limitado a texto, 
+          gráficos, logos, iconos, imágenes, clips de audio, descargas digitales, compilaciones de datos y software) son 
+          propiedad de Consorcios SRL o sus licenciantes y están protegidos por leyes de propiedad intelectual.
+        </p>
+
+        <h3 class="text-xl font-semibold text-gray-800 mb-3">5.2 Tus Derechos</h3>
+        <p class="text-gray-700">
+          Retienes todos los derechos sobre el contenido que subes o creas en la plataforma. Al usar nuestros servicios, 
+          nos otorgas una licencia limitada, no exclusiva, mundial y libre de regalías para usar, almacenar y procesar 
+          ese contenido únicamente con el fin de proporcionar el servicio.
+        </p>
+      </section>
+
+      <!-- Pagos y facturación -->
+      <section class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">6. Pagos y Facturación</h2>
+        
+        <h3 class="text-xl font-semibold text-gray-800 mb-3">6.1 Tarifas</h3>
+        <p class="text-gray-700">
+          Algunas funciones de nuestros servicios pueden requerir pago de tarifas. Las tarifas aplicables se te 
+          comunicarán claramente antes de que te comprometas a pagar. Todas las tarifas son en pesos argentinos (ARS) 
+          a menos que se indique lo contrario.
+        </p>
+
+        <h3 class="text-xl font-semibold text-gray-800 mb-3 mt-4">6.2 Métodos de Pago</h3>
+        <p class="text-gray-700">
+          Aceptamos varios métodos de pago a través de procesadores de pago seguros de terceros. Al proporcionar información 
+          de pago, garantizas que estás autorizado para usar ese método de pago.
+        </p>
+
+        <h3 class="text-xl font-semibold text-gray-800 mb-3 mt-4">6.3 Renovaciones y Cancelaciones</h3>
+        <p class="text-gray-700">
+          Las suscripciones se renuevan automáticamente a menos que las canceles antes del próximo período de facturación. 
+          Puedes cancelar tu suscripción en cualquier momento desde la configuración de tu cuenta. No se realizan reembolsos 
+          por períodos parciales.
+        </p>
+      </section>
+
+      <!-- Limitación de responsabilidad -->
+      <section class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">7. Limitación de Responsabilidad</h2>
+        
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded mb-4">
+          <p class="text-red-800 font-semibold mb-2">RENUNCIA DE GARANTÍAS</p>
+          <p class="text-red-800 text-sm">
+            NUESTROS SERVICIOS SE PROPORCIONAN "TAL CUAL" Y "SEGÚN DISPONIBILIDAD" SIN GARANTÍAS DE NINGÚN TIPO, 
+            YA SEAN EXPRESAS O IMPLÍCITAS. NO GARANTIZAMOS QUE EL SERVICIO SEA ININTERRUMPIDO, SEGURO O LIBRE DE ERRORES.
+          </p>
+        </div>
+
+        <p class="text-gray-700 mb-4">
+          En la medida máxima permitida por la ley, Consorcios y sus afiliados, directores, empleados y agentes no serán 
+          responsables por:
+        </p>
+        <ul class="list-disc pl-6 text-gray-700 space-y-2">
+          <li>Daños indirectos, incidentales, especiales o consecuentes</li>
+          <li>Pérdida de beneficios, datos, uso o buena voluntad</li>
+          <li>Interrupciones del servicio o problemas de seguridad</li>
+          <li>Errores o inexactitudes en el contenido</li>
+          <li>Daños resultantes del uso o imposibilidad de usar el servicio</li>
+        </ul>
+
+        <p class="text-gray-700 mt-4">
+          Nuestra responsabilidad total hacia ti por cualquier reclamo no excederá el monto que hayas pagado a Consorcios 
+          en los 12 meses anteriores al evento que dio lugar al reclamo.
+        </p>
+      </section>
+
+      <!-- Indemnización -->
+      <section class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">8. Indemnización</h2>
+        <p class="text-gray-700">
+          Aceptas indemnizar, defender y eximir de responsabilidad a Consorcios y sus afiliados, directores, empleados y 
+          agentes de cualquier reclamo, responsabilidad, daño, pérdida y gasto (incluyendo honorarios legales razonables) 
+          que surja de:
+        </p>
+        <ul class="list-disc pl-6 text-gray-700 space-y-2 mt-4">
+          <li>Tu uso o mal uso de los servicios</li>
+          <li>Tu violación de estos Términos</li>
+          <li>Tu violación de derechos de terceros</li>
+          <li>Cualquier contenido que publiques o transmitas</li>
+        </ul>
+      </section>
+
+      <!-- Terminación -->
+      <section class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">9. Terminación del Servicio</h2>
+        
+        <h3 class="text-xl font-semibold text-gray-800 mb-3">9.1 Por Tu Parte</h3>
+        <p class="text-gray-700">
+          Puedes terminar tu cuenta en cualquier momento desde la configuración de tu cuenta o contactándonos. 
+          La terminación será efectiva al final del período de facturación actual si tienes una suscripción activa.
+        </p>
+
+        <h3 class="text-xl font-semibold text-gray-800 mb-3 mt-4">9.2 Por Nuestra Parte</h3>
+        <p class="text-gray-700">
+          Nos reservamos el derecho de suspender o terminar tu acceso a los servicios inmediatamente, sin previo aviso, por:
+        </p>
+        <ul class="list-disc pl-6 text-gray-700 space-y-2 mt-2">
+          <li>Violación de estos Términos</li>
+          <li>Actividad fraudulenta o ilegal</li>
+          <li>Falta de pago de tarifas</li>
+          <li>Abuso o mal uso del servicio</li>
+          <li>Por razones legales o regulatorias</li>
+        </ul>
+
+        <h3 class="text-xl font-semibold text-gray-800 mb-3 mt-4">9.3 Efectos de la Terminación</h3>
+        <p class="text-gray-700">
+          Tras la terminación, tu derecho a usar los servicios cesará inmediatamente. Podemos eliminar tu cuenta y todo 
+          el contenido asociado después de 30 días. Algunas disposiciones de estos Términos sobrevivirán a la terminación.
+        </p>
+      </section>
+
+      <!-- Modificaciones -->
+      <section class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">10. Modificaciones de los Términos</h2>
+        <p class="text-gray-700">
+          Nos reservamos el derecho de modificar estos Términos en cualquier momento. Si realizamos cambios materiales, 
+          te notificaremos mediante:
+        </p>
+        <ul class="list-disc pl-6 text-gray-700 space-y-2 mt-2">
+          <li>Email a tu dirección registrada</li>
+          <li>Notificación destacada en nuestro sitio web</li>
+          <li>Notificación dentro de la aplicación</li>
+        </ul>
+        <p class="text-gray-700 mt-4">
+          Tu uso continuado de los servicios después de la fecha efectiva de los términos revisados constituye tu aceptación 
+          de dichos términos. Si no estás de acuerdo con los nuevos términos, debes dejar de usar los servicios.
+        </p>
+      </section>
+
+      <!-- Resolución de disputas -->
+      <section class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">11. Resolución de Disputas</h2>
+        
+        <h3 class="text-xl font-semibold text-gray-800 mb-3">11.1 Ley Aplicable</h3>
+        <p class="text-gray-700">
+          Estos Términos se regirán e interpretarán de acuerdo con las leyes de la República Argentina, sin dar efecto a 
+          ninguna disposición sobre conflicto de leyes.
+        </p>
+
+        <h3 class="text-xl font-semibold text-gray-800 mb-3 mt-4">11.2 Jurisdicción</h3>
+        <p class="text-gray-700">
+          Cualquier disputa que surja de o relacionada con estos Términos o los servicios será sometida a la jurisdicción 
+          exclusiva de los tribunales de la Ciudad Autónoma de Buenos Aires, Argentina.
+        </p>
+
+        <h3 class="text-xl font-semibold text-gray-800 mb-3 mt-4">11.3 Resolución Informal</h3>
+        <p class="text-gray-700">
+          Antes de iniciar cualquier acción legal, aceptas intentar resolver la disputa informalmente contactándonos y 
+          dándonos 30 días para resolver el asunto.
+        </p>
+      </section>
+
+      <!-- Disposiciones generales -->
+      <section class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">12. Disposiciones Generales</h2>
+        
+        <h3 class="text-xl font-semibold text-gray-800 mb-3">12.1 Acuerdo Completo</h3>
+        <p class="text-gray-700">
+          Estos Términos, junto con nuestra Política de Privacidad, constituyen el acuerdo completo entre tú y Consorcios 
+          respecto al uso de los servicios.
+        </p>
+
+        <h3 class="text-xl font-semibold text-gray-800 mb-3 mt-4">12.2 Divisibilidad</h3>
+        <p class="text-gray-700">
+          Si alguna disposición de estos Términos se considera inválida o inaplicable, las disposiciones restantes 
+          permanecerán en pleno vigor y efecto.
+        </p>
+
+        <h3 class="text-xl font-semibold text-gray-800 mb-3 mt-4">12.3 Renuncia</h3>
+        <p class="text-gray-700">
+          Ninguna renuncia a cualquier término de este acuerdo se considerará una renuncia adicional o continua de dicho 
+          término o cualquier otro término.
+        </p>
+
+        <h3 class="text-xl font-semibold text-gray-800 mb-3 mt-4">12.4 Cesión</h3>
+        <p class="text-gray-700">
+          No puedes ceder ni transferir estos Términos o tu cuenta sin nuestro consentimiento previo por escrito. Podemos 
+          ceder estos Términos sin restricciones.
+        </p>
+      </section>
+
+      <!-- Contacto -->
+      <section class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">13. Contacto</h2>
+        <p class="text-gray-700 mb-4">
+          Si tienes preguntas sobre estos Términos de Servicio, puedes contactarnos:
+        </p>
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+          <p class="text-gray-700"><strong>Email:</strong> <a href="mailto:legal@consorcios.com" class="text-blue-600 hover:text-blue-800">legal&#64;consorcios.com</a></p>
+          <p class="text-gray-700 mt-2"><strong>Dirección:</strong> Consorcios SRL, Buenos Aires, Argentina</p>
+          <p class="text-gray-700 mt-2"><strong>Teléfono:</strong> +54 11 1234-5678</p>
+          <p class="text-gray-700 mt-2"><strong>Horario de atención:</strong> Lunes a Viernes, 9:00 - 18:00 hs</p>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <div class="border-t border-gray-200 pt-6 mt-8">
+        <p class="text-sm text-gray-500 text-center">
+          Al crear una cuenta y utilizar nuestros servicios, reconoces que has leído, comprendido y aceptado estos Términos de Servicio.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Botón volver -->
+    <div class="mt-6 text-center">
+      <button
+        (click)="goBack()"
+        class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition"
+      >
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        Volver al Login
+      </button>
+    </div>
+  </div>
+</div>
