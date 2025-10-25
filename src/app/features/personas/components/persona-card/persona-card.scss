@@ -1,0 +1,102 @@
+// Estilos para PersonaCardComponent
+.persona-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover {
+    transform: translateY(-4px);
+  }
+}
+
+// Animación de entrada
+.persona-card {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Efecto hover en botones
+button {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    transform: scale(1.02);
+  }
+  
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+// Animación del avatar en hover de la card
+.persona-card:hover .avatar {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+}
+
+// Gradiente del header
+.bg-gradient-to-r {
+  background-image: linear-gradient(to right, #3b82f6, #2563eb);
+}
+
+// Badge animado
+.persona-card:hover .badge {
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+// Efecto de iluminación en hover
+.persona-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(59, 130, 246, 0.05),
+    transparent
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.persona-card:hover::before {
+  opacity: 1;
+}
+
+// Iconos con animación
+svg {
+  transition: transform 0.2s ease;
+}
+
+button:hover svg {
+  transform: scale(1.1);
+}
+
+// Responsive adjustments
+@media (max-width: 640px) {
+  .persona-card {
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
+}

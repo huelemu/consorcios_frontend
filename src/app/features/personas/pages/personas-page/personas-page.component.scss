@@ -1,0 +1,27 @@
+// Estilos personalizados para PersonasPageComponent
+// Tailwind CSS maneja la mayoría del styling
+
+.personas-page {
+  // Añadir cualquier estilo custom aquí si es necesario
+}
+
+// Animaciones suaves para las transiciones
+.fade-enter {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// Loader spinner animation
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

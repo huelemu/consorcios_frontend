@@ -1,0 +1,50 @@
+// Estilos para PersonasListComponent
+.personas-list {
+  // Tailwind maneja la mayoría del styling
+}
+
+// Animación para las filas de la tabla
+tbody tr {
+  transition: background-color 0.15s ease-in-out;
+}
+
+// Hover effect mejorado para botones de acción
+button {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+// Estilos para avatares
+.avatar-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+// Responsive table
+@media (max-width: 768px) {
+  .personas-list {
+    // Mobile optimizations
+  }
+}
+
+// Animación fade-in para las cards mobile
+.mobile-card {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

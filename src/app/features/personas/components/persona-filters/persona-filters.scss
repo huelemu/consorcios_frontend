@@ -1,0 +1,27 @@
+// Estilos personalizados para PersonaFiltersComponent
+// Tailwind CSS maneja la mayoría del styling
+
+.filters-container {
+  // Añadir cualquier estilo custom aquí si es necesario
+}
+
+// Animación suave para el debounce
+input[type="text"] {
+  transition: all 0.2s ease-in-out;
+}
+
+// Estilos para los badges de filtros activos
+.filter-badge {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

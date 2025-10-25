@@ -1,0 +1,197 @@
+<div class="personas-page bg-gray-50 min-h-screen p-6">
+  <!-- Header -->
+  <div class="max-w-7xl mx-auto mb-6">
+    <div class="flex justify-between items-center mb-4">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Gestión de Personas</h1>
+        <p class="text-gray-600 mt-1">
+          Administra personas físicas y jurídicas del sistema
+        </p>
+      </div>
+      <button
+        (click)="openCreateModal()"
+        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition-colors flex items-center gap-2"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Nueva Persona
+      </button>
+    </div>
+
+    <!-- Estadísticas -->
+    <div *ngIf="stats" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Total Personas</p>
+            <p class="text-2xl font-bold text-gray-900">{{ stats.total }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 bg-green-100 rounded-lg p-3">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Personas Físicas</p>
+            <p class="text-2xl font-bold text-gray-900">{{ stats.fisicas }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 bg-purple-100 rounded-lg p-3">
+            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Personas Jurídicas</p>
+            <p class="text-2xl font-bold text-gray-900">{{ stats.juridicas }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="max-w-7xl mx-auto mb-6">
+    <app-persona-filters
+      [filters]="filters"
+      (filtersChange)="onFiltersChange($event)"
+    ></app-persona-filters>
+  </div>
+
+  <!-- Tabs y vista -->
+  <div class="max-w-7xl mx-auto">
+    <div class="bg-white rounded-lg shadow">
+      <!-- Tabs Header -->
+      <div class="border-b border-gray-200">
+        <div class="flex items-center justify-between px-6 py-4">
+          <nav class="flex space-x-8">
+            <button
+              (click)="setView('list')"
+              [class.border-blue-600]="activeView === 'list'"
+              [class.text-blue-600]="activeView === 'list'"
+              [class.border-transparent]="activeView !== 'list'"
+              [class.text-gray-500]="activeView !== 'list'"
+              class="border-b-2 pb-2 px-1 text-sm font-medium transition-colors hover:text-blue-600 hover:border-blue-300 flex items-center gap-2"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+              </svg>
+              Vista Lista
+            </button>
+            <button
+              (click)="setView('cards')"
+              [class.border-blue-600]="activeView === 'cards'"
+              [class.text-blue-600]="activeView === 'cards'"
+              [class.border-transparent]="activeView !== 'cards'"
+              [class.text-gray-500]="activeView !== 'cards'"
+              class="border-b-2 pb-2 px-1 text-sm font-medium transition-colors hover:text-blue-600 hover:border-blue-300 flex items-center gap-2"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+              </svg>
+              Vista Tarjetas
+            </button>
+          </nav>
+          <div class="text-sm text-gray-600">
+            Mostrando {{ personas.length }} de {{ total }} personas
+          </div>
+        </div>
+      </div>
+
+      <!-- Loader -->
+      <div *ngIf="loading" class="flex justify-center items-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+
+      <!-- Error -->
+      <div *ngIf="error && !loading" class="p-6">
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start">
+          <svg class="w-5 h-5 text-red-600 mt-0.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div>
+            <h3 class="text-sm font-medium text-red-800">Error</h3>
+            <p class="text-sm text-red-700 mt-1">{{ error }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vista Lista -->
+      <div *ngIf="activeView === 'list' && !loading && !error">
+        <app-personas-list
+          [personas]="personas"
+          (edit)="openEditModal($event)"
+          (delete)="onDeletePersona($event)"
+        ></app-personas-list>
+      </div>
+
+      <!-- Vista Tarjetas -->
+      <div *ngIf="activeView === 'cards' && !loading && !error">
+        <app-personas-cards
+          [personas]="personas"
+          (edit)="openEditModal($event)"
+          (delete)="onDeletePersona($event)"
+        ></app-personas-cards>
+      </div>
+
+      <!-- Mensaje sin resultados -->
+      <div *ngIf="!loading && !error && personas.length === 0" class="p-12 text-center">
+        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+        <h3 class="text-lg font-medium text-gray-900 mb-1">No hay personas registradas</h3>
+        <p class="text-gray-600">Comienza creando una nueva persona</p>
+      </div>
+
+      <!-- Paginación -->
+      <div *ngIf="!loading && !error && totalPages > 1" class="border-t border-gray-200 px-6 py-4">
+        <div class="flex items-center justify-between">
+          <button
+            (click)="onPageChange(currentPage - 1)"
+            [disabled]="currentPage === 1"
+            [class.opacity-50]="currentPage === 1"
+            [class.cursor-not-allowed]="currentPage === 1"
+            class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:hover:bg-white"
+          >
+            Anterior
+          </button>
+          <div class="text-sm text-gray-700">
+            Página <span class="font-medium">{{ currentPage }}</span> de <span class="font-medium">{{ totalPages }}</span>
+          </div>
+          <button
+            (click)="onPageChange(currentPage + 1)"
+            [disabled]="currentPage === totalPages"
+            [class.opacity-50]="currentPage === totalPages"
+            [class.cursor-not-allowed]="currentPage === totalPages"
+            class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:hover:bg-white"
+          >
+            Siguiente
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Formulario -->
+<app-persona-form-dialog
+  *ngIf="showFormModal"
+  [persona]="editingPersona"
+  (close)="closeFormModal()"
+  (saved)="onPersonaSaved()"
+></app-persona-form-dialog>

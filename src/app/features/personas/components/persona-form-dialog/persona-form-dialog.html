@@ -1,0 +1,293 @@
+<!-- Backdrop del Modal -->
+<div 
+  class="modal-backdrop fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center p-4"
+  (click)="onBackdropClick($event)"
+  (keydown)="onEscapeKey($event)"
+  tabindex="0"
+>
+  <!-- Modal Container -->
+  <div 
+    class="modal-container bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden animate-slideIn"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Header -->
+    <div class="modal-header bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-5 flex items-center justify-between">
+      <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+        {{ getTitle() }}
+      </h2>
+      <button
+        (click)="onClose()"
+        class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors"
+        type="button"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Body con Formulario -->
+    <div class="modal-body overflow-y-auto max-h-[calc(90vh-200px)] px-6 py-6">
+      
+      <!-- Mensaje de Error Global -->
+      <div *ngIf="error" class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start">
+        <svg class="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <div>
+          <h4 class="text-sm font-semibold text-red-800">Error</h4>
+          <p class="text-sm text-red-700 mt-1">{{ error }}</p>
+        </div>
+      </div>
+
+      <!-- Formulario -->
+      <form [formGroup]="personaForm" (ngSubmit)="onSubmit()">
+        
+        <!-- Tipo de Persona -->
+        <div class="mb-6">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            Tipo de Persona *
+          </label>
+          <div class="grid grid-cols-2 gap-4">
+            <label 
+              *ngFor="let tipo of tiposPersona"
+              [class.ring-2]="personaForm.get('tipo_persona')?.value === tipo.value"
+              [class.ring-blue-500]="personaForm.get('tipo_persona')?.value === tipo.value"
+              [class.bg-blue-50]="personaForm.get('tipo_persona')?.value === tipo.value"
+              class="flex items-center justify-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 transition-all"
+            >
+              <input
+                type="radio"
+                formControlName="tipo_persona"
+                [value]="tipo.value"
+                class="sr-only"
+              />
+              <span class="text-2xl mr-2">{{ tipo.value === 'fisica' ? '👤' : '🏢' }}</span>
+              <span class="font-medium text-gray-900">{{ tipo.label }}</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Información Personal -->
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            Información Personal
+          </h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <!-- Nombre -->
+            <div>
+              <label for="nombre" class="block text-sm font-medium text-gray-700 mb-2">
+                Nombre *
+              </label>
+              <input
+                type="text"
+                id="nombre"
+                formControlName="nombre"
+                [class.border-red-500]="hasError('nombre')"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="Juan"
+              />
+              <p *ngIf="hasError('nombre')" class="mt-1 text-sm text-red-600">
+                {{ getErrorMessage('nombre') }}
+              </p>
+            </div>
+
+            <!-- Apellido -->
+            <div>
+              <label for="apellido" class="block text-sm font-medium text-gray-700 mb-2">
+                Apellido
+              </label>
+              <input
+                type="text"
+                id="apellido"
+                formControlName="apellido"
+                [class.border-red-500]="hasError('apellido')"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="Pérez"
+              />
+              <p *ngIf="hasError('apellido')" class="mt-1 text-sm text-red-600">
+                {{ getErrorMessage('apellido') }}
+              </p>
+            </div>
+
+            <!-- Documento -->
+            <div>
+              <label for="documento" class="block text-sm font-medium text-gray-700 mb-2">
+                Documento *
+              </label>
+              <input
+                type="text"
+                id="documento"
+                formControlName="documento"
+                [class.border-red-500]="hasError('documento')"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="12345678"
+              />
+              <p *ngIf="hasError('documento')" class="mt-1 text-sm text-red-600">
+                {{ getErrorMessage('documento') }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Información de Contacto -->
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            Información de Contacto
+          </h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <!-- Email -->
+            <div>
+              <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                formControlName="email"
+                [class.border-red-500]="hasError('email')"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="juan@ejemplo.com"
+              />
+              <p *ngIf="hasError('email')" class="mt-1 text-sm text-red-600">
+                {{ getErrorMessage('email') }}
+              </p>
+            </div>
+
+            <!-- Teléfono -->
+            <div>
+              <label for="telefono" class="block text-sm font-medium text-gray-700 mb-2">
+                Teléfono
+              </label>
+              <input
+                type="tel"
+                id="telefono"
+                formControlName="telefono"
+                [class.border-red-500]="hasError('telefono')"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="+54 11 1234-5678"
+              />
+              <p *ngIf="hasError('telefono')" class="mt-1 text-sm text-red-600">
+                {{ getErrorMessage('telefono') }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ubicación -->
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Ubicación
+          </h3>
+          
+          <div class="space-y-4">
+            
+            <!-- Dirección -->
+            <div>
+              <label for="direccion" class="block text-sm font-medium text-gray-700 mb-2">
+                Dirección
+              </label>
+              <input
+                type="text"
+                id="direccion"
+                formControlName="direccion"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="Av. Corrientes 1234"
+              />
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              
+              <!-- Localidad -->
+              <div>
+                <label for="localidad" class="block text-sm font-medium text-gray-700 mb-2">
+                  Localidad
+                </label>
+                <input
+                  type="text"
+                  id="localidad"
+                  formControlName="localidad"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  placeholder="CABA"
+                />
+              </div>
+
+              <!-- Provincia -->
+              <div>
+                <label for="provincia" class="block text-sm font-medium text-gray-700 mb-2">
+                  Provincia
+                </label>
+                <select
+                  id="provincia"
+                  formControlName="provincia"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                >
+                  <option *ngFor="let prov of provincias" [value]="prov">
+                    {{ prov }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- País -->
+              <div>
+                <label for="pais" class="block text-sm font-medium text-gray-700 mb-2">
+                  País
+                </label>
+                <input
+                  type="text"
+                  id="pais"
+                  formControlName="pais"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  placeholder="Argentina"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Footer con Botones -->
+    <div class="modal-footer bg-gray-50 px-6 py-4 flex items-center justify-end gap-3 border-t border-gray-200">
+      <button
+        type="button"
+        (click)="onClose()"
+        [disabled]="loading"
+        class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Cancelar
+      </button>
+      <button
+        type="submit"
+        (click)="onSubmit()"
+        [disabled]="loading || personaForm.invalid"
+        class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+      >
+        <svg *ngIf="loading" class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span>{{ getSaveButtonText() }}</span>
+      </button>
+    </div>
+
+  </div>
+</div>

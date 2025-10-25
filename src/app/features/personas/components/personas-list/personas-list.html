@@ -1,0 +1,215 @@
+<div class="personas-list">
+  <!-- Tabla Desktop -->
+  <div class="hidden md:block overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Persona
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Documento
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Contacto
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Ubicación
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Tipo
+          </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Fecha
+          </th>
+          <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Acciones
+          </th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr *ngFor="let persona of personas" class="hover:bg-gray-50 transition-colors">
+          <!-- Persona (Avatar + Nombre) -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex items-center">
+              <div class="flex-shrink-0 h-10 w-10">
+                <div class="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold text-sm">
+                  {{ getInitials(persona) }}
+                </div>
+              </div>
+              <div class="ml-4">
+                <div class="text-sm font-medium text-gray-900">
+                  {{ getFullName(persona) }}
+                </div>
+                <div class="text-sm text-gray-500" *ngIf="persona.email">
+                  {{ truncate(persona.email, 25) }}
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <!-- Documento -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">{{ persona.documento || '-' }}</div>
+          </td>
+
+          <!-- Contacto -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">
+              {{ persona.telefono || '-' }}
+            </div>
+            <div class="text-sm text-gray-500" *ngIf="persona.email">
+              {{ truncate(persona.email, 25) }}
+            </div>
+          </td>
+
+          <!-- Ubicación -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">
+              {{ persona.localidad || '-' }}
+            </div>
+            <div class="text-sm text-gray-500">
+              {{ persona.provincia || '-' }}
+            </div>
+          </td>
+
+          <!-- Tipo -->
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + getTipoBadgeClass(persona.tipo_persona)">
+              {{ getTipoIcon(persona.tipo_persona) }} 
+              {{ persona.tipo_persona === 'fisica' ? 'Física' : 'Jurídica' }}
+            </span>
+          </td>
+
+          <!-- Fecha -->
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            {{ formatDate(persona.fecha_creacion) }}
+          </td>
+
+          <!-- Acciones -->
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <div class="flex items-center justify-end gap-2">
+              <!-- Botón Ver -->
+              <button
+                (click)="onView(persona)"
+                class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50 transition-colors"
+                title="Ver detalle"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </button>
+
+              <!-- Botón Editar -->
+              <button
+                (click)="onEdit(persona)"
+                class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50 transition-colors"
+                title="Editar"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </button>
+
+              <!-- Botón Eliminar -->
+              <button
+                (click)="onDelete(persona.id)"
+                class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors"
+                title="Eliminar"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Vista Mobile (Cards compactas) -->
+  <div class="md:hidden space-y-4 p-4">
+    <div *ngFor="let persona of personas" class="bg-white rounded-lg shadow p-4 border border-gray-200">
+      <!-- Header -->
+      <div class="flex items-start justify-between mb-3">
+        <div class="flex items-center">
+          <div class="h-12 w-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold">
+            {{ getInitials(persona) }}
+          </div>
+          <div class="ml-3">
+            <div class="text-sm font-semibold text-gray-900">
+              {{ getFullName(persona) }}
+            </div>
+            <span [class]="'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-1 ' + getTipoBadgeClass(persona.tipo_persona)">
+              {{ getTipoIcon(persona.tipo_persona) }} 
+              {{ persona.tipo_persona === 'fisica' ? 'Física' : 'Jurídica' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div class="space-y-2 text-sm">
+        <div class="flex items-center text-gray-600">
+          <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+          </svg>
+          <span>{{ persona.documento || 'Sin documento' }}</span>
+        </div>
+
+        <div *ngIf="persona.email" class="flex items-center text-gray-600">
+          <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          <span class="truncate">{{ persona.email }}</span>
+        </div>
+
+        <div *ngIf="persona.telefono" class="flex items-center text-gray-600">
+          <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+          </svg>
+          <span>{{ persona.telefono }}</span>
+        </div>
+
+        <div *ngIf="persona.provincia" class="flex items-center text-gray-600">
+          <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span>{{ persona.localidad }}, {{ persona.provincia }}</span>
+        </div>
+
+        <div class="flex items-center text-gray-500 text-xs">
+          <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <span>{{ formatDate(persona.fecha_creacion) }}</span>
+        </div>
+      </div>
+
+      <!-- Acciones Mobile -->
+      <div class="flex items-center justify-end gap-2 mt-4 pt-3 border-t border-gray-200">
+        <button
+          (click)="onView(persona)"
+          class="flex-1 text-blue-600 hover:bg-blue-50 px-3 py-2 rounded text-sm font-medium transition-colors"
+        >
+          Ver
+        </button>
+        <button
+          (click)="onEdit(persona)"
+          class="flex-1 text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded text-sm font-medium transition-colors"
+        >
+          Editar
+        </button>
+        <button
+          (click)="onDelete(persona.id)"
+          class="flex-1 text-red-600 hover:bg-red-50 px-3 py-2 rounded text-sm font-medium transition-colors"
+        >
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

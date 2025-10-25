@@ -1,17 +1,20 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './auth/login/login.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
-import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.component';  // ← NUEVO
-import { ResetPasswordComponent } from './auth/reset-password/reset-password.component';      // ← NUEVO
+import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './auth/reset-password/reset-password.component';
 import { AuthGuard } from './auth/auth.guard';
 import { LayoutComponent } from './core/layout/layout.component';
+import { PersonasPageComponent } from './features/personas/pages/personas-page/personas-page.component';
+
 
 export const appRoutes: Routes = [
   // Rutas públicas (sin autenticación)
 
   { path: 'login', component: LoginComponent },
-  { path: 'forgot-password', component: ForgotPasswordComponent },  // ← NUEVO
-  { path: 'reset-password', component: ResetPasswordComponent },    // ← NUEVO
+  { path: 'forgot-password', component: ForgotPasswordComponent }, 
+  { path: 'reset-password', component: ResetPasswordComponent },
+  { path: 'personas', component: PersonasPageComponent },
 
   { 
     path: 'register', 
