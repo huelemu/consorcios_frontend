@@ -182,8 +182,8 @@ export class AuthService {
    * Verificar validez del token de reset
    */
   verifyResetToken(token: string): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/auth/verify-reset-token`, { token });
-  }
+  return this.http.get(`${environment.apiUrl}/auth/verify-reset-token/${token}`);
+}
 
   /**
    * Resetear contraseña con token
