@@ -194,4 +194,103 @@ export class AuthService {
       newPassword 
     });
   }
+
+   // ========================================================================
+  // ✨ MÉTODOS NUEVOS PARA VERIFICAR ROLES/PERMISOS
+  // ========================================================================
+
+  /**
+   * Obtiene el rol del usuario actual
+   */
+  getUserRole(): string | null {
+    const user = this.getCurrentUser();
+    return user?.rol || null;
+  }
+
+  /**
+   * Verifica si el usuario tiene un rol específico
+   */
+  hasRole(role: string): boolean {
+    const userRole = this.getUserRole();
+    return userRole === role;
+  }
+
+  /**
+   * Verifica si el usuario tiene alguno de los roles especificados
+   */
+  hasAnyRole(roles: string[]): boolean {
+    const userRole = this.getUserRole();
+    return userRole ? roles.includes(userRole) : false;
+  }
+
+  /**
+   * Verifica si el usuario es admin global
+   */
+  isAdminGlobal(): boolean {
+    return this.hasRole('admin_global');
+  }
+
+  /**
+   * Verifica si el usuario es tenant admin
+   */
+  isTenantAdmin(): boolean {
+    return this.hasRole('tenant_admin');
+  }
+
+  /**
+   * Verifica si el usuario es admin de consorcio
+   */
+  isAdminConsorcio(): boolean {
+    return this.hasRole('admin_consorcio');
+  }
+
+  /**
+   * Verifica si el usuario es propietario
+   */
+  isPropietario(): boolean {
+    return this.hasRole('propietario');
+  }
+
+  /**
+   * Verifica si el usuario es inquilino
+   */
+  isInquilino(): boolean {
+    return this.hasRole('inquilino');
+  }
+
+  /**
+   * Verifica si el usuario tiene permisos de administrador (cualquier tipo)
+   */
+  isAdmin(): boolean {
+    return this.hasAnyRole(['admin_global', 'tenant_admin', 'admin_consorcio']);
+  }
+
+  /**
+   * Verifica si el usuario puede acceder al módulo de personas
+   */
+  canAccessPersonas(): boolean {
+    return this.isAdmin();
+  }
+
+  /**
+   * Verifica si el usuario puede crear personas
+   */
+  canCreatePersonas(): boolean {
+    return this.isAdmin();
+  }
+
+  /**
+   * Verifica si el usuario puede editar personas
+   */
+  canEditPersonas(): boolean {
+    return this.isAdmin();
+  }
+
+  /**
+   * Verifica si el usuario puede eliminar personas
+   */
+  canDeletePersonas(): boolean {
+    return this.isAdminGlobal(); // Solo admin global
+  }
+  
 }

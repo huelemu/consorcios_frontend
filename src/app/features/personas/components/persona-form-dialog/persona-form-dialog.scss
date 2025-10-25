@@ -1,4 +1,4 @@
-// Estilos para PersonaFormDialogComponent
+// Estilos para PersonaFormDialogComponent con colores Material (Cyan y Orange)
 
 // Backdrop con fade-in
 .modal-backdrop {
@@ -30,22 +30,28 @@
   }
 }
 
-// Animación del header gradient
+// Header gradient con colores Material Cyan
 .modal-header {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
 }
 
-// Focus states mejorados
+// Focus states con cyan
 input:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
 }
 
-// Radio buttons personalizados
+// Radio buttons personalizados con cyan
 input[type="radio"]:checked + span {
   font-weight: 600;
+  color: #0891b2;
+}
+
+// Labels de sección con cyan
+h3 svg {
+  color: #0891b2;
 }
 
 // Animación de errores
@@ -85,12 +91,25 @@ button {
   
   &:hover:not(:disabled) {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
   
   &:active:not(:disabled) {
     transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Botón principal con gradient orange
+button[type="submit"] {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  box-shadow: 0 4px 6px rgba(249, 115, 22, 0.3);
+  
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+    box-shadow: 0 6px 12px rgba(249, 115, 22, 0.4);
+  }
+  
+  &:active:not(:disabled) {
+    box-shadow: 0 2px 4px rgba(249, 115, 22, 0.3);
   }
 }
 
@@ -130,12 +149,12 @@ button {
     transition: color 0.2s ease;
     
     &:hover {
-      color: #2563eb;
+      color: #0891b2;
     }
   }
 }
 
-// Efecto ripple en los radio buttons
+// Efecto ripple en los radio buttons con cyan
 label:has(input[type="radio"]) {
   position: relative;
   overflow: hidden;
@@ -148,7 +167,7 @@ label:has(input[type="radio"]) {
     width: 0;
     height: 0;
     border-radius: 50%;
-    background: rgba(59, 130, 246, 0.3);
+    background: rgba(6, 182, 212, 0.3);
     transform: translate(-50%, -50%);
     transition: width 0.6s, height 0.6s;
   }
@@ -157,6 +176,18 @@ label:has(input[type="radio"]) {
     width: 200px;
     height: 200px;
   }
+}
+
+// Hover en labels de radio con cyan
+label:has(input[type="radio"]):hover {
+  border-color: #06b6d4 !important;
+}
+
+// Radio seleccionado con cyan
+label:has(input[type="radio"]:checked) {
+  background-color: #ecfeff !important;
+  border-color: #06b6d4 !important;
+  box-shadow: 0 0 0 2px #06b6d4;
 }
 
 // Responsive adjustments
@@ -171,15 +202,11 @@ label:has(input[type="radio"]) {
   }
 }
 
-// Dark mode support (opcional)
-@media (prefers-color-scheme: dark) {
-  .modal-container {
-    background: #1f2937;
-    color: #f9fafb;
-  }
+// Transiciones suaves para inputs
+input, select {
+  transition: all 0.2s ease-in-out;
   
-  .modal-footer {
-    background: #111827;
-    border-color: #374151;
+  &:hover:not(:disabled) {
+    border-color: #06b6d4;
   }
 }

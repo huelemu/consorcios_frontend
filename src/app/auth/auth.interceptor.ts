@@ -1,16 +1,8 @@
 import { HttpInterceptorFn } from '@angular/common/http';
-import { inject } from '@angular/core';
-import { AuthService } from '../auth/auth.service';
 
-/**
- * Interceptor para agregar automáticamente el token JWT
- * a todas las peticiones HTTP
- */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const authService = inject(AuthService);
-  const token = authService.getToken();
-
-  // Si hay token, clonamos la petición y agregamos el header Authorization
+  const token = localStorage.getItem('token');
+  
   if (token) {
     req = req.clone({
       setHeaders: {
@@ -18,6 +10,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       }
     });
   }
-
+  
   return next(req);
 };

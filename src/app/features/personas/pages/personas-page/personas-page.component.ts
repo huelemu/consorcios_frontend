@@ -6,6 +6,7 @@ import { PersonaFormDialogComponent } from '../../components/persona-form-dialog
 import { PersonaFiltersComponent } from '../../components/persona-filters/persona-filters';
 import { PersonasService } from '../../services/personas.service';
 import { Persona, PersonasFilters, PersonasStats } from '../../models/persona.model';
+import { AuthService } from '../../../../auth/auth.service';
 
 @Component({
   selector: 'app-personas-page',
