@@ -9,7 +9,9 @@ import { LayoutComponent } from './core/layout/layout.component';
 import { PersonasPageComponent } from './features/personas/pages/personas-page/personas-page.component';
 import { NotDevelopedComponent } from './core/not-developed/not-developed.component';
 import { UsuariosPageComponent } from './features/usuarios/pages/usuarios-page/usuarios-page.component';
-
+import { ConsorciosListComponent } from './features/consorcios/pages/consorcios-list/consorcios-list.component';
+import { ConsorcioFormComponent } from './features/consorcios/components/consorcio-form/consorcio-form.component';
+import { ConsorcioDetailComponent } from './features/consorcios/pages/consorcio-detail/consorcio-detail.component';
 
 export const appRoutes: Routes = [
   // Rutas públicas (sin autenticación)
@@ -19,6 +21,8 @@ export const appRoutes: Routes = [
   { path: 'register', loadComponent: () => import('./auth/register/register.component').then(m => m.RegisterComponent) },
   { path: 'privacy', loadComponent: () => import('./legal/privacy-policy/privacy-policy.component').then(m => m.PrivacyPolicyComponent)},
   { path: 'terms', loadComponent: () => import('./legal/terms-of-service/terms-of-service.component').then(m => m.TermsOfServiceComponent)},
+
+
  
   // Rutas protegidas (requieren autenticación)
   {
@@ -28,8 +32,16 @@ export const appRoutes: Routes = [
     children: [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'personas', component: PersonasPageComponent, canActivate: [RoleGuard], data: { roles: ['admin_global', 'tenant_admin', 'admin_consorcio']}},
-      { path: 'consorcios', component: NotDevelopedComponent },
+      { path: 'consorcios/nuevo', component: ConsorcioFormComponent, canActivate: [RoleGuard], 
+        data: { roles: ['admin_global', 'tenant_admin', 'admin_consorcio', 'admin_edificio', 'propietario', 'inquilino']}},
+      { path: 'consorcios/:id/editar', component: ConsorcioFormComponent, canActivate: [RoleGuard], 
+        data: { roles: ['admin_global', 'tenant_admin', 'admin_consorcio', 'admin_edificio', 'propietario', 'inquilino']}},
+      { path: 'consorcios/:id', component: ConsorcioDetailComponent, canActivate: [RoleGuard], 
+        data: { roles: ['admin_global', 'tenant_admin', 'admin_consorcio', 'admin_edificio', 'propietario', 'inquilino']}},
+      { path: 'consorcios', component: ConsorciosListComponent, canActivate: [RoleGuard], 
+        data: { roles: ['admin_global', 'tenant_admin', 'admin_consorcio', 'admin_edificio', 'propietario', 'inquilino']}},
       { path: 'usuarios', component: UsuariosPageComponent, canActivate: [RoleGuard], data: { roles: ['admin_global', 'tenant_admin', 'admin_consorcio']}},
+      { path: 'unidades', component: NotDevelopedComponent },
       { path: 'proveedores', component: NotDevelopedComponent },
       { path: 'expensas', component: NotDevelopedComponent },
       { path: 'tickets', component: NotDevelopedComponent },

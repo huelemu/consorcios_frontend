@@ -1,0 +1,154 @@
+/* Estilos para el detalle del consorcio */
+
+/* Animación de carga */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Transiciones suaves */
+.transition {
+  transition: all 0.2s ease;
+}
+
+/* Cards hover */
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.rounded-xl:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Botones hover */
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Barra de progreso animada */
+.bg-purple-600 {
+  transition: width 0.5s ease-out;
+}
+
+/* Grid responsive */
+@media (max-width: 1024px) {
+  .lg\:col-span-2 {
+    grid-column: span 1;
+  }
+  
+  .lg\:col-span-1 {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .md\:grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+  
+  .flex.gap-2 {
+    flex-wrap: wrap;
+  }
+  
+  button {
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+  }
+}
+
+/* Enlaces hover */
+a:hover {
+  text-decoration: underline;
+}
+
+/* Modal overlay */
+.fixed {
+  z-index: 9999;
+}
+
+.bg-opacity-50 {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Animación de entrada para el modal */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.fixed > div {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Badges de estado */
+.rounded-full {
+  border-radius: 9999px;
+}
+
+/* Estados de las unidades */
+.border-gray-200:hover {
+  border-color: #93c5fd;
+}
+
+/* Estadísticas - fondos */
+.bg-blue-50 {
+  background-color: #eff6ff;
+}
+
+.bg-green-50 {
+  background-color: #f0fdf4;
+}
+
+.bg-purple-50 {
+  background-color: #faf5ff;
+}
+
+.bg-orange-50 {
+  background-color: #fff7ed;
+}
+
+/* Texto en negrita para datos importantes */
+.font-bold {
+  font-weight: 700;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+/* Espaciado consistente */
+.space-y-4 > * + * {
+  margin-top: 1rem;
+}
+
+.space-y-6 > * + * {
+  margin-top: 1.5rem;
+}
+
+/* Focus visible */
+*:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}

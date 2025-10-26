@@ -1,0 +1,325 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <!-- Header con botón volver -->
+  <div class="mb-6">
+    <button
+      (click)="volver()"
+      class="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-4 transition"
+    >
+      <span>←</span>
+      <span>Volver a Consorcios</span>
+    </button>
+  </div>
+
+  <!-- Loading spinner -->
+  <div *ngIf="loading" class="flex justify-center items-center py-12">
+    <div class="h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
+  </div>
+
+  <!-- Mensaje de error -->
+  <div *ngIf="error && !loading" class="mb-4 rounded-lg bg-red-50 border border-red-200 p-4 text-red-800">
+    <div class="flex items-center gap-2">
+      <span class="text-xl">⚠️</span>
+      <span>{{ error }}</span>
+    </div>
+    <button
+      (click)="volver()"
+      class="mt-4 text-sm underline hover:no-underline"
+    >
+      Volver a la lista
+    </button>
+  </div>
+
+  <!-- Contenido principal -->
+  <div *ngIf="consorcio && !loading" class="space-y-6">
+    
+    <!-- Header del consorcio -->
+    <div class="rounded-xl bg-white p-6 shadow-sm">
+      <div class="flex items-start justify-between">
+        <!-- Info principal -->
+        <div class="flex items-start gap-4">
+          <div class="text-5xl">🏢</div>
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900">{{ consorcio.nombre }}</h1>
+            <p class="mt-1 text-gray-600">{{ getDireccion() }}</p>
+            <div class="mt-2 flex items-center gap-3">
+              <!-- Badge de estado -->
+              <span 
+                [ngClass]="ESTADO_COLORS[consorcio.estado]"
+                class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium border"
+              >
+                <span>{{ ESTADO_ICONS[consorcio.estado] }}</span>
+                <span>{{ ESTADO_LABELS[consorcio.estado] }}</span>
+              </span>
+              <!-- CUIT -->
+              <span *ngIf="consorcio.cuit" class="text-sm text-gray-500">
+                CUIT: {{ consorcio.cuit }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="flex items-center gap-2">
+          <!-- Botón Editar -->
+          <button
+            *ngIf="canEdit"
+            (click)="editarConsorcio()"
+            class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 transition"
+          >
+            <span>✏️</span>
+            <span>Editar</span>
+          </button>
+
+          <!-- Botón Activar/Desactivar -->
+          <button
+            *ngIf="canEdit"
+            (click)="toggleEstado()"
+            [class]="consorcio.estado === 'activo' ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-green-600 hover:bg-green-700'"
+            class="rounded-lg px-4 py-2 text-white transition"
+          >
+            {{ consorcio.estado === 'activo' ? '⏸️ Desactivar' : '▶️ Activar' }}
+          </button>
+
+          <!-- Botón Eliminar -->
+          <button
+            *ngIf="canDelete"
+            (click)="confirmarEliminar()"
+            class="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700 transition"
+          >
+            🗑️
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid de información -->
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      
+      <!-- Estadísticas -->
+      <div class="lg:col-span-1">
+        <div class="rounded-xl bg-white p-6 shadow-sm">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Estadísticas</h2>
+          
+          <div class="space-y-4">
+            <!-- Total Unidades -->
+            <div class="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+              <div>
+                <p class="text-sm text-gray-600">Total Unidades</p>
+                <p class="text-2xl font-bold text-blue-600">
+                  {{ consorcio.stats?.totalUnidades || 0 }}
+                </p>
+              </div>
+              <div class="text-4xl">🏠</div>
+            </div>
+
+            <!-- Unidades Ocupadas -->
+            <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+              <div>
+                <p class="text-sm text-gray-600">Ocupadas</p>
+                <p class="text-2xl font-bold text-green-600">
+                  {{ consorcio.stats?.unidadesOcupadas || 0 }}
+                </p>
+              </div>
+              <div class="text-4xl">✓</div>
+            </div>
+
+            <!-- Porcentaje de ocupación -->
+            <div class="p-4 bg-purple-50 rounded-lg">
+              <p class="text-sm text-gray-600 mb-2">Ocupación</p>
+              <div class="flex items-center gap-3">
+                <div class="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
+                  <div 
+                    class="h-full bg-purple-600 transition-all duration-500"
+                    [style.width.%]="getPorcentajeOcupacion()"
+                  ></div>
+                </div>
+                <span class="text-lg font-bold text-purple-600">
+                  {{ getPorcentajeOcupacion() }}%
+                </span>
+              </div>
+            </div>
+
+            <!-- Superficie Total -->
+            <div *ngIf="consorcio.stats?.superficieTotal" class="p-4 bg-orange-50 rounded-lg">
+              <p class="text-sm text-gray-600">Superficie Total</p>
+              <p class="text-2xl font-bold text-orange-600">
+                {{ consorcio.stats?.superficieTotal | number:'1.2-2' }} m²
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información detallada -->
+      <div class="lg:col-span-2 space-y-6">
+        
+        <!-- Datos del Consorcio -->
+        <div class="rounded-xl bg-white p-6 shadow-sm">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Información del Consorcio</h2>
+          
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <!-- Dirección -->
+            <div>
+              <p class="text-sm text-gray-500">Dirección</p>
+              <p class="text-base font-medium text-gray-900">
+                {{ consorcio.direccion || 'Sin dirección' }}
+              </p>
+            </div>
+
+            <!-- Ciudad -->
+            <div>
+              <p class="text-sm text-gray-500">Ciudad</p>
+              <p class="text-base font-medium text-gray-900">
+                {{ consorcio.ciudad || 'Sin ciudad' }}
+              </p>
+            </div>
+
+            <!-- Provincia -->
+            <div>
+              <p class="text-sm text-gray-500">Provincia</p>
+              <p class="text-base font-medium text-gray-900">
+                {{ consorcio.provincia || 'Sin provincia' }}
+              </p>
+            </div>
+
+            <!-- País -->
+            <div>
+              <p class="text-sm text-gray-500">País</p>
+              <p class="text-base font-medium text-gray-900">
+                {{ consorcio.pais || 'Sin país' }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Datos de Contacto -->
+        <div *ngIf="hasDatosContacto()" class="rounded-xl bg-white p-6 shadow-sm">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Datos de Contacto</h2>
+          
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <!-- Teléfono -->
+            <div *ngIf="consorcio.telefono_contacto">
+              <p class="text-sm text-gray-500">Teléfono</p>
+              <p class="text-base font-medium text-gray-900">
+                <a [href]="'tel:' + consorcio.telefono_contacto" class="text-blue-600 hover:underline">
+                  {{ consorcio.telefono_contacto }}
+                </a>
+              </p>
+            </div>
+
+            <!-- Email -->
+            <div *ngIf="consorcio.email_contacto">
+              <p class="text-sm text-gray-500">Email</p>
+              <p class="text-base font-medium text-gray-900">
+                <a [href]="'mailto:' + consorcio.email_contacto" class="text-blue-600 hover:underline">
+                  {{ consorcio.email_contacto }}
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Responsable -->
+        <div *ngIf="hasResponsable()" class="rounded-xl bg-white p-6 shadow-sm">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Responsable</h2>
+          
+          <div class="flex items-start gap-4">
+            <div class="text-4xl">👤</div>
+            <div class="flex-1">
+              <p class="text-lg font-medium text-gray-900">{{ getResponsable() }}</p>
+              <p class="text-sm text-gray-500 mt-1">{{ consorcio.responsable?.rol_global }}</p>
+              
+              <div class="mt-3 space-y-1">
+                <p class="text-sm text-gray-600">
+                  📧 <a [href]="'mailto:' + getResponsableEmail()" class="text-blue-600 hover:underline">
+                    {{ getResponsableEmail() }}
+                  </a>
+                </p>
+                <p *ngIf="consorcio.responsable?.persona?.telefono" class="text-sm text-gray-600">
+                  📱 <a [href]="'tel:' + getResponsableTelefono()" class="text-blue-600 hover:underline">
+                    {{ getResponsableTelefono() }}
+                  </a>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Unidades Funcionales -->
+    <div class="rounded-xl bg-white p-6 shadow-sm">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-gray-900">Unidades Funcionales</h2>
+        <button
+          (click)="gestionarUnidades()"
+          class="text-sm text-blue-600 hover:text-blue-800 transition"
+        >
+          Gestionar Unidades →
+        </button>
+      </div>
+
+      <!-- Lista de unidades -->
+      <div *ngIf="hasUnidades()" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div
+          *ngFor="let unidad of consorcio.unidades"
+          class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-sm transition"
+        >
+          <div class="flex items-start justify-between mb-2">
+            <div>
+              <p class="font-semibold text-gray-900">{{ unidad.codigo }}</p>
+              <p *ngIf="unidad.piso" class="text-sm text-gray-500">Piso {{ unidad.piso }}</p>
+            </div>
+            <span 
+              [ngClass]="getUnidadEstadoClass(unidad.estado)"
+              class="px-2 py-1 rounded-full text-xs font-medium border"
+            >
+              {{ getUnidadEstadoLabel(unidad.estado) }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sin unidades -->
+      <div *ngIf="!hasUnidades()" class="text-center py-8 text-gray-500">
+        <div class="text-5xl mb-2">🏠</div>
+        <p>No hay unidades registradas</p>
+        <button
+          (click)="gestionarUnidades()"
+          class="mt-4 text-sm text-blue-600 hover:underline"
+        >
+          Agregar primera unidad
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal de confirmación de eliminación -->
+<div *ngIf="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+  <div class="bg-white rounded-xl shadow-xl p-6 max-w-md w-full mx-4">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">
+      ¿Eliminar consorcio?
+    </h3>
+    <p class="text-gray-600 mb-6">
+      ¿Estás seguro de que deseas eliminar el consorcio 
+      <strong>"{{ consorcio?.nombre }}"</strong>?
+      Esta acción desactivará el consorcio pero no eliminará sus datos.
+    </p>
+    <div class="flex gap-3">
+      <button
+        (click)="cancelarEliminar()"
+        class="flex-1 rounded-lg border border-gray-300 px-4 py-2 hover:bg-gray-50 transition"
+      >
+        Cancelar
+      </button>
+      <button
+        (click)="eliminarConsorcio()"
+        class="flex-1 rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700 transition"
+      >
+        Eliminar
+      </button>
+    </div>
+  </div>
+</div>
