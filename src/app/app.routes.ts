@@ -8,6 +8,7 @@ import { RoleGuard } from './auth/role.guard';
 import { LayoutComponent } from './core/layout/layout.component';
 import { PersonasPageComponent } from './features/personas/pages/personas-page/personas-page.component';
 import { NotDevelopedComponent } from './core/not-developed/not-developed.component';
+import { UsuariosPageComponent } from './features/usuarios/pages/usuarios-page/usuarios-page.component';
 
 
 export const appRoutes: Routes = [
@@ -26,24 +27,13 @@ export const appRoutes: Routes = [
     canActivate: [AuthGuard],
     children: [
       { path: 'dashboard', component: DashboardComponent },
-      
-      // ✅ Módulo PERSONAS - Ya desarrollado
-      { 
-        path: 'personas', 
-        component: PersonasPageComponent,
-        canActivate: [RoleGuard],
-        data: { roles: ['admin_global', 'tenant_admin', 'admin_consorcio'] }
-      },
-      
-      // 🚧 Módulos pendientes de desarrollo
+      { path: 'personas', component: PersonasPageComponent, canActivate: [RoleGuard], data: { roles: ['admin_global', 'tenant_admin', 'admin_consorcio']}},
       { path: 'consorcios', component: NotDevelopedComponent },
-      { path: 'unidades', component: NotDevelopedComponent },
-      { path: 'usuarios', component: NotDevelopedComponent },
+      { path: 'usuarios', component: UsuariosPageComponent, canActivate: [RoleGuard], data: { roles: ['admin_global', 'tenant_admin', 'admin_consorcio']}},
       { path: 'proveedores', component: NotDevelopedComponent },
       { path: 'expensas', component: NotDevelopedComponent },
       { path: 'tickets', component: NotDevelopedComponent },
       { path: 'perfil', component: NotDevelopedComponent },
-      
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],
   },

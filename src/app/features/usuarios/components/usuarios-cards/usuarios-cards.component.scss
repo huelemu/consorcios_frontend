@@ -1,0 +1,81 @@
+/* Animaciones y efectos para las tarjetas */
+
+/* Animación de hover en las tarjetas */
+.bg-white {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Efecto de elevación en hover */
+.bg-white:hover {
+  transform: translateY(-4px);
+}
+
+/* Animación de botones */
+button {
+  transition: all 0.2s ease-in-out;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Animación del avatar */
+.rounded-full {
+  transition: transform 0.3s ease-in-out;
+}
+
+.bg-white:hover .rounded-full {
+  transform: scale(1.05);
+}
+
+/* Efecto de truncate mejorado */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Grid responsive mejorado */
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Animación de entrada */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bg-white {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+/* Delay progresivo para las tarjetas */
+.bg-white:nth-child(1) { animation-delay: 0.05s; }
+.bg-white:nth-child(2) { animation-delay: 0.1s; }
+.bg-white:nth-child(3) { animation-delay: 0.15s; }
+.bg-white:nth-child(4) { animation-delay: 0.2s; }
+.bg-white:nth-child(5) { animation-delay: 0.25s; }
+.bg-white:nth-child(6) { animation-delay: 0.3s; }
+.bg-white:nth-child(7) { animation-delay: 0.35s; }
+.bg-white:nth-child(8) { animation-delay: 0.4s; }

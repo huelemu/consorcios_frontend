@@ -1,0 +1,250 @@
+<!-- Overlay del modal -->
+<div *ngIf="isOpen" 
+     class="fixed inset-0 z-50 overflow-y-auto"
+     (click)="onClose()">
+  
+  <!-- Backdrop -->
+  <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+
+  <!-- Modal Container -->
+  <div class="flex min-h-screen items-center justify-center p-4">
+    <div class="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+         (click)="$event.stopPropagation()">
+      
+      <!-- Header -->
+      <div class="sticky top-0 bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 rounded-t-2xl">
+        <div class="flex items-center justify-between">
+          <h2 class="text-2xl font-bold text-white flex items-center">
+            <span class="mr-2">{{ isEditMode ? '✏️' : '➕' }}</span>
+            {{ isEditMode ? 'Editar Usuario' : 'Nuevo Usuario' }}
+          </h2>
+          <button
+            type="button"
+            (click)="onClose()"
+            class="text-white hover:text-gray-200 transition-colors"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <form [formGroup]="usuarioForm" (ngSubmit)="onSubmit()" class="p-6 space-y-6">
+        
+        <!-- Persona (solo en modo creación) -->
+        <div *ngIf="!isEditMode">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Persona *
+          </label>
+          <select
+            formControlName="persona_id"
+            [class.border-red-500]="hasError('persona_id')"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+          >
+            <option value="">Seleccionar persona...</option>
+            <option *ngFor="let persona of personas" [value]="persona.id">
+              {{ getPersonaNombre(persona) }}
+            </option>
+          </select>
+          <p *ngIf="hasError('persona_id')" class="mt-1 text-sm text-red-600">
+            {{ getErrorMessage('persona_id') }}
+          </p>
+        </div>
+
+        <!-- Información del Usuario (si está en modo edición) -->
+        <div *ngIf="isEditMode && usuario" class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+          <div class="flex items-center">
+            <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg mr-4">
+              {{ usuario.persona?.nombre?.charAt(0) || 'U' }}
+            </div>
+            <div>
+              <p class="font-semibold text-gray-900">
+                {{ usuario.persona?.nombre }} {{ usuario.persona?.apellido }}
+              </p>
+              <p class="text-sm text-gray-500">{{ usuario.persona?.documento }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Username -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Username
+          </label>
+          <input
+            type="text"
+            formControlName="username"
+            placeholder="usuario123"
+            [class.border-red-500]="hasError('username')"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+          />
+          <p *ngIf="hasError('username')" class="mt-1 text-sm text-red-600">
+            {{ getErrorMessage('username') }}
+          </p>
+        </div>
+
+        <!-- Email -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Email *
+          </label>
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="usuario@ejemplo.com"
+            [class.border-red-500]="hasError('email')"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+          />
+          <p *ngIf="hasError('email')" class="mt-1 text-sm text-red-600">
+            {{ getErrorMessage('email') }}
+          </p>
+        </div>
+
+        <!-- Contraseña (obligatoria en creación, opcional en edición) -->
+        <div *ngIf="!isEditMode || usuarioForm.get('password')?.value">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Contraseña {{ isEditMode ? '(opcional - dejar vacío para no cambiar)' : '*' }}
+          </label>
+          <div class="relative">
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="••••••••"
+              [class.border-red-500]="hasError('password')"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
+            />
+            <button
+              type="button"
+              (click)="togglePasswordVisibility()"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            >
+              <svg *ngIf="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              <svg *ngIf="showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+              </svg>
+            </button>
+          </div>
+          <p *ngIf="hasError('password')" class="mt-1 text-sm text-red-600">
+            {{ getErrorMessage('password') }}
+          </p>
+        </div>
+
+        <!-- Confirmar Contraseña (solo en creación) -->
+        <div *ngIf="!isEditMode">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Confirmar Contraseña *
+          </label>
+          <div class="relative">
+            <input
+              [type]="showConfirmPassword ? 'text' : 'password'"
+              formControlName="confirm_password"
+              placeholder="••••••••"
+              [class.border-red-500]="hasError('confirm_password') || usuarioForm.hasError('passwordMismatch')"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
+            />
+            <button
+              type="button"
+              (click)="toggleConfirmPasswordVisibility()"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            >
+              <svg *ngIf="!showConfirmPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              <svg *ngIf="showConfirmPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+              </svg>
+            </button>
+          </div>
+          <p *ngIf="hasError('confirm_password')" class="mt-1 text-sm text-red-600">
+            {{ getErrorMessage('confirm_password') }}
+          </p>
+          <p *ngIf="usuarioForm.hasError('passwordMismatch') && usuarioForm.get('confirm_password')?.touched" 
+             class="mt-1 text-sm text-red-600">
+            Las contraseñas no coinciden
+          </p>
+        </div>
+
+        <!-- Rol Global -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Rol Global *
+          </label>
+          <select
+            formControlName="rol_global"
+            [class.border-red-500]="hasError('rol_global')"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+          >
+            <option *ngFor="let rol of rolesDisponibles" [value]="rol.value">
+              {{ rol.icon }} {{ rol.label }}
+            </option>
+          </select>
+          <p *ngIf="hasError('rol_global')" class="mt-1 text-sm text-red-600">
+            {{ getErrorMessage('rol_global') }}
+          </p>
+        </div>
+
+        <!-- OAuth Provider (solo en creación) -->
+        <div *ngIf="!isEditMode">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Método de Autenticación
+          </label>
+          <select
+            formControlName="oauth_provider"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+          >
+            <option value="local">🔑 Local (Email y Contraseña)</option>
+            <option value="google">🔵 Google OAuth</option>
+            <option value="microsoft">🟦 Microsoft OAuth</option>
+          </select>
+        </div>
+
+        <!-- Estado Activo -->
+        <div class="flex items-center">
+          <input
+            type="checkbox"
+            id="activo"
+            formControlName="activo"
+            class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+          />
+          <label for="activo" class="ml-3 text-sm font-medium text-gray-700">
+            Usuario Activo
+          </label>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="flex gap-3 pt-4 border-t border-gray-200">
+          <button
+            type="button"
+            (click)="onClose()"
+            [disabled]="isSubmitting"
+            class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="isSubmitting || usuarioForm.invalid"
+            class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+          >
+            <span *ngIf="!isSubmitting">{{ isEditMode ? 'Guardar Cambios' : 'Crear Usuario' }}</span>
+            <span *ngIf="isSubmitting" class="flex items-center justify-center">
+              <svg class="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Guardando...
+            </span>
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>

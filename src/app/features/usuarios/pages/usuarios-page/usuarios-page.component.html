@@ -1,0 +1,301 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <div class="max-w-7xl mx-auto">
+    
+    <!-- Header -->
+    <div class="mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+            <span class="mr-3">👤</span>
+            Gestión de Usuarios
+          </h1>
+          <p class="text-gray-600 mt-1">Administra los usuarios del sistema</p>
+        </div>
+        <button
+          (click)="openCreateModal()"
+          class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl font-medium flex items-center"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          Nuevo Usuario
+        </button>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600">Total Usuarios</p>
+              <p class="text-2xl font-bold text-gray-900">{{ total }}</p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+              <span class="text-2xl">👥</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600">Activos</p>
+              <p class="text-2xl font-bold text-green-600">
+                {{ getActivosCount() }}
+              </p>
+            </div>
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+              <span class="text-2xl">✅</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600">Inactivos</p>
+              <p class="text-2xl font-bold text-red-600">
+                {{ getInactivosCount() }}
+              </p>
+            </div>
+            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+              <span class="text-2xl">❌</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600">En esta página</p>
+              <p class="text-2xl font-bold text-gray-900">{{ usuarios.length }}</p>
+            </div>
+            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+              <span class="text-2xl">📄</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtros y búsqueda -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        
+        <!-- Búsqueda -->
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Buscar
+          </label>
+          <div class="relative">
+            <input
+              type="text"
+              [(ngModel)]="filters.search"
+              (keyup.enter)="applyFilters()"
+              placeholder="Buscar por nombre, email, username..."
+              class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- Filtro por Rol -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Rol
+          </label>
+          <select
+            [(ngModel)]="filters.rol_global"
+            (change)="applyFilters()"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option *ngFor="let rol of rolesDisponibles" [value]="rol.value">
+              {{ rol.label }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Filtro por Estado -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Estado
+          </label>
+          <select
+            [(ngModel)]="filters.activo"
+            (change)="applyFilters()"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option [ngValue]="undefined">Todos</option>
+            <option [ngValue]="true">Activos</option>
+            <option [ngValue]="false">Inactivos</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Botones de acción de filtros -->
+      <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+        <div class="flex items-center gap-2">
+          <button
+            (click)="clearFilters()"
+            *ngIf="hasActiveFilters()"
+            class="text-sm text-gray-600 hover:text-gray-900 underline"
+          >
+            Limpiar filtros
+          </button>
+          <span *ngIf="hasActiveFilters()" class="text-sm text-gray-500">
+            ({{ total }} resultados)
+          </span>
+        </div>
+
+        <!-- Selector de vista -->
+        <div class="flex gap-2">
+          <button
+            (click)="setView('list')"
+            [class.bg-blue-100]="activeView === 'list'"
+            [class.text-blue-600]="activeView === 'list'"
+            class="px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+            title="Vista Lista"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+            </svg>
+          </button>
+          <button
+            (click)="setView('cards')"
+            [class.bg-blue-100]="activeView === 'cards'"
+            [class.text-blue-600]="activeView === 'cards'"
+            class="px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+            title="Vista Tarjetas"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loader -->
+    <div *ngIf="loading" class="flex justify-center items-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="error && !loading" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+      <div class="flex items-start">
+        <svg class="w-5 h-5 text-red-600 mt-0.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <div>
+          <h3 class="text-sm font-medium text-red-800">Error</h3>
+          <p class="text-sm text-red-700 mt-1">{{ error }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div *ngIf="!loading && !error">
+      
+      <!-- Vista Lista -->
+      <div *ngIf="activeView === 'list'">
+        <app-usuarios-list
+          [usuarios]="usuarios"
+          (edit)="openEditModal($event)"
+          (delete)="onDeleteUsuario($event)"
+          (toggleActive)="onToggleActive($event)"
+          (resetPassword)="onResetPassword($event)"
+          (viewRoles)="onViewRoles($event)"
+        ></app-usuarios-list>
+      </div>
+
+      <!-- Vista Tarjetas -->
+      <div *ngIf="activeView === 'cards'">
+        <app-usuarios-cards
+          [usuarios]="usuarios"
+          (edit)="openEditModal($event)"
+          (delete)="onDeleteUsuario($event)"
+          (toggleActive)="onToggleActive($event)"
+          (resetPassword)="onResetPassword($event)"
+          (viewRoles)="onViewRoles($event)"
+        ></app-usuarios-cards>
+      </div>
+
+      <!-- Paginación -->
+      <div *ngIf="totalPages > 1" class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="flex items-center justify-between">
+          
+          <!-- Info de paginación -->
+          <div class="text-sm text-gray-700">
+            Mostrando <span class="font-medium">{{ (page - 1) * limit + 1 }}</span> a 
+            <span class="font-medium">{{ getMaxResult() }}</span> de 
+            <span class="font-medium">{{ total }}</span> resultados
+          </div>
+
+          <!-- Botones de paginación -->
+          <div class="flex items-center gap-2">
+            
+            <!-- Anterior -->
+            <button
+              (click)="changePage(page - 1)"
+              [disabled]="page === 1"
+              class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+
+            <!-- Números de página -->
+            <button
+              *ngFor="let p of getPageRange()"
+              (click)="changePage(p)"
+              [class.bg-blue-600]="p === page"
+              [class.text-white]="p === page"
+              [class.hover:bg-gray-50]="p !== page"
+              class="px-4 py-2 border border-gray-300 rounded-lg transition-colors"
+            >
+              {{ p }}
+            </button>
+
+            <!-- Siguiente -->
+            <button
+              (click)="changePage(page + 1)"
+              [disabled]="page === totalPages"
+              class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+
+            <!-- Selector de límite -->
+            <select
+              [(ngModel)]="limit"
+              (change)="changeLimit(limit)"
+              class="ml-4 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option [value]="5">5 por página</option>
+              <option [value]="10">10 por página</option>
+              <option [value]="20">20 por página</option>
+              <option [value]="50">50 por página</option>
+            </select>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal de formulario -->
+<app-usuario-form-modal
+  [isOpen]="isModalOpen"
+  [usuario]="selectedUsuario"
+  [personas]="personasDisponibles"
+  (close)="closeModal()"
+  (save)="onSaveUsuario($event)"
+></app-usuario-form-modal>
