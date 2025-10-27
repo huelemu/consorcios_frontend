@@ -1,0 +1,75 @@
+/* =========================================
+   UNIDADES LIST COMPONENT STYLES
+   ========================================= */
+
+/* Animación de entrada para las tarjetas */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Hover effect para las tarjetas de unidades */
+.group:hover {
+  transform: translateY(-4px);
+}
+
+/* Efecto de sombra suave en hover */
+.shadow-sm:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Estilo para el spinner de carga */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Transición suave para badges de estado */
+span[class*="bg-"] {
+  transition: all 0.2s ease;
+}
+
+/* Mejorar legibilidad en dispositivos móviles */
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .text-3xl {
+    font-size: 1.75rem;
+  }
+}
+
+/* Estilo para botones deshabilitados en paginación */
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Focus states mejorados para accesibilidad */
+input:focus,
+select:focus,
+button:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Animación sutil para el modal */
+.fixed {
+  backdrop-filter: blur(4px);
+}

@@ -1,0 +1,190 @@
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+  <!-- Título de la sección -->
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+      <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+      </svg>
+      Filtros de Búsqueda
+    </h3>
+  </div>
+
+  <!-- Primera fila: Búsqueda, Consorcio y Estado -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    
+    <!-- Input de búsqueda -->
+    <div>
+      <label for="search" class="block text-sm font-medium text-gray-700 mb-2">
+        🔍 Buscar Unidad
+      </label>
+      <div class="relative">
+        <input
+          type="text"
+          id="search"
+          [value]="searchTerm"
+          (input)="onSearchChange($any($event.target).value)"
+          placeholder="Código, piso..."
+          class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+        />
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+        
+        <!-- Botón para limpiar búsqueda -->
+        <button
+          *ngIf="searchTerm"
+          (click)="searchTerm = ''; onSearchChange('')"
+          class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Select Consorcio -->
+    <div>
+      <label for="consorcio" class="block text-sm font-medium text-gray-700 mb-2">
+        🏢 Consorcio
+      </label>
+      <select
+        id="consorcio"
+        [(ngModel)]="consorcioId"
+        (ngModelChange)="onConsorcioChange()"
+        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+      >
+        <option [ngValue]="null">Todos los consorcios</option>
+        <option *ngFor="let consorcio of consorcios" [ngValue]="consorcio.id">
+          {{ consorcio.nombre }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Select Estado con colores -->
+    <div>
+      <label for="estado" class="block text-sm font-medium text-gray-700 mb-2">
+        🏷️ Estado
+      </label>
+      <select
+        id="estado"
+        [(ngModel)]="estado"
+        (ngModelChange)="onEstadoChange()"
+        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+      >
+        <option *ngFor="let est of estadosUnidad" [value]="est.value">
+          {{ est.label }}
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Segunda fila: Ordenamiento, Tickets Pendientes y Acciones -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+    
+    <!-- Select Ordenar por -->
+    <div>
+      <label for="sortBy" class="block text-sm font-medium text-gray-700 mb-2">
+        📊 Ordenar por
+      </label>
+      <select
+        id="sortBy"
+        [(ngModel)]="sortBy"
+        (ngModelChange)="onSortChange()"
+        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+      >
+        <option *ngFor="let campo of camposOrdenamiento" [value]="campo.value">
+          {{ campo.label }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Botón toggle para orden ASC/DESC -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">
+        🔄 Orden
+      </label>
+      <button
+        (click)="toggleSortOrder()"
+        class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 font-medium"
+      >
+        <svg *ngIf="sortOrder === 'ASC'" class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+        </svg>
+        <svg *ngIf="sortOrder === 'DESC'" class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
+        </svg>
+        {{ sortOrder === 'ASC' ? 'Ascendente' : 'Descendente' }}
+      </button>
+    </div>
+
+    <!-- Checkbox Tickets Pendientes (preparado para futuro) -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">
+        🎫 Filtros especiales
+      </label>
+      <div class="flex items-center h-[42px] px-4 border border-gray-300 rounded-lg bg-gray-50">
+        <input
+          type="checkbox"
+          id="ticketsPendientes"
+          [(ngModel)]="tieneTiketsPendientes"
+          (ngModelChange)="onTicketsPendientesChange()"
+          class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+        />
+        <label for="ticketsPendientes" class="ml-2 text-sm text-gray-700 cursor-pointer">
+          Con tickets pendientes
+        </label>
+      </div>
+    </div>
+
+    <!-- Botón Limpiar Filtros -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2 opacity-0">
+        Acciones
+      </label>
+      <button
+        (click)="clearFilters()"
+        [disabled]="!hasActiveFilters()"
+        [class.opacity-50]="!hasActiveFilters()"
+        [class.cursor-not-allowed]="!hasActiveFilters()"
+        class="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors flex items-center justify-center gap-2 font-medium disabled:hover:bg-gray-100"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        Limpiar Filtros
+      </button>
+    </div>
+  </div>
+
+  <!-- Indicador de filtros activos -->
+  <div *ngIf="hasActiveFilters()" class="mt-4 flex items-center gap-2 text-sm text-gray-600">
+    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <span>Filtros activos aplicados</span>
+    
+    <!-- Badges de filtros activos -->
+    <div class="flex flex-wrap gap-2 ml-2">
+      <span *ngIf="searchTerm" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+        Búsqueda: "{{ searchTerm }}"
+      </span>
+      <span *ngIf="consorcioId" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+        {{ getConsorcioNombre() }}
+      </span>
+      <span *ngIf="estado" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+            [ngClass]="{
+              'bg-green-100 text-green-800': estado === 'ocupado',
+              'bg-yellow-100 text-yellow-800': estado === 'vacante',
+              'bg-red-100 text-red-800': estado === 'mantenimiento'
+            }">
+        {{ estado === 'ocupado' ? 'Ocupado' : estado === 'vacante' ? 'Vacante' : 'En Mantenimiento' }}
+      </span>
+      <span *ngIf="tieneTiketsPendientes" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+        Con tickets pendientes
+      </span>
+    </div>
+  </div>
+</div>

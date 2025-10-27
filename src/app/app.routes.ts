@@ -12,45 +12,177 @@ import { UsuariosPageComponent } from './features/usuarios/pages/usuarios-page/u
 import { ConsorciosListComponent } from './features/consorcios/pages/consorcios-list/consorcios-list.component';
 import { ConsorcioFormComponent } from './features/consorcios/components/consorcio-form/consorcio-form.component';
 import { ConsorcioDetailComponent } from './features/consorcios/pages/consorcio-detail/consorcio-detail.component';
+import { UnidadesListComponent } from './features/unidades/components/unidades-list/unidades-list.component';
+import { UnidadFormComponent } from './features/unidades/components/unidad-form/unidad-form.component';
+import { UnidadesPageComponent } from './features/unidades/pages/unidades-page/unidades-page.component';
 
 export const appRoutes: Routes = [
-  // Rutas públicas (sin autenticación)
-  { path: 'login', component: LoginComponent },
-  { path: 'forgot-password', component: ForgotPasswordComponent }, 
-  { path: 'reset-password', component: ResetPasswordComponent },
-  { path: 'register', loadComponent: () => import('./auth/register/register.component').then(m => m.RegisterComponent) },
-  { path: 'privacy', loadComponent: () => import('./legal/privacy-policy/privacy-policy.component').then(m => m.PrivacyPolicyComponent)},
-  { path: 'terms', loadComponent: () => import('./legal/terms-of-service/terms-of-service.component').then(m => m.TermsOfServiceComponent)},
+  // ========================================
+  // RUTAS PÚBLICAS (sin autenticación)
+  // ========================================
+  { 
+    path: 'login', 
+    component: LoginComponent 
+  },
+  { 
+    path: 'forgot-password', 
+    component: ForgotPasswordComponent 
+  }, 
+  { 
+    path: 'reset-password', 
+    component: ResetPasswordComponent 
+  },
+  { 
+    path: 'register', 
+    loadComponent: () => import('./auth/register/register.component').then(m => m.RegisterComponent) 
+  },
+  { 
+    path: 'privacy', 
+    loadComponent: () => import('./legal/privacy-policy/privacy-policy.component').then(m => m.PrivacyPolicyComponent)
+  },
+  { 
+    path: 'terms', 
+    loadComponent: () => import('./legal/terms-of-service/terms-of-service.component').then(m => m.TermsOfServiceComponent)
+  },
 
-
- 
-  // Rutas protegidas (requieren autenticación)
+  // ========================================
+  // RUTAS PROTEGIDAS (requieren autenticación)
+  // ========================================
   {
     path: '',
     component: LayoutComponent,
     canActivate: [AuthGuard],
     children: [
-      { path: 'dashboard', component: DashboardComponent },
-      { path: 'personas', component: PersonasPageComponent, canActivate: [RoleGuard], data: { roles: ['admin_global', 'tenant_admin', 'admin_consorcio']}},
-      { path: 'consorcios/nuevo', component: ConsorcioFormComponent, canActivate: [RoleGuard], 
-        data: { roles: ['admin_global', 'tenant_admin', 'admin_consorcio', 'admin_edificio', 'propietario', 'inquilino']}},
-      { path: 'consorcios/:id/editar', component: ConsorcioFormComponent, canActivate: [RoleGuard], 
-        data: { roles: ['admin_global', 'tenant_admin', 'admin_consorcio', 'admin_edificio', 'propietario', 'inquilino']}},
-      { path: 'consorcios/:id', component: ConsorcioDetailComponent, canActivate: [RoleGuard], 
-        data: { roles: ['admin_global', 'tenant_admin', 'admin_consorcio', 'admin_edificio', 'propietario', 'inquilino']}},
-      { path: 'consorcios', component: ConsorciosListComponent, canActivate: [RoleGuard], 
-        data: { roles: ['admin_global', 'tenant_admin', 'admin_consorcio', 'admin_edificio', 'propietario', 'inquilino']}},
-      { path: 'usuarios', component: UsuariosPageComponent, canActivate: [RoleGuard], data: { roles: ['admin_global', 'tenant_admin', 'admin_consorcio']}},
-      { path: 'unidades', component: NotDevelopedComponent },
-      { path: 'proveedores', component: NotDevelopedComponent },
-      { path: 'expensas', component: NotDevelopedComponent },
-      { path: 'tickets', component: NotDevelopedComponent },
-      { path: 'perfil', component: NotDevelopedComponent },
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      // Dashboard
+      { 
+        path: 'dashboard', 
+        component: DashboardComponent 
+      },
+
+      // ========================================
+      // PERSONAS
+      // ========================================
+      { 
+        path: 'personas', 
+        component: PersonasPageComponent, 
+        canActivate: [RoleGuard], 
+        data: { roles: ['admin_global', 'tenant_admin', 'admin_consorcio'] }
+      },
+
+      // ========================================
+      // CONSORCIOS
+      // ========================================
+      { 
+        path: 'consorcios/nuevo', 
+        component: ConsorcioFormComponent, 
+        canActivate: [RoleGuard], 
+        data: { roles: ['admin_global', 'tenant_admin', 'admin_consorcio'] }
+      },
+      { 
+        path: 'consorcios/:id/editar', 
+        component: ConsorcioFormComponent, 
+        canActivate: [RoleGuard], 
+        data: { roles: ['admin_global', 'tenant_admin', 'admin_consorcio'] }
+      },
+      { 
+        path: 'consorcios/:id', 
+        component: ConsorcioDetailComponent, 
+        canActivate: [RoleGuard], 
+        data: { roles: ['admin_global', 'tenant_admin', 'admin_consorcio', 'admin_edificio', 'propietario', 'inquilino'] }
+      },
+      { 
+        path: 'consorcios', 
+        component: ConsorciosListComponent, 
+        canActivate: [RoleGuard], 
+        data: { roles: ['admin_global', 'tenant_admin', 'admin_consorcio', 'admin_edificio', 'propietario', 'inquilino'] }
+      },
+
+      // ========================================
+      // UNIDADES FUNCIONALES ⬅️ NUEVO
+      // ========================================
+      { 
+        path: 'unidades/nuevo', 
+        component: UnidadFormComponent, 
+        canActivate: [RoleGuard], 
+        data: { 
+          roles: ['admin_global', 'tenant_admin', 'admin_consorcio', 'admin_edificio'],
+          title: 'Nueva Unidad Funcional'
+        }
+      },
+      { 
+        path: 'unidades/:id/editar', 
+        component: UnidadFormComponent, 
+        canActivate: [RoleGuard], 
+        data: { 
+          roles: ['admin_global', 'tenant_admin', 'admin_consorcio', 'admin_edificio'],
+          title: 'Editar Unidad Funcional'
+        }
+      },
+      { 
+        path: 'unidades/:id', 
+        component: UnidadesListComponent, // O UnidadDetailComponent si lo creas después
+        canActivate: [RoleGuard], 
+        data: { 
+          roles: ['admin_global', 'tenant_admin', 'admin_consorcio', 'admin_edificio', 'propietario', 'inquilino'],
+          title: 'Detalle de Unidad'
+        }
+      },
+      { 
+        path: 'unidades', 
+        component: UnidadesPageComponent, 
+        canActivate: [RoleGuard], 
+        data: { 
+          roles: ['admin_global', 'tenant_admin', 'admin_consorcio', 'admin_edificio', 'propietario', 'inquilino'],
+          title: 'Unidades Funcionales'
+        }
+      },
+
+      // ========================================
+      // USUARIOS
+      // ========================================
+      { 
+        path: 'usuarios', 
+        component: UsuariosPageComponent, 
+        canActivate: [RoleGuard], 
+        data: { roles: ['admin_global', 'tenant_admin', 'admin_consorcio'] }
+      },
+      
+      // ========================================
+      // MÓDULOS EN DESARROLLO
+      // ========================================
+      { 
+        path: 'proveedores', 
+        component: NotDevelopedComponent,
+        data: { title: 'Proveedores' }
+      },
+      { 
+        path: 'expensas', 
+        component: NotDevelopedComponent,
+        data: { title: 'Expensas' }
+      },
+      { 
+        path: 'tickets', 
+        component: NotDevelopedComponent,
+        data: { title: 'Tickets' }
+      },
+      { 
+        path: 'perfil', 
+        component: NotDevelopedComponent,
+        data: { title: 'Perfil' }
+      },
+
+      // Redirect por defecto dentro del layout
+      { 
+        path: '', 
+        redirectTo: 'dashboard', 
+        pathMatch: 'full' 
+      },
     ],
   },
 
-  // Redirect por defecto
+  // ========================================
+  // REDIRECT POR DEFECTO
+  // ========================================
   { 
     path: '**', 
     redirectTo: 'login' 

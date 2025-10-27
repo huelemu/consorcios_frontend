@@ -1,0 +1,92 @@
+/* =========================================
+   UNIDAD FORM COMPONENT STYLES
+   ========================================= */
+
+/* Animación de aparición para mensajes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Spinner de carga */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Transiciones suaves para inputs */
+input,
+select {
+  transition: all 0.2s ease;
+}
+
+/* Estados de validación */
+input.border-red-500,
+select.border-red-500 {
+  border-color: #ef4444;
+  background-color: #fef2f2;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+input.border-red-500:focus,
+select.border-red-500:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* Mejorar apariencia de campos numéricos */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Hover states para botones */
+button {
+  transition: all 0.2s ease;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Responsividad mejorada */
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Placeholder con mejor contraste */
+::placeholder {
+  color: #9ca3af;
+  opacity: 1;
+}
