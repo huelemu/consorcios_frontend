@@ -15,6 +15,10 @@ import { ConsorcioDetailComponent } from './features/consorcios/pages/consorcio-
 import { UnidadesListComponent } from './features/unidades/components/unidades-list/unidades-list.component';
 import { UnidadFormComponent } from './features/unidades/components/unidad-form/unidad-form.component';
 import { UnidadesPageComponent } from './features/unidades/pages/unidades-page/unidades-page.component';
+import { UnidadDetailComponent } from './features/unidades/components/inidad-detail/unidad-detail.component';
+import { TicketsPageComponent } from './features/tickets/pages/tickets-page/tickets-page.component';
+import { ProveedoresPageComponent } from './features/proveedores/pages/proveedores-page/proveedores-page.component';
+import { ProveedorDetalleComponent } from './features/proveedores/pages/proveedor-detalle/proveedor-detalle.component';
 
 export const appRoutes: Routes = [
   // ========================================
@@ -100,6 +104,7 @@ export const appRoutes: Routes = [
       // ========================================
       // UNIDADES FUNCIONALES ⬅️ NUEVO
       // ========================================
+      
       { 
         path: 'unidades/nuevo', 
         component: UnidadFormComponent, 
@@ -120,7 +125,7 @@ export const appRoutes: Routes = [
       },
       { 
         path: 'unidades/:id', 
-        component: UnidadesListComponent, // O UnidadDetailComponent si lo creas después
+        component: UnidadDetailComponent,
         canActivate: [RoleGuard], 
         data: { 
           roles: ['admin_global', 'tenant_admin', 'admin_consorcio', 'admin_edificio', 'propietario', 'inquilino'],
@@ -138,6 +143,22 @@ export const appRoutes: Routes = [
       },
 
       // ========================================
+      // TICKETS
+      // ========================================
+      {
+        path: 'tickets',
+        component: TicketsPageComponent,
+        canActivate: [RoleGuard],
+        data: {
+          roles: ['admin_global', 'tenant_admin', 'admin_consorcio', 'admin_edificio', 'propietario', 'inquilino'],
+          title: 'Gestión de Tickets'
+        }
+      },
+
+
+
+      
+      // ========================================
       // USUARIOS
       // ========================================
       { 
@@ -148,23 +169,37 @@ export const appRoutes: Routes = [
       },
       
       // ========================================
-      // MÓDULOS EN DESARROLLO
+      // PROVEEDORES
       // ========================================
+
       { 
         path: 'proveedores', 
-        component: NotDevelopedComponent,
-        data: { title: 'Proveedores' }
+        component: ProveedoresPageComponent, 
+        canActivate: [RoleGuard], 
+        data: { 
+          roles: ['admin_global', 'tenant_admin', 'admin_consorcio', 'proveedor'],
+          title: 'Proveedores'
+        }
       },
+      { 
+        path: 'proveedores/:id', 
+        component: ProveedorDetalleComponent, 
+        canActivate: [RoleGuard], 
+        data: { 
+          roles: ['admin_global', 'tenant_admin', 'admin_consorcio', 'proveedor'],
+          title: 'Detalle de Proveedor'
+        }
+      },
+      // ========================================
+      // MÓDULOS EN DESARROLLO
+      // ========================================
+  
       { 
         path: 'expensas', 
         component: NotDevelopedComponent,
         data: { title: 'Expensas' }
       },
-      { 
-        path: 'tickets', 
-        component: NotDevelopedComponent,
-        data: { title: 'Tickets' }
-      },
+ 
       { 
         path: 'perfil', 
         component: NotDevelopedComponent,

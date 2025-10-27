@@ -14,16 +14,45 @@
           </p>
         </div>
         
-        <!-- Botón Crear -->
-        <button
-          (click)="onCreateUnidad()"
-          class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-          Nueva Unidad
-        </button>
+        <div class="flex items-center gap-3">
+          <!-- Toggle Vista Grid/Lista -->
+          <div class="flex items-center gap-2 bg-white rounded-lg shadow-sm border border-gray-200 p-1">
+            <button
+              (click)="viewMode = 'grid'"
+              [class]="viewMode === 'grid' 
+                ? 'bg-blue-600 text-white' 
+                : 'text-gray-600 hover:text-gray-900'"
+              class="p-2 rounded transition-colors"
+              title="Vista de tarjetas">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+              </svg>
+            </button>
+            
+            <button
+              (click)="viewMode = 'list'"
+              [class]="viewMode === 'list' 
+                ? 'bg-blue-600 text-white' 
+                : 'text-gray-600 hover:text-gray-900'"
+              class="p-2 rounded transition-colors"
+              title="Vista de lista">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Botón Crear -->
+          <button
+            (click)="onCreateUnidad()"
+            class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Nueva Unidad
+          </button>
+        </div>
       </div>
 
       <!-- Estadísticas Rápidas -->
@@ -145,15 +174,27 @@
       </div>
     </div>
 
-    <!-- Grid de Unidades -->
-    <div *ngIf="!loading && !error && unidades.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <!-- Vista Grid (Tarjetas) -->
+    <div *ngIf="viewMode === 'grid' && !loading && !error && unidades.length > 0" 
+         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
       <app-unidad-card
         *ngFor="let unidad of unidades"
         [unidad]="unidad"
+        [class]="unidad.tickets_count && unidad.tickets_count > 0 ? 'ring-2 ring-orange-400' : ''"
         (onView)="onViewUnidad($event)"
         (onEdit)="onEditUnidad($event)"
         (onDelete)="onDeleteUnidad($event)"
       ></app-unidad-card>
+    </div>
+
+    <!-- Vista Lista -->
+    <div *ngIf="viewMode === 'list' && !loading && !error && unidades.length > 0" class="mb-8">
+      <app-unidad-list
+        [unidades]="unidades"
+        (onView)="onViewUnidad($event)"
+        (onEdit)="onEditUnidad($event)"
+        (onDelete)="onDeleteUnidad($event)"
+      ></app-unidad-list>
     </div>
 
     <!-- Paginación -->

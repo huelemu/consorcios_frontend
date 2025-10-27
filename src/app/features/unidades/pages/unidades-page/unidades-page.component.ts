@@ -2,15 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { UnidadesService } from '../../services/unidades.service';
+import { ConsorciosService } from '../../../consorcios/services/consorcios.service';
 import { UnidadFilters, UnidadFuncional, UnidadesStats } from '../../models/unidad.model';
+import { Consorcio } from '../../../consorcios/models/consorcio.model';
 import { UnidadFiltersComponent } from '../../components/unidad-filters/unidad-filters.component';
 import { UnidadCardComponent } from '../../components/unidad-card/unidad-card.component';
-
-// Interfaz temporal para consorcios
-interface Consorcio {
-  id: number;
-  nombre: string;
-}
+import { UnidadListComponent } from '../../components/unidad-list/unidad-list.component';
 
 @Component({
   selector: 'app-unidades-page',
@@ -18,7 +15,8 @@ interface Consorcio {
   imports: [
     CommonModule,
     UnidadFiltersComponent,
-    UnidadCardComponent
+    UnidadCardComponent,
+    UnidadListComponent
   ],
   templateUrl: './unidades-page.component.html'
 })
@@ -27,18 +25,18 @@ export class UnidadesPageComponent implements OnInit {
   unidades: UnidadFuncional[] = [];
   consorcios: Consorcio[] = [];
   loading = false;
+  loadingConsorcios = false;
   error: string | null = null;
 
-  // Paginación
+  // Vista: 'grid' o 'list'
+  viewMode: 'grid' | 'list' = 'grid';
+
   currentPage = 1;
   pageSize = 12;
   total = 0;
   totalPages = 0;
-
-  // Hacer Math disponible en el template
   Math = Math;
 
-  // Filtros
   filters: UnidadFilters = {
     search: '',
     consorcio_id: undefined,
@@ -50,6 +48,7 @@ export class UnidadesPageComponent implements OnInit {
 
   constructor(
     private unidadesService: UnidadesService,
+    private consorciosService: ConsorciosService,
     private router: Router
   ) {}
 
@@ -58,10 +57,26 @@ export class UnidadesPageComponent implements OnInit {
     this.loadUnidades();
   }
 
+  toggleView(): void {
+    this.viewMode = this.viewMode === 'grid' ? 'list' : 'grid';
+  }
+
   loadConsorcios(): void {
-    // TODO: Implementar llamada al servicio de consorcios
-    // Por ahora array vacío
-    this.consorcios = [];
+    this.loadingConsorcios = true;
+    this.consorciosService.getConsorciosActivos({ 
+      limit: 100, 
+      sortBy: 'nombre', 
+      sortOrder: 'asc' 
+    }).subscribe({
+      next: (response) => {
+        this.consorcios = response.data;
+        this.loadingConsorcios = false;
+      },
+      error: (err) => {
+        console.error('Error al cargar consorcios:', err);
+        this.loadingConsorcios = false;
+      }
+    });
   }
 
   loadUnidades(): void {
@@ -89,8 +104,19 @@ export class UnidadesPageComponent implements OnInit {
     });
   }
 
+  getEstadisticas(): UnidadesStats {
+    const stats: UnidadesStats = {
+      total: this.unidades.length,
+      ocupadas: this.unidades.filter(u => u.estado === 'ocupado').length,
+      vacantes: this.unidades.filter(u => u.estado === 'vacante').length,
+      mantenimiento: this.unidades.filter(u => u.estado === 'mantenimiento').length,
+      conTickets: this.unidades.filter(u => (u.tickets_count || 0) > 0).length
+    };
+    return stats;
+  }
+
   onFiltersChange(newFilters: UnidadFilters): void {
-    this.filters = { ...newFilters };
+    this.filters = { ...this.filters, ...newFilters };
     this.currentPage = 1;
     this.loadUnidades();
   }
@@ -110,14 +136,9 @@ export class UnidadesPageComponent implements OnInit {
   }
 
   onDeleteUnidad(unidad: UnidadFuncional): void {
-    const confirmacion = confirm(
-      `¿Está seguro que desea eliminar la unidad ${unidad.codigo}?\n\nEsta acción no se puede deshacer.`
-    );
-
-    if (confirmacion) {
+    if (confirm(`¿Estás seguro de que deseas eliminar la unidad ${unidad.codigo}?`)) {
       this.unidadesService.deleteUnidad(unidad.id).subscribe({
         next: () => {
-          alert('Unidad eliminada correctamente');
           this.loadUnidades();
         },
         error: (err) => {
@@ -129,15 +150,37 @@ export class UnidadesPageComponent implements OnInit {
   }
 
   onCreateUnidad(): void {
-    this.router.navigate(['/unidades', 'nuevo']);
+    this.router.navigate(['/unidades/nuevo']);
   }
 
-  getEstadisticas(): UnidadesStats {
-    const ocupadas = this.unidades.filter(u => u.estado === 'ocupado').length;
-    const vacantes = this.unidades.filter(u => u.estado === 'vacante').length;
-    const mantenimiento = this.unidades.filter(u => u.estado === 'mantenimiento').length;
-    const conTickets = this.unidades.filter(u => (u.tickets_count || 0) > 0).length;
+  crearUnidad(): void {
+    this.onCreateUnidad();
+  }
 
-    return { ocupadas, vacantes, mantenimiento, conTickets, total: this.total };
+  verDetalle(unidadOrId: number | UnidadFuncional): void {
+    const id = typeof unidadOrId === 'number' ? unidadOrId : unidadOrId.id;
+    this.router.navigate(['/unidades', id]);
+  }
+
+  eliminarUnidad(unidadOrId: number | UnidadFuncional): void {
+    const id = typeof unidadOrId === 'number' ? unidadOrId : unidadOrId.id;
+    const codigo = typeof unidadOrId === 'number' ? 'esta unidad' : unidadOrId.codigo;
+    
+    if (confirm(`¿Estás seguro de que deseas eliminar ${codigo}?`)) {
+      this.unidadesService.deleteUnidad(id).subscribe({
+        next: () => {
+          this.loadUnidades();
+        },
+        error: (err) => {
+          console.error('Error al eliminar unidad:', err);
+          alert('Error al eliminar la unidad. Por favor, intente nuevamente.');
+        }
+      });
+    }
+  }
+
+  refresh(): void {
+    this.loadConsorcios();
+    this.loadUnidades();
   }
 }
