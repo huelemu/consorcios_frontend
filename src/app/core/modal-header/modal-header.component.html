@@ -1,0 +1,17 @@
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white">
+      <div class="flex items-center gap-2">
+        <mat-icon [ngClass]="iconClasses">{{ icon }}</mat-icon>
+        <h2 class="text-lg font-semibold" [ngClass]="textClasses">
+          {{ title }}
+        </h2>
+      </div>
+
+      <button
+        mat-icon-button
+        (click)="close.emit()"
+        aria-label="Cerrar"
+        class="hover:bg-gray-100 rounded-full"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>

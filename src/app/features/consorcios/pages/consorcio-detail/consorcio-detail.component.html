@@ -39,7 +39,12 @@
         <div class="flex items-start gap-4">
           <div class="text-5xl">🏢</div>
           <div>
-            <h1 class="text-3xl font-bold text-gray-900">{{ consorcio.nombre }}</h1>
+     <h1 class="text-3xl font-bold text-gray-900">
+            {{ consorcio.nombre }}
+            <span *ngIf="consorcio.codigo_ext" class="text-gray-500 text-xl font-medium">
+              ({{ consorcio.codigo_ext }})
+            </span>
+          </h1>
             <p class="mt-1 text-gray-600">{{ getDireccion() }}</p>
             <div class="mt-2 flex items-center gap-3">
               <!-- Badge de estado -->
@@ -248,16 +253,31 @@
     </div>
 
     <!-- Unidades Funcionales -->
-    <div class="rounded-xl bg-white p-6 shadow-sm">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-semibold text-gray-900">Unidades Funcionales</h2>
-        <button
-          (click)="gestionarUnidades()"
-          class="text-sm text-blue-600 hover:text-blue-800 transition"
-        >
-          Gestionar Unidades →
-        </button>
-      </div>
+<div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+  <h2 class="text-lg font-semibold text-gray-900">Unidades Funcionales</h2>
+  <div class="flex flex-wrap gap-2">
+    <button
+      (click)="gestionarUnidades()"
+      class="flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700 transition"
+    >
+      🏢 <span>Gestionar Unidades</span>
+    </button>
+
+    <button
+      (click)="crearTicket()"
+      class="flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm text-white hover:bg-indigo-700 transition"
+    >
+      🎫 <span>Crear Ticket</span>
+    </button>
+
+    <button
+      (click)="volver()"
+      class="flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
+    >
+      ← <span>Volver a Consorcios</span>
+    </button>
+  </div>
+</div>
 
       <!-- Lista de unidades -->
       <div *ngIf="hasUnidades()" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -285,16 +305,16 @@
         <div class="text-5xl mb-2">🏠</div>
         <p>No hay unidades registradas</p>
         <button
-          (click)="gestionarUnidades()"
-          class="mt-4 text-sm text-blue-600 hover:underline"
+          (click)="crearUnidad()"
+          class="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 transition"
         >
-          Agregar primera unidad
+          + Agregar primera unidad
         </button>
       </div>
     </div>
 
   </div>
-</div>
+
 
 <!-- Modal de confirmación de eliminación -->
 <div *ngIf="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">

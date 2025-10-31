@@ -3,6 +3,10 @@ import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ConsorciosService } from '../../services/consorcios.service';
 import { AuthService } from '../../../../auth/auth.service';
+import { ModalService } from '../../../../core/services/modal.service';
+import { TicketFormDialogComponent } from '../../../tickets/components/ticket-form-dialog/ticket-form-dialog.component';
+import { ToastrService } from 'ngx-toastr';
+
 import {
   Consorcio,
   ESTADO_LABELS,
@@ -47,7 +51,9 @@ export class ConsorcioDetailComponent implements OnInit {
     private consorciosService: ConsorciosService,
     private authService: AuthService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private modalService: ModalService,
+     private toastr: ToastrService,
   ) {}
 
   ngOnInit(): void {
@@ -314,4 +320,57 @@ export class ConsorcioDetailComponent implements OnInit {
   hasUnidades(): boolean {
     return !!(this.consorcio?.unidades && this.consorcio.unidades.length > 0);
   }
+
+  /**
+ * Abrir modal para crear una nueva unidad funcional
+ */
+crearUnidad(): void {
+  console.log('Abrir modal para crear unidad del consorcio:', this.consorcioId);
+  // TODO: usar modalService cuando esté disponible
+  alert('Abrir modal para crear una nueva unidad funcional');
+}
+
+/**
+ * Abrir modal para crear un nuevo ticket (contextual)
+ * - Si se llama desde el consorcio → precarga consorcio_id y nombre
+ * - Si se llama desde una unidad funcional → también precarga unidad_funcional_id
+ */
+async crearTicket(unidadFuncionalId?: number): Promise<void> {
+  try {
+    const modalRef: any = await this.modalService.open(
+      'Nuevo Ticket',
+      TicketFormDialogComponent,
+      'ticket'
+    );
+
+    if (modalRef?.componentRef?.instance) {
+      const instance = modalRef.componentRef.instance;
+
+      // Info del Consorcio
+      instance.consorcio_id = this.consorcioId;
+      instance.consorcio_nombre = this.consorcio?.codigo_ext
+        ? `${this.consorcio?.nombre} (${this.consorcio?.codigo_ext})`
+        : this.consorcio?.nombre;
+
+      // Info de la unidad funcional (opcional)
+      if (unidadFuncionalId) {
+        const unidad = this.consorcio?.unidades?.find((u: any) => u.id === unidadFuncionalId);
+        instance.unidad_funcional_id = unidadFuncionalId;
+        instance.unidad_funcional_nombre = unidad ? (unidad.codigo ? unidad.codigo : `UF ${unidad.id}`): `UF ${unidadFuncionalId}`;
+
+      }
+    }
+
+    modalRef?.result
+      ?.then((res: any) => {
+        if (res === 'saved') {
+          this.toastr.success('Ticket creado correctamente', 'Éxito');
+          // Refresh opcional
+        }
+      })
+      .catch(() => {});
+  } catch (error) {
+    console.error('Error al abrir el modal de ticket:', error);
+  }
+}
 }

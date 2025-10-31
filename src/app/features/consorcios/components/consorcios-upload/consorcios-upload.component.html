@@ -1,0 +1,76 @@
+<h1 style="color:red">TEST UPLOAD COMPONENT</h1>
+
+
+<div class="p-6 space-y-6">
+  <h1 class="text-2xl font-semibold">Importar Consorcios desde Excel</h1>
+
+  <!-- Selector de archivo -->
+  <div class="space-y-2">
+    <label class="block text-sm font-medium">Archivo Excel (.xlsx)</label>
+    <input
+      type="file"
+      accept=".xlsx"
+      (change)="onFileSelected($event)"
+      class="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gray-800 file:text-white hover:file:bg-gray-700"
+    />
+    <p class="text-xs text-gray-500">Se leerá la primera hoja. Se mostrarán hasta 20 filas de previsualización.</p>
+  </div>
+
+  <!-- Previsualización & Mapeo -->
+  <div *ngIf="excelColumns().length" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Mapeo -->
+    <div class="border rounded-xl p-4">
+      <h2 class="font-medium mb-3">Mapeo de columnas</h2>
+      <form [formGroup]="mappingForm" class="space-y-3">
+        <ng-container *ngFor="let f of fields">
+          <div class="flex items-center gap-2">
+            <label class="w-48 text-sm">{{ f.label }}</label>
+            <select
+              class="flex-1 rounded-lg border px-3 py-2 text-sm"
+              [formControlName]="f.field"
+            >
+              <option [ngValue]="null">-- Sin asignar --</option>
+              <option *ngFor="let col of excelColumns()" [ngValue]="col">{{ col }}</option>
+            </select>
+          </div>
+        </ng-container>
+
+        <div *ngIf="missingRequired()" class="text-xs text-red-600">
+          Debés asignar una columna al campo <strong>Nombre</strong>.
+        </div>
+
+        <button
+          type="button"
+          (click)="submit()"
+          [disabled]="loading()"
+          class="mt-3 inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700 disabled:opacity-50"
+        >
+          <span *ngIf="!loading()">Importar</span>
+          <span *ngIf="loading()">Importando...</span>
+        </button>
+      </form>
+
+
+    <!-- Preview -->
+    <div class="border rounded-xl p-4 overflow-auto">
+      <h2 class="font-medium mb-3">Previsualización (primeras 20 filas)</h2>
+      <table class="min-w-full text-sm">
+        <thead class="sticky top-0 bg-gray-50">
+          <tr>
+            <th *ngFor="let c of excelColumns()" class="text-left px-2 py-1 font-medium border-b">{{ c }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of rows()">
+            <td *ngFor="let c of excelColumns()" class="px-2 py-1 border-b">{{ r[c] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Mensaje inicial -->
+  <div *ngIf="!excelColumns().length" class="text-sm text-gray-500">
+    Subí un archivo para comenzar y luego mapeá cada columna a un campo del modelo de Consorcio.
+  </div>
+</div>

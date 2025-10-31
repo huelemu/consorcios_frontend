@@ -1,277 +1,83 @@
-<div class="min-h-screen bg-gray-50 p-6">
-  <!-- Header -->
-  <div class="mb-6">
-    <button
-      (click)="cancelar()"
-      class="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-4 transition"
-    >
-      <span>←</span>
-      <span>Volver a Consorcios</span>
-    </button>
+<!-- Backdrop -->
+<div 
+  class="modal-backdrop fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center p-4"
+  (click)="onBackdropClick($event)"
+  (keydown)="onEscapeKey($event)"
+  tabindex="0"
+>
+  <!-- Modal Container -->
+  <div 
+    class="modal-container bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden animate-slideIn"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Header -->
+    <div class="modal-header bg-gradient-to-r from-indigo-500 to-indigo-600 px-6 py-5 flex items-center justify-between">
+      <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+        <mat-icon class="text-white">business</mat-icon>
+        Crear Consorcio
+      </h2>
+      <button
+        (click)="onClose()"
+        class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors"
+        type="button"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
 
-    <h1 class="text-3xl font-bold text-gray-900">
-      {{ isEditMode ? 'Editar Consorcio' : 'Nuevo Consorcio' }}
-    </h1>
-    <p class="mt-1 text-sm text-gray-600">
-      {{ isEditMode ? 'Modifica los datos del consorcio' : 'Completa los datos para crear un nuevo consorcio' }}
-    </p>
-  </div>
+    <!-- Formulario -->
+    <div class="modal-body overflow-y-auto max-h-[calc(90vh-200px)] px-6 py-6">
+      <form [formGroup]="form" class="flex flex-col gap-4">
 
-  <!-- Loading spinner -->
-  <div *ngIf="loading" class="flex justify-center items-center py-12">
-    <div class="h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
-  </div>
-
-  <!-- Formulario -->
-  <div *ngIf="!loading" class="max-w-4xl">
-    <form [formGroup]="consorcioForm" (ngSubmit)="onSubmit()" class="space-y-6">
-      
-      <!-- Mensaje de error general -->
-      <div *ngIf="error" class="rounded-lg bg-red-50 border border-red-200 p-4 text-red-800">
-        <div class="flex items-center gap-2">
-          <span class="text-xl">⚠️</span>
-          <span>{{ error }}</span>
-        </div>
+      <div class="form-group">
+        <label class="font-semibold text-gray-700">Código Externo</label>
+        <input formControlName="codigo_ext" class="input" placeholder="" />
       </div>
 
-      <!-- Mensaje de éxito -->
-      <div *ngIf="successMessage" class="rounded-lg bg-green-50 border border-green-200 p-4 text-green-800">
-        <div class="flex items-center gap-2">
-          <span class="text-xl">✓</span>
-          <span>{{ successMessage }}</span>
+        <div>
+          <label class="font-semibold text-gray-700">Nombre del Consorcio *</label>
+          <input formControlName="nombre" class="input" placeholder="Ej. Torre San Martín" />
         </div>
-      </div>
 
-      <!-- Card: Información Básica -->
-      <div class="rounded-xl bg-white p-6 shadow-sm">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Información Básica</h2>
-        
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <!-- Nombre -->
-          <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Nombre del Consorcio <span class="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              formControlName="nombre"
-              placeholder="Ej: Edificio Libertad"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              [class.border-red-500]="hasError('nombre')"
-            />
-            <p *ngIf="hasError('nombre')" class="mt-1 text-sm text-red-600">
-              {{ getErrorMessage('nombre') }}
-            </p>
-          </div>
+        <div>
+          <label class="font-semibold text-gray-700">Dirección *</label>
+          <input formControlName="direccion" class="input" placeholder="Av. Corrientes 1234" />
+        </div>
 
-          <!-- Dirección -->
-          <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Dirección
-            </label>
-            <input
-              type="text"
-              formControlName="direccion"
-              placeholder="Ej: Av. Libertad 1200"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              [class.border-red-500]="hasError('direccion')"
-            />
-            <p *ngIf="hasError('direccion')" class="mt-1 text-sm text-red-600">
-              {{ getErrorMessage('direccion') }}
-            </p>
-          </div>
-
-          <!-- Ciudad -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Ciudad
-            </label>
-            <input
-              type="text"
-              formControlName="ciudad"
-              placeholder="Ej: CABA"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              [class.border-red-500]="hasError('ciudad')"
-            />
-            <p *ngIf="hasError('ciudad')" class="mt-1 text-sm text-red-600">
-              {{ getErrorMessage('ciudad') }}
-            </p>
+            <label class="font-semibold text-gray-700">Ciudad</label>
+            <input formControlName="ciudad" class="input" placeholder="Ej. CABA" />
           </div>
-
-          <!-- Provincia -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Provincia
-            </label>
-            <select
-              formControlName="provincia"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              [class.border-red-500]="hasError('provincia')"
-            >
-              <option value="">Seleccionar provincia</option>
-              <option *ngFor="let provincia of PROVINCIAS" [value]="provincia">
-                {{ provincia }}
+            <label class="font-semibold text-gray-700">Provincia</label>
+            <input formControlName="provincia" class="input" placeholder="Ej. Buenos Aires" />
+          </div>
+        </div>
+
+        <div>
+          <label class="font-semibold text-gray-700">Responsable del edificio</label>
+          <div class="flex gap-2">
+            <select formControlName="responsable_id" class="input flex-1">
+              <option [ngValue]="null">Seleccione...</option>
+              <option *ngFor="let r of responsables" [ngValue]="r.id">
+                {{ r.nombre }} {{ r.apellido }}
               </option>
             </select>
-            <p *ngIf="hasError('provincia')" class="mt-1 text-sm text-red-600">
-              {{ getErrorMessage('provincia') }}
-            </p>
-          </div>
-
-          <!-- País -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              País
-            </label>
-            <input
-              type="text"
-              formControlName="pais"
-              placeholder="Argentina"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              [class.border-red-500]="hasError('pais')"
-            />
-            <p *ngIf="hasError('pais')" class="mt-1 text-sm text-red-600">
-              {{ getErrorMessage('pais') }}
-            </p>
-          </div>
-
-          <!-- CUIT -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              CUIT
-            </label>
-            <input
-              type="text"
-              formControlName="cuit"
-              placeholder="XX-XXXXXXXX-X"
-              (input)="onCuitInput($event)"
-              maxlength="13"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              [class.border-red-500]="hasError('cuit')"
-            />
-            <p *ngIf="hasError('cuit')" class="mt-1 text-sm text-red-600">
-              {{ getErrorMessage('cuit') }}
-            </p>
-            <p class="mt-1 text-xs text-gray-500">
-              Formato: XX-XXXXXXXX-X
-            </p>
+            <button type="button" (click)="crearResponsableNuevo()" 
+              class="bg-indigo-500 text-white rounded-lg px-3 py-2 hover:bg-indigo-600">
+              + Nuevo
+            </button>
           </div>
         </div>
-      </div>
 
-      <!-- Card: Información de Contacto -->
-      <div class="rounded-xl bg-white p-6 shadow-sm">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Información de Contacto</h2>
-        
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <!-- Teléfono -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Teléfono de Contacto
-            </label>
-            <input
-              type="tel"
-              formControlName="telefono_contacto"
-              placeholder="+54 11 1234-5678"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              [class.border-red-500]="hasError('telefono_contacto')"
-            />
-            <p *ngIf="hasError('telefono_contacto')" class="mt-1 text-sm text-red-600">
-              {{ getErrorMessage('telefono_contacto') }}
-            </p>
-          </div>
+      </form>
+    </div>
 
-          <!-- Email -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Email de Contacto
-            </label>
-            <input
-              type="email"
-              formControlName="email_contacto"
-              placeholder="contacto@consorcio.com"
-              class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              [class.border-red-500]="hasError('email_contacto')"
-            />
-            <p *ngIf="hasError('email_contacto')" class="mt-1 text-sm text-red-600">
-              {{ getErrorMessage('email_contacto') }}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card: Responsable -->
-      <div class="rounded-xl bg-white p-6 shadow-sm">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Responsable del Consorcio</h2>
-        
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Administrador Responsable
-          </label>
-          
-          <select
-            formControlName="responsable_id"
-            class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            [disabled]="loadingResponsables"
-            [class.border-red-500]="hasError('responsable_id')"
-          >
-            <option [ngValue]="null">Sin responsable asignado</option>
-            <option *ngFor="let responsable of responsables" [ngValue]="responsable.id">
-              {{ getResponsableNombre(responsable) }}
-            </option>
-          </select>
-
-          <p *ngIf="loadingResponsables" class="mt-1 text-sm text-gray-500">
-            Cargando responsables...
-          </p>
-          
-          <p *ngIf="hasError('responsable_id')" class="mt-1 text-sm text-red-600">
-            {{ getErrorMessage('responsable_id') }}
-          </p>
-          
-          <p class="mt-1 text-xs text-gray-500">
-            Selecciona un administrador que será responsable de gestionar este consorcio
-          </p>
-        </div>
-      </div>
-
-      <!-- Botones de acción -->
-      <div class="flex items-center justify-end gap-4 border-t border-gray-200 pt-6">
-        <button
-          type="button"
-          (click)="cancelar()"
-          [disabled]="submitting"
-          class="rounded-lg border border-gray-300 px-6 py-2 hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Cancelar
-        </button>
-
-        <button
-          type="button"
-          (click)="limpiarFormulario()"
-          [disabled]="submitting || !consorcioForm.dirty"
-          class="rounded-lg border border-gray-300 px-6 py-2 hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Limpiar
-        </button>
-
-        <button
-          type="submit"
-          [disabled]="submitting || consorcioForm.invalid"
-          class="flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <span *ngIf="!submitting">{{ isEditMode ? 'Actualizar' : 'Crear' }} Consorcio</span>
-          <span *ngIf="submitting" class="flex items-center gap-2">
-            <span class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
-            <span>{{ isEditMode ? 'Actualizando...' : 'Creando...' }}</span>
-          </span>
-        </button>
-      </div>
-
-      <!-- Leyenda de campos obligatorios -->
-      <div class="text-sm text-gray-500 text-center">
-        <span class="text-red-500">*</span> Campos obligatorios
-      </div>
-    </form>
+    <!-- Footer -->
+    <div class="modal-footer flex justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
+      <button (click)="onClose()" class="btn-secondary">Cancelar</button>
+      <button (click)="onSubmit()" class="btn-primary">Guardar</button>
+    </div>
   </div>
 </div>

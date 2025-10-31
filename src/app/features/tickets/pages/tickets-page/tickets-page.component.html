@@ -6,14 +6,23 @@
         Control centralizado de reclamos, pedidos de mantenimiento y solicitudes internas vinculadas a cada unidad funcional.
       </p>
     </div>
-    <button
-      type="button"
-      class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-    >
-      <span class="text-lg">➕</span>
-      Nuevo ticket
-    </button>
+<button
+  type="button"
+  class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+  (click)="openCreateDialog()"
+>
+  <span class="text-lg">➕</span>
+  Nuevo ticket
+</button>
+
   </div>
+
+<div *ngIf="errorMessages.length > 0" class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+    <ul class="list-disc space-y-1 pl-4">
+      <li *ngFor="let message of errorMessages">{{ message }}</li>
+    </ul>
+  </div>
+
 
   <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
     <div
@@ -125,6 +134,19 @@
     </div>
   </form>
 
+<!-- ============================
+     FORMULARIO DE NUEVO TICKET
+     ============================ -->
+<!-- <app-ticket-form
+  (ticketCreated)="loadTickets()"
+  [consorcioId]="null"
+  [unidadId]="null"
+></app-ticket-form> -->
+
+<!-- ============================
+     LISTADO DE TICKETS EXISTENTES
+     ============================ -->
+
   <div class="grid gap-6 xl:grid-cols-[2fr_1fr]">
     <div class="rounded-xl border border-gray-200 bg-white shadow-sm">
       <div class="border-b border-gray-100 px-5 py-4">
@@ -193,7 +215,12 @@
                 </div>
               </td>
             </tr>
-            <tr *ngIf="filteredTickets.length === 0">
+             <tr *ngIf="isLoadingTickets">
+              <td colspan="6" class="px-5 py-10 text-center text-sm text-gray-500">
+                Cargando tickets...
+              </td>
+            </tr>
+            <tr *ngIf="!isLoadingTickets && filteredTickets.length === 0">
               <td colspan="6" class="px-5 py-10 text-center text-sm text-gray-500">
                 No se encontraron tickets con los filtros seleccionados.
               </td>

@@ -1,0 +1,78 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4 p-4 w-full max-w-lg">
+
+  <!-- CONSORCIO -->
+  <ng-container *ngIf="!consorcio_id; else consorcioBloqueado">
+    <label class="text-sm text-gray-600 font-semibold">Consorcio *</label>
+    <select formControlName="consorcio_id" class="input" (change)="cargarUnidades(form.value.consorcio_id)">
+      <option [ngValue]="null">Seleccione consorcio...</option>
+      <option *ngFor="let c of consorcios" [ngValue]="c.id">
+        {{ c.nombre }} <span *ngIf="c.codigo_ext">({{ c.codigo_ext }})</span>
+      </option>
+    </select>
+  </ng-container>
+
+  <ng-template #consorcioBloqueado>
+    <label class="text-sm text-gray-600 font-semibold">Consorcio</label>
+    <input
+      class="input bg-gray-100 cursor-not-allowed"
+      [value]="getConsorcioNombre()"
+      disabled
+    />
+  </ng-template>
+
+  <!-- UNIDAD FUNCIONAL -->
+  <ng-container *ngIf="!unidad_funcional_id; else unidadBloqueada">
+    <label class="text-sm text-gray-600 font-semibold">Unidad funcional *</label>
+    <select formControlName="unidad_funcional_id" class="input">
+      <option [ngValue]="null">Seleccione unidad...</option>
+      <option *ngFor="let u of unidades" [ngValue]="u.id">
+        {{ u.codigo || u.nombre || ('UF-' + u.id) }}
+      </option>
+    </select>
+  </ng-container>
+
+  <ng-template #unidadBloqueada>
+    <label class="text-sm text-gray-600 font-semibold">Unidad funcional</label>
+    <input
+      class="input bg-gray-100 cursor-not-allowed"
+      [value]="getUnidadNombre()"
+      disabled
+    />
+  </ng-template>
+
+  <!-- TITULO -->
+  <div>
+    <label class="text-sm text-gray-600 font-semibold">Título *</label>
+    <input
+      formControlName="titulo"
+      class="input"
+      placeholder="Ej. Fuga de agua en pasillo"
+    />
+  </div>
+
+  <!-- DESCRIPCION -->
+  <div>
+    <label class="text-sm text-gray-600 font-semibold">Descripción</label>
+    <textarea
+      formControlName="descripcion"
+      class="input h-24"
+      placeholder="Describa el problema..."
+    ></textarea>
+  </div>
+
+  <!-- PRIORIDAD -->
+  <div>
+    <label class="text-sm text-gray-600 font-semibold">Prioridad</label>
+    <select formControlName="prioridad" class="input">
+      <option value="baja">Baja</option>
+      <option value="media">Media</option>
+      <option value="alta">Alta</option>
+    </select>
+  </div>
+
+  <!-- BOTONES -->
+  <div class="flex justify-end gap-3 mt-6">
+    <button type="button" (click)="onClose()" class="btn-secondary">Cancelar</button>
+    <button type="submit" [disabled]="form.invalid" class="btn-primary">Guardar</button>
+  </div>
+</form>

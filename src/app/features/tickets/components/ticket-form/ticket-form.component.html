@@ -1,0 +1,73 @@
+<div class="flex flex-col h-full max-h-[85vh] bg-white">
+  <!-- HEADER -->
+<app-modal-header
+  title="Crear Persona"
+  icon="person_add"
+  [module]="'ticket'"
+  (close)="onCancel()"
+></app-modal-header>
+
+  <!-- BODY -->
+  <div class="overflow-y-auto p-6">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="grid gap-5 md:grid-cols-2">
+      <!-- Consorcio -->
+      <mat-form-field appearance="fill">
+        <mat-label>Consorcio</mat-label>
+        <mat-select formControlName="consorcioId" [disabled]="!!data.consorcioId">
+          <mat-option *ngFor="let c of consorcios" [value]="c.id">{{ c.nombre }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Unidad -->
+      <mat-form-field appearance="fill">
+        <mat-label>Unidad funcional / Espacio común</mat-label>
+        <mat-select formControlName="unidadId" [disabled]="!!data.unidadId">
+          <mat-option [value]="null">Ninguna</mat-option>
+          <mat-option *ngFor="let u of unidades" [value]="u.id">{{ u.nombre }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Tipo -->
+      <mat-form-field appearance="fill">
+        <mat-label>Tipo</mat-label>
+        <mat-select formControlName="tipo">
+          <mat-option *ngFor="let tipo of tipos" [value]="tipo">{{ tipo | titlecase }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Prioridad -->
+      <mat-form-field appearance="fill">
+        <mat-label>Prioridad</mat-label>
+        <mat-select formControlName="prioridad">
+          <mat-option *ngFor="let prioridad of prioridades" [value]="prioridad">{{ prioridad | titlecase }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Título -->
+      <mat-form-field appearance="fill" class="md:col-span-2">
+        <mat-label>Título / Resumen</mat-label>
+        <input matInput formControlName="titulo" placeholder="Ej: Luces del pasillo apagadas" />
+      </mat-form-field>
+
+      <!-- Descripción -->
+      <mat-form-field appearance="fill" class="md:col-span-2">
+        <mat-label>Descripción detallada</mat-label>
+        <textarea
+          matInput
+          rows="4"
+          formControlName="descripcion"
+          placeholder="Describí brevemente el problema o solicitud..."
+        ></textarea>
+      </mat-form-field>
+    </form>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="flex justify-end gap-3 border-t border-gray-200 px-6 py-4 bg-gray-50">
+    <button mat-stroked-button color="warn" type="button" (click)="onCancel()">Cancelar</button>
+    <button mat-flat-button color="primary" [disabled]="form.invalid || isSubmitting" (click)="onSubmit()">
+      <mat-icon>save</mat-icon>
+      Guardar Ticket
+    </button>
+  </div>
+</div>

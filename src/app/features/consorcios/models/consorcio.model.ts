@@ -14,6 +14,7 @@ export interface Consorcio {
   id: number;
   tenant_id?: number | null;
   nombre: string;
+  codigo_ext: string;
   direccion?: string | null;
   ciudad?: string | null;
   provincia?: string | null;
@@ -53,6 +54,7 @@ export interface ResponsableBasic {
  * Información básica de unidad funcional
  */
 export interface UnidadBasic {
+  nombre: string;
   id: number;
   codigo: string;
   piso?: string;

@@ -40,3 +40,49 @@ body {
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+/* ==========================
+   ESTILOS GLOBALES DE DIALOG
+   ========================== */
+
+::ng-deep .mat-mdc-dialog-container .mdc-dialog__surface {
+  /* Sobrescribimos el estilo por defecto de Material 3 */
+  @apply bg-white text-gray-800 rounded-2xl shadow-2xl overflow-hidden p-0;
+  box-shadow: 0 10px 35px -5px rgba(0, 0, 0, 0.25);
+  animation: fadeInScale 0.25s ease-in-out;
+}
+
+/* Fondo del overlay con blur y transparencia */
+::ng-deep .cdk-overlay-backdrop {
+  @apply bg-gray-900/60 backdrop-blur-sm;
+}
+
+/* Transición de fondo */
+::ng-deep .cdk-overlay-backdrop-showing {
+  opacity: 1;
+  transition: opacity 0.25s ease-in-out;
+}
+
+/* Animación modal */
+@keyframes fadeInScale {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Clase personalizada para los diálogos de Consorcios */
+.custom-dialog-container {
+  @apply rounded-2xl shadow-2xl overflow-hidden;
+}
+::ng-deep .mat-mdc-dialog-container .mdc-dialog__surface {
+  @apply bg-white rounded-2xl shadow-2xl overflow-hidden;
+}
+
+/* Evitar footer por defecto del ModalBase (evita botones duplicados) */
+.modal-footer { display: none !important; }
+

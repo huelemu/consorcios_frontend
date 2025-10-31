@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './auth/login/login.component';
-import { DashboardComponent } from './dashboard/dashboard.component';
+import { DashboardComponent } from './core/dashboard/dashboard.component';
 import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './auth/reset-password/reset-password.component';
 import { AuthGuard } from './auth/auth.guard';
@@ -19,6 +19,8 @@ import { UnidadDetailComponent } from './features/unidades/components/inidad-det
 import { TicketsPageComponent } from './features/tickets/pages/tickets-page/tickets-page.component';
 import { ProveedoresPageComponent } from './features/proveedores/pages/proveedores-page/proveedores-page.component';
 import { ProveedorDetalleComponent } from './features/proveedores/pages/proveedor-detalle/proveedor-detalle.component';
+import { ConsorciosUploadComponent } from './features/consorcios/components/consorcios-upload/consorcios-upload.component';
+
 
 export const appRoutes: Routes = [
   // ========================================
@@ -48,6 +50,8 @@ export const appRoutes: Routes = [
     path: 'terms', 
     loadComponent: () => import('./legal/terms-of-service/terms-of-service.component').then(m => m.TermsOfServiceComponent)
   },
+  
+
 
   // ========================================
   // RUTAS PROTEGIDAS (requieren autenticación)
@@ -76,6 +80,16 @@ export const appRoutes: Routes = [
       // ========================================
       // CONSORCIOS
       // ========================================
+
+      {
+  path: 'consorcios/import',
+  loadComponent: () =>
+    import('./features/consorcios/components/consorcios-upload/consorcios-upload.component')
+      .then(m => m.ConsorciosUploadComponent),
+  canActivate: [RoleGuard],
+  data: { roles: ['admin_global', 'tenant_admin', 'admin_consorcio'] }
+},
+
       { 
         path: 'consorcios/nuevo', 
         component: ConsorcioFormComponent, 
@@ -100,6 +114,9 @@ export const appRoutes: Routes = [
         canActivate: [RoleGuard], 
         data: { roles: ['admin_global', 'tenant_admin', 'admin_consorcio', 'admin_edificio', 'propietario', 'inquilino'] }
       },
+
+
+
 
       // ========================================
       // UNIDADES FUNCIONALES ⬅️ NUEVO
