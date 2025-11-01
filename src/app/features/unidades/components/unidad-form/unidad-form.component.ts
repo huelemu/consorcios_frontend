@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -12,7 +12,7 @@ import { Consorcio } from '../../../consorcios/models/consorcio.model';
  * UNIDAD FORM COMPONENT
  * =========================================
  * Componente para crear y editar unidades funcionales
- * ✅ ACTUALIZADO: Ahora carga consorcios reales desde el backend
+ * ✅ Soporta modo página (con rutas) y modo modal
  */
 @Component({
   selector: 'app-unidad-form',
@@ -22,6 +22,13 @@ import { Consorcio } from '../../../consorcios/models/consorcio.model';
   styleUrls: ['./unidad-form.component.scss']
 })
 export class UnidadFormComponent implements OnInit {
+  // ===== MODO MODAL =====
+  @Input() isModal = false;
+  @Input() unidadData: UnidadFuncional | null = null;
+  @Input() consorciosList: Consorcio[] = [];
+  @Output() close = new EventEmitter<void>();
+  @Output() saved = new EventEmitter<UnidadFuncional>();
+
   isEditMode = false;
   unidadId: number | null = null;
   loading = false;
@@ -46,7 +53,6 @@ export class UnidadFormComponent implements OnInit {
     { value: 'mantenimiento', label: 'En Mantenimiento' }
   ];
 
-  // ✅ Consorcios reales desde el backend
   consorcios: Consorcio[] = [];
 
   constructor(
@@ -57,10 +63,48 @@ export class UnidadFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Cargar consorcios primero
+    if (this.isModal) {
+      // MODO MODAL
+      this.initModalMode();
+    } else {
+      // MODO PÁGINA (ruta)
+      this.initPageMode();
+    }
+  }
+
+  /**
+   * Inicializar modo modal
+   */
+  private initModalMode(): void {
+    // Usar consorcios pasados por Input
+    if (this.consorciosList && this.consorciosList.length > 0) {
+      this.consorcios = this.consorciosList;
+    } else {
+      this.loadConsorcios();
+    }
+
+    // Cargar datos si es edición
+    if (this.unidadData) {
+      this.isEditMode = true;
+      this.unidadId = this.unidadData.id;
+      this.unidad = {
+        consorcio_id: this.unidadData.consorcio_id,
+        codigo: this.unidadData.codigo,
+        piso: this.unidadData.piso,
+        superficie: this.unidadData.superficie,
+        porcentaje_participacion: this.unidadData.porcentaje_participacion,
+        estado: this.unidadData.estado
+      };
+    }
+  }
+
+  /**
+   * Inicializar modo página
+   */
+  private initPageMode(): void {
     this.loadConsorcios();
 
-    // Verificar si es modo edición
+    // Verificar si es modo edición desde ruta
     this.route.params.subscribe(params => {
       if (params['id']) {
         this.isEditMode = true;
@@ -71,7 +115,7 @@ export class UnidadFormComponent implements OnInit {
   }
 
   /**
-   * ✅ Cargar consorcios activos desde el backend
+   * Cargar consorcios activos desde el backend
    */
   loadConsorcios(): void {
     this.loadingConsorcios = true;
@@ -85,7 +129,6 @@ export class UnidadFormComponent implements OnInit {
         this.consorcios = response.data;
         this.loadingConsorcios = false;
         
-        // Si solo hay un consorcio, seleccionarlo automáticamente
         if (this.consorcios.length === 1 && !this.isEditMode) {
           this.unidad.consorcio_id = this.consorcios[0].id;
         }
@@ -126,14 +169,14 @@ export class UnidadFormComponent implements OnInit {
   }
 
   /**
-   * ✅ NUEVO: Validar superficie
+   * Validar superficie
    */
   validateSuperficie(): boolean {
     return this.unidad.superficie >= 0;
   }
 
   /**
-   * ✅ NUEVO: Validar porcentaje de participación
+   * Validar porcentaje de participación
    */
   validatePorcentaje(): boolean {
     const porcentaje = this.unidad.porcentaje_participacion;
@@ -149,7 +192,6 @@ export class UnidadFormComponent implements OnInit {
       return;
     }
 
-    // Validaciones adicionales
     if (!this.unidad.consorcio_id || this.unidad.consorcio_id === 0) {
       this.error = 'Debes seleccionar un consorcio.';
       return;
@@ -193,14 +235,20 @@ export class UnidadFormComponent implements OnInit {
         this.successMessage = 'Unidad creada correctamente.';
         this.loading = false;
         
-        // Redirigir después de 1.5 segundos
-        setTimeout(() => {
-          this.router.navigate(['/unidades']);
-        }, 1500);
+        if (this.isModal) {
+          // Modo modal: emitir evento
+          this.saved.emit(response.data);
+          setTimeout(() => this.onClose(), 500);
+        } else {
+          // Modo página: redirigir
+          setTimeout(() => {
+            this.router.navigate(['/unidades']);
+          }, 1500);
+        }
       },
       error: (err) => {
         console.error('Error al crear unidad:', err);
-        this.error = err.error?.message || 'Error al crear la unidad. Por favor, intenta nuevamente.';
+        this.error = err.error?.message || 'Error al crear la unidad.';
         this.loading = false;
       }
     });
@@ -225,14 +273,20 @@ export class UnidadFormComponent implements OnInit {
         this.successMessage = 'Unidad actualizada correctamente.';
         this.loading = false;
         
-        // Redirigir después de 1.5 segundos
-        setTimeout(() => {
-          this.router.navigate(['/unidades']);
-        }, 1500);
+        if (this.isModal) {
+          // Modo modal: emitir evento
+          this.saved.emit(response.data);
+          setTimeout(() => this.onClose(), 500);
+        } else {
+          // Modo página: redirigir
+          setTimeout(() => {
+            this.router.navigate(['/unidades']);
+          }, 1500);
+        }
       },
       error: (err) => {
         console.error('Error al actualizar unidad:', err);
-        this.error = err.error?.message || 'Error al actualizar la unidad. Por favor, intenta nuevamente.';
+        this.error = err.error?.message || 'Error al actualizar la unidad.';
         this.loading = false;
       }
     });
@@ -242,14 +296,17 @@ export class UnidadFormComponent implements OnInit {
    * Cancelar y volver
    */
   cancelar(): void {
-    this.router.navigate(['/unidades']);
+    if (this.isModal) {
+      this.onClose();
+    } else {
+      this.router.navigate(['/unidades']);
+    }
   }
 
   /**
-   * Obtener nombre del consorcio por ID
+   * Cerrar modal
    */
-  getNombreConsorcio(id: number): string {
-    const consorcio = this.consorcios.find(c => c.id === id);
-    return consorcio ? consorcio.nombre : 'Consorcio desconocido';
+  onClose(): void {
+    this.close.emit();
   }
 }

@@ -14,12 +14,6 @@ import {
   getNombreResponsable
 } from '../../models/consorcio.model';
 
-/**
- * =========================================
- * CONSORCIOS LIST COMPONENT
- * =========================================
- * Página principal del módulo de consorcios
- */
 @Component({
   selector: 'app-consorcios-list',
   standalone: true,
@@ -33,9 +27,12 @@ export class ConsorciosListComponent implements OnInit {
   loading: boolean = false;
   error: string = '';
 
+  // Vista: 'cards' o 'list'
+  viewMode: 'cards' | 'list' = 'cards';
+
   // Paginación
   currentPage: number = 1;
-  pageSize: number = 10;
+  pageSize: number = 12;
   totalItems: number = 0;
   totalPages: number = 0;
 
@@ -50,7 +47,7 @@ export class ConsorciosListComponent implements OnInit {
   };
 
   // UI
-  showFilters: boolean = false;
+  showFilters: boolean = true;
   selectedConsorcio: Consorcio | null = null;
   showDeleteModal: boolean = false;
 
@@ -59,7 +56,7 @@ export class ConsorciosListComponent implements OnInit {
   canEdit: boolean = false;
   canDelete: boolean = false;
 
-  // Constantes para el template
+  // Constantes
   readonly ESTADO_LABELS = ESTADO_LABELS;
   readonly ESTADO_COLORS = ESTADO_COLORS;
   readonly PROVINCIAS = PROVINCIAS_ARGENTINA;
@@ -76,18 +73,12 @@ export class ConsorciosListComponent implements OnInit {
     this.loadConsorcios();
   }
 
-  /**
-   * Verificar permisos del usuario
-   */
   checkPermissions(): void {
     this.canCreate = this.authService.hasAnyRole(['admin_global', 'tenant_admin']);
     this.canEdit = this.authService.hasAnyRole(['admin_global', 'tenant_admin', 'admin_consorcio']);
     this.canDelete = this.authService.hasAnyRole(['admin_global', 'tenant_admin']);
   }
 
-  /**
-   * Cargar consorcios con filtros aplicados
-   */
   loadConsorcios(): void {
     this.loading = true;
     this.error = '';
@@ -98,7 +89,6 @@ export class ConsorciosListComponent implements OnInit {
       ...this.filters
     };
 
-    // Limpiar filtros vacíos
     if (!params.search) delete params.search;
     if (!params.estado) delete params.estado;
     if (!params.ciudad) delete params.ciudad;
@@ -119,17 +109,11 @@ export class ConsorciosListComponent implements OnInit {
     });
   }
 
-  /**
-   * Aplicar filtros y resetear paginación
-   */
   applyFilters(): void {
     this.currentPage = 1;
     this.loadConsorcios();
   }
 
-  /**
-   * Limpiar todos los filtros
-   */
   clearFilters(): void {
     this.filters = {
       search: '',
@@ -143,16 +127,19 @@ export class ConsorciosListComponent implements OnInit {
     this.loadConsorcios();
   }
 
-  /**
-   * Toggle mostrar/ocultar filtros
-   */
+  hasActiveFilters(): boolean {
+    return !!(
+      this.filters.search ||
+      this.filters.estado ||
+      this.filters.ciudad ||
+      this.filters.provincia
+    );
+  }
+
   toggleFilters(): void {
     this.showFilters = !this.showFilters;
   }
 
-  /**
-   * Cambiar página
-   */
   changePage(page: number): void {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
@@ -160,104 +147,72 @@ export class ConsorciosListComponent implements OnInit {
     }
   }
 
-  /**
-   * Cambiar tamaño de página
-   */
   changePageSize(size: number): void {
     this.pageSize = size;
     this.currentPage = 1;
     this.loadConsorcios();
   }
 
-  /**
-   * Ordenar por columna
-   */
   sortBy(field: 'nombre' | 'ciudad' | 'creado_en'): void {
     if (this.filters.sortBy === field) {
-      // Toggle orden
       this.filters.sortOrder = this.filters.sortOrder === 'asc' ? 'desc' : 'asc';
     } else {
       this.filters.sortBy = field;
       this.filters.sortOrder = 'asc';
     }
-    this.loadConsorcios();
+    this.applyFilters();
   }
 
-  /**
-   * Navegar al detalle de un consorcio
-   */
-  verDetalle(id: number): void {
-    this.router.navigate(['/consorcios', id]);
-  }
-
-  /**
-   * Navegar al formulario de crear consorcio
-   */
   crearConsorcio(): void {
     this.router.navigate(['/consorcios/nuevo']);
   }
 
-  /**
-   * Navegar al formulario de editar consorcio
-   */
-  editarConsorcio(id: number, event: Event): void {
-    event.stopPropagation();
-    this.router.navigate(['/consorcios', id, 'editar']);
+  verDetalle(id: number): void {
+    this.router.navigate(['/consorcios', id]);
   }
 
-  /**
-   * Abrir modal de confirmación para eliminar
-   */
+  editarConsorcio(id: number, event: Event): void {
+    event.stopPropagation();
+    this.router.navigate(['/consorcios/editar', id]);
+  }
+
   confirmarEliminar(consorcio: Consorcio, event: Event): void {
     event.stopPropagation();
     this.selectedConsorcio = consorcio;
     this.showDeleteModal = true;
   }
 
-  /**
-   * Eliminar consorcio
-   */
-  eliminarConsorcio(): void {
-    if (!this.selectedConsorcio) return;
-
-    this.loading = true;
-    this.consorciosService.deleteConsorcio(this.selectedConsorcio.id).subscribe({
-      next: (response) => {
-        console.log('Consorcio eliminado:', response.message);
-        this.showDeleteModal = false;
-        this.selectedConsorcio = null;
-        this.loadConsorcios();
-      },
-      error: (error) => {
-        console.error('Error al eliminar consorcio:', error);
-        this.error = error.error?.message || 'Error al eliminar el consorcio';
-        this.loading = false;
-        this.showDeleteModal = false;
-      }
-    });
-  }
-
-  /**
-   * Cancelar eliminación
-   */
   cancelarEliminar(): void {
     this.showDeleteModal = false;
     this.selectedConsorcio = null;
   }
 
-  /**
-   * Cambiar estado del consorcio (activar/desactivar)
-   */
+  eliminarConsorcio(): void {
+    if (!this.selectedConsorcio) return;
+
+    this.consorciosService.deleteConsorcio(this.selectedConsorcio.id).subscribe({
+      next: () => {
+        this.showDeleteModal = false;
+        this.selectedConsorcio = null;
+        this.loadConsorcios();
+      },
+      error: (error) => {
+        console.error('Error al eliminar:', error);
+        this.error = 'Error al eliminar el consorcio';
+        this.showDeleteModal = false;
+      }
+    });
+  }
+
   toggleEstado(consorcio: Consorcio, event: Event): void {
     event.stopPropagation();
 
-    const action = consorcio.estado === 'activo' 
+    const action = consorcio.estado === 'activo'
       ? this.consorciosService.desactivarConsorcio(consorcio.id)
       : this.consorciosService.activarConsorcio(consorcio.id);
 
     action.subscribe({
-      next: (response) => {
-        console.log('Estado actualizado:', response.message);
+      next: () => {
         this.loadConsorcios();
       },
       error: (error) => {
@@ -267,23 +222,22 @@ export class ConsorciosListComponent implements OnInit {
     });
   }
 
-  /**
-   * Obtener dirección completa formateada
-   */
   getDireccion(consorcio: Consorcio): string {
     return getDireccionCompleta(consorcio);
   }
 
-  /**
-   * Obtener nombre del responsable
-   */
   getResponsable(consorcio: Consorcio): string {
     return getNombreResponsable(consorcio);
   }
 
-  /**
-   * Generar array de páginas para la paginación
-   */
+  getEstadisticas() {
+    return {
+      activos: this.consorcios.filter(c => c.estado === 'activo').length,
+      inactivos: this.consorcios.filter(c => c.estado === 'inactivo').length,
+      totalUnidades: this.consorcios.reduce((sum, c) => sum + (c.stats?.totalUnidades || 0), 0)
+    };
+  }
+
   getPagesArray(): number[] {
     const pages: number[] = [];
     const maxPagesToShow = 5;
@@ -301,9 +255,6 @@ export class ConsorciosListComponent implements OnInit {
     return pages;
   }
 
-  /**
-   * Verificar si el usuario puede editar un consorcio específico
-   */
   canEditConsorcio(consorcio: Consorcio): boolean {
     const user = this.authService.getCurrentUser();
     if (!user) return false;
@@ -315,9 +266,6 @@ export class ConsorciosListComponent implements OnInit {
     return false;
   }
 
-  /**
-   * Verificar si el usuario puede eliminar un consorcio específico
-   */
   canDeleteConsorcio(consorcio: Consorcio): boolean {
     const user = this.authService.getCurrentUser();
     if (!user) return false;

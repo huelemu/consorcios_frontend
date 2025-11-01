@@ -1,7 +1,7 @@
 <div class="min-h-screen bg-gray-50 py-8">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     
-    <!-- Header -->
+    <!-- ===== HEADER ===== -->
     <div class="mb-8">
       <div class="flex items-center justify-between">
         <div>
@@ -15,7 +15,7 @@
         </div>
         
         <div class="flex items-center gap-3">
-          <!-- Toggle Vista Grid/Lista -->
+          <!-- Toggle Vista -->
           <div class="flex items-center gap-2 bg-white rounded-lg shadow-sm border border-gray-200 p-1">
             <button
               (click)="viewMode = 'grid'"
@@ -37,16 +37,15 @@
               class="p-2 rounded transition-colors"
               title="Vista de lista">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
               </svg>
             </button>
           </div>
 
-          <!-- Botón Crear -->
+          <!-- Botón Nueva Unidad -->
           <button
             (click)="onCreateUnidad()"
-            class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-          >
+            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg flex items-center gap-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
@@ -54,85 +53,120 @@
           </button>
         </div>
       </div>
+    </div>
 
-      <!-- Estadísticas Rápidas -->
-      <div class="mt-6 grid grid-cols-1 md:grid-cols-5 gap-4">
-        
-        <!-- Total -->
-        <div class="bg-white rounded-lg shadow-sm border-2 border-gray-200 p-4">
-          <div class="flex items-center gap-3">
-            <div class="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-lg">
-              <span class="text-2xl">🏢</span>
-            </div>
-            <div>
-              <p class="text-sm text-gray-600">Total</p>
-              <p class="text-2xl font-bold text-gray-900">{{ getEstadisticas().total }}</p>
-            </div>
+    <!-- ===== TARJETAS ESTADÍSTICAS ===== -->
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+      
+      <!-- Total -->
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Total</p>
+            <p class="text-2xl font-bold text-gray-900">{{ getEstadisticas().total }}</p>
           </div>
         </div>
+      </div>
 
-        <!-- Ocupadas -->
-        <div class="bg-white rounded-lg shadow-sm border-2 border-green-200 p-4">
-          <div class="flex items-center gap-3">
-            <div class="flex items-center justify-center w-10 h-10 bg-green-100 rounded-lg">
-              <span class="text-2xl">✅</span>
-            </div>
-            <div>
-              <p class="text-sm text-gray-600">Ocupadas</p>
-              <p class="text-2xl font-bold text-green-700">{{ getEstadisticas().ocupadas }}</p>
-            </div>
+      <!-- Ocupadas -->
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 bg-green-100 rounded-lg p-3">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Ocupadas</p>
+            <p class="text-2xl font-bold text-gray-900">{{ getEstadisticas().ocupadas }}</p>
           </div>
         </div>
+      </div>
 
-        <!-- Vacantes -->
-        <div class="bg-white rounded-lg shadow-sm border-2 border-yellow-200 p-4">
-          <div class="flex items-center gap-3">
-            <div class="flex items-center justify-center w-10 h-10 bg-yellow-100 rounded-lg">
-              <span class="text-2xl">🚪</span>
-            </div>
-            <div>
-              <p class="text-sm text-gray-600">Vacantes</p>
-              <p class="text-2xl font-bold text-yellow-700">{{ getEstadisticas().vacantes }}</p>
-            </div>
+      <!-- Vacantes -->
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 bg-yellow-100 rounded-lg p-3">
+            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Vacantes</p>
+            <p class="text-2xl font-bold text-gray-900">{{ getEstadisticas().vacantes }}</p>
           </div>
         </div>
+      </div>
 
-        <!-- Mantenimiento -->
-        <div class="bg-white rounded-lg shadow-sm border-2 border-red-200 p-4">
-          <div class="flex items-center gap-3">
-            <div class="flex items-center justify-center w-10 h-10 bg-red-100 rounded-lg">
-              <span class="text-2xl">🔧</span>
-            </div>
-            <div>
-              <p class="text-sm text-gray-600">Mantenimiento</p>
-              <p class="text-2xl font-bold text-red-700">{{ getEstadisticas().mantenimiento }}</p>
-            </div>
+      <!-- Mantenimiento -->
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 bg-red-100 rounded-lg p-3">
+            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Mantenimiento</p>
+            <p class="text-2xl font-bold text-gray-900">{{ getEstadisticas().mantenimiento }}</p>
           </div>
         </div>
+      </div>
 
-        <!-- Con Tickets -->
-        <div class="bg-white rounded-lg shadow-sm border-2 border-orange-200 p-4">
-          <div class="flex items-center gap-3">
-            <div class="flex items-center justify-center w-10 h-10 bg-orange-100 rounded-lg">
-              <span class="text-2xl">🎫</span>
-            </div>
-            <div>
-              <p class="text-sm text-gray-600">Con Tickets</p>
-              <p class="text-2xl font-bold text-orange-700">{{ getEstadisticas().conTickets }}</p>
-            </div>
+      <!-- Con Tickets -->
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 bg-orange-100 rounded-lg p-3">
+            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Con Tickets</p>
+            <p class="text-2xl font-bold text-gray-900">{{ getEstadisticas().conTickets }}</p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Componente de Filtros -->
-    <app-unidad-filters
-      [filters]="filters"
-      [consorcios]="consorcios"
-      (filtersChange)="onFiltersChange($event)"
-    ></app-unidad-filters>
+    <!-- ===== FILTROS ===== -->
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+      <!-- Header con botón colapsar -->
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+          </svg>
+          Filtros de Búsqueda
+        </h3>
+        
+        <button
+          (click)="toggleFilters()"
+          class="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  [attr.d]="showFilters ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'" />
+          </svg>
+          {{ showFilters ? 'Ocultar' : 'Mostrar' }} filtros
+        </button>
+      </div>
 
-    <!-- Loading State -->
+      <!-- Panel de filtros -->
+      <app-unidad-filters
+        *ngIf="showFilters"
+        [filters]="filters"
+        [consorcios]="consorcios"
+        (filtersChange)="onFiltersChange($event)"
+      ></app-unidad-filters>
+    </div>
+
+    <!-- ===== LOADING ===== -->
     <div *ngIf="loading" class="flex items-center justify-center py-12">
       <div class="text-center">
         <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -140,7 +174,7 @@
       </div>
     </div>
 
-    <!-- Error State -->
+    <!-- ===== ERROR ===== -->
     <div *ngIf="error && !loading" class="bg-red-50 border-2 border-red-200 rounded-lg p-6 mb-6">
       <div class="flex items-center gap-3">
         <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -150,7 +184,7 @@
       </div>
     </div>
 
-    <!-- Empty State -->
+    <!-- ===== EMPTY STATE ===== -->
     <div *ngIf="!loading && !error && unidades.length === 0" class="bg-white rounded-lg shadow-sm border-2 border-gray-200 p-12 text-center">
       <div class="max-w-md mx-auto">
         <span class="text-6xl mb-4 block">🏠</span>
@@ -164,8 +198,7 @@
         </p>
         <button
           (click)="onCreateUnidad()"
-          class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
-        >
+          class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
@@ -174,7 +207,7 @@
       </div>
     </div>
 
-    <!-- Vista Grid (Tarjetas) -->
+    <!-- ===== VISTA GRID (Tarjetas) ===== -->
     <div *ngIf="viewMode === 'grid' && !loading && !error && unidades.length > 0" 
          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
       <app-unidad-card
@@ -187,7 +220,7 @@
       ></app-unidad-card>
     </div>
 
-    <!-- Vista Lista -->
+    <!-- ===== VISTA LISTA ===== -->
     <div *ngIf="viewMode === 'list' && !loading && !error && unidades.length > 0" class="mb-8">
       <app-unidad-list
         [unidades]="unidades"
@@ -197,7 +230,7 @@
       ></app-unidad-list>
     </div>
 
-    <!-- Paginación -->
+    <!-- ===== PAGINACIÓN ===== -->
     <div *ngIf="!loading && !error && totalPages > 1" class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
       <div class="flex items-center justify-between">
         
@@ -215,56 +248,43 @@
         <!-- Controles de paginación -->
         <div class="flex items-center gap-2">
           
-          <!-- Botón Primera -->
-          <button
-            (click)="onPageChange(1)"
-            [disabled]="currentPage === 1"
-            [class.opacity-50]="currentPage === 1"
-            [class.cursor-not-allowed]="currentPage === 1"
-            class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:hover:bg-white transition-colors"
-          >
-            Primera
-          </button>
-
-          <!-- Botón Anterior -->
+          <!-- Anterior -->
           <button
             (click)="onPageChange(currentPage - 1)"
             [disabled]="currentPage === 1"
-            [class.opacity-50]="currentPage === 1"
-            [class.cursor-not-allowed]="currentPage === 1"
-            class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:hover:bg-white transition-colors"
-          >
+            class="px-3 py-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors">
             Anterior
           </button>
-
-          <!-- Número de página actual -->
-          <div class="px-4 py-2 text-sm font-semibold text-blue-600 bg-blue-50 border-2 border-blue-200 rounded-lg">
-            {{ currentPage }} / {{ totalPages }}
-          </div>
-
-          <!-- Botón Siguiente -->
+          
+          <!-- Números de página -->
+          <button
+            *ngFor="let page of [].constructor(totalPages); let i = index"
+            (click)="onPageChange(i + 1)"
+            [class]="(i + 1) === currentPage 
+              ? 'px-4 py-2 rounded-lg bg-blue-600 text-white font-medium' 
+              : 'px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50'">
+            {{ i + 1 }}
+          </button>
+          
+          <!-- Siguiente -->
           <button
             (click)="onPageChange(currentPage + 1)"
             [disabled]="currentPage === totalPages"
-            [class.opacity-50]="currentPage === totalPages"
-            [class.cursor-not-allowed]="currentPage === totalPages"
-            class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:hover:bg-white transition-colors"
-          >
+            class="px-3 py-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors">
             Siguiente
-          </button>
-
-          <!-- Botón Última -->
-          <button
-            (click)="onPageChange(totalPages)"
-            [disabled]="currentPage === totalPages"
-            [class.opacity-50]="currentPage === totalPages"
-            [class.cursor-not-allowed]="currentPage === totalPages"
-            class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:hover:bg-white transition-colors"
-          >
-            Última
           </button>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<!-- ===== MODAL FORMULARIO ===== -->
+<app-unidad-form
+  *ngIf="showFormModal"
+  [isModal]="true"
+  [unidadData]="editingUnidad"
+  [consorciosList]="consorcios"
+  (close)="closeFormModal()"
+  (saved)="onUnidadSaved()"
+></app-unidad-form>

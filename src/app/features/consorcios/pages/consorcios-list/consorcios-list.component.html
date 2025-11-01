@@ -1,376 +1,595 @@
-<div class="min-h-screen bg-gray-50 p-6">
-  <!-- Header -->
-  <div class="mb-6 flex items-center justify-between">
-    <div>
-      <h1 class="text-3xl font-bold text-gray-900">Consorcios</h1>
-      <p class="mt-1 text-sm text-gray-600">
-        Gestión de edificios y consorcios
-      </p>
-    </div>
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     
-    <button
-      *ngIf="canCreate"
-      (click)="crearConsorcio()"
-      class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 transition"
-    >
-      <span class="text-xl">+</span>
-      <span>Nuevo Consorcio</span>
-    </button>
-  </div>
-
-  <!-- Barra de búsqueda y filtros -->
-  <div class="mb-6 rounded-xl bg-white p-4 shadow-sm">
-    <!-- Búsqueda principal -->
-    <div class="flex gap-3">
-      <div class="flex-1">
-        <input
-          type="text"
-          [(ngModel)]="filters.search"
-          (keyup.enter)="applyFilters()"
-          placeholder="Buscar por nombre, dirección o CUIT..."
-          class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-        />
-      </div>
-      
-      <button
-        (click)="applyFilters()"
-        class="rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 transition"
-      >
-        🔍 Buscar
-      </button>
-      
-      <button
-        (click)="toggleFilters()"
-        class="rounded-lg border border-gray-300 px-4 py-2 hover:bg-gray-50 transition"
-      >
-        {{ showFilters ? '▲' : '▼' }} Filtros
-      </button>
-    </div>
-
-    <!-- Panel de filtros expandible -->
-    <div *ngIf="showFilters" class="mt-4 grid grid-cols-1 gap-4 border-t border-gray-200 pt-4 md:grid-cols-4">
-      <!-- Filtro por Estado -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-        <select
-          [(ngModel)]="filters.estado"
-          class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
-        >
-          <option [ngValue]="undefined">Todos</option>
-          <option value="activo">Activo</option>
-          <option value="inactivo">Inactivo</option>
-        </select>
-      </div>
-
-      <!-- Filtro por Ciudad -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
-        <input
-          type="text"
-          [(ngModel)]="filters.ciudad"
-          placeholder="Ej: CABA"
-          class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
-        />
-      </div>
-
-      <!-- Filtro por Provincia -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Provincia</label>
-        <select
-          [(ngModel)]="filters.provincia"
-          class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
-        >
-          <option [ngValue]="''">Todas</option>
-          <option *ngFor="let provincia of PROVINCIAS" [value]="provincia">
-            {{ provincia }}
-          </option>
-        </select>
-      </div>
-
-      <!-- Botones de acción de filtros -->
-      <div class="flex items-end gap-2">
-        <button
-          (click)="applyFilters()"
-          class="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 transition"
-        >
-          Aplicar
-        </button>
-        <button
-          (click)="clearFilters()"
-          class="flex-1 rounded-lg border border-gray-300 px-4 py-2 hover:bg-gray-50 transition"
-        >
-          Limpiar
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Mensaje de error -->
-  <div *ngIf="error" class="mb-4 rounded-lg bg-red-50 border border-red-200 p-4 text-red-800">
-    <div class="flex items-center gap-2">
-      <span class="text-xl">⚠️</span>
-      <span>{{ error }}</span>
-    </div>
-  </div>
-
-  <!-- Loading spinner -->
-  <div *ngIf="loading" class="flex justify-center items-center py-12">
-    <div class="h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
-  </div>
-
-  <!-- Tabla de consorcios -->
-  <div *ngIf="!loading && consorcios.length > 0" class="rounded-xl bg-white shadow-sm overflow-hidden">
-    <div class="overflow-x-auto">
-      <table class="w-full">
-        <thead class="bg-gray-50 border-b border-gray-200">
-          <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                (click)="sortBy('nombre')">
-              <div class="flex items-center gap-2">
-                <span>Nombre</span>
-                <span *ngIf="filters.sortBy === 'nombre'" class="text-blue-600">
-                  {{ filters.sortOrder === 'asc' ? '▲' : '▼' }}
-                </span>
-              </div>
-            </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Dirección
-            </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                (click)="sortBy('ciudad')">
-              <div class="flex items-center gap-2">
-                <span>Ciudad</span>
-                <span *ngIf="filters.sortBy === 'ciudad'" class="text-blue-600">
-                  {{ filters.sortOrder === 'asc' ? '▲' : '▼' }}
-                </span>
-              </div>
-            </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Responsable
-            </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Unidades
-            </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Estado
-            </th>
-            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Acciones
-            </th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200">
-          <tr *ngFor="let consorcio of consorcios" 
-              (click)="verDetalle(consorcio.id)"
-              class="hover:bg-gray-50 cursor-pointer transition">
-            <!-- Nombre -->
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="flex items-center">
-                <div class="text-lg mr-2">🏢</div>
-                <div>
-                  <div class="text-sm font-medium text-gray-900">
-                    {{ consorcio.nombre }}
-                  </div>
-                  <div *ngIf="consorcio.cuit" class="text-xs text-gray-500">
-                    CUIT: {{ consorcio.cuit }}
-                  </div>
-                </div>
-              </div>
-            </td>
-
-            <!-- Dirección -->
-            <td class="px-6 py-4">
-              <div class="text-sm text-gray-900">{{ consorcio.direccion || '-' }}</div>
-            </td>
-
-            <!-- Ciudad -->
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">{{ consorcio.ciudad || '-' }}</div>
-              <div *ngIf="consorcio.provincia" class="text-xs text-gray-500">
-                {{ consorcio.provincia }}
-              </div>
-            </td>
-
-            <!-- Responsable -->
-            <td class="px-6 py-4">
-              <div class="text-sm text-gray-900">
-                {{ getResponsable(consorcio) }}
-              </div>
-            </td>
-
-            <!-- Unidades -->
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="flex items-center gap-2">
-                <span class="text-2xl font-bold text-blue-600">
-                  {{ consorcio.stats?.totalUnidades || 0 }}
-                </span>
-                <div class="text-xs text-gray-500">
-                  <div>{{ consorcio.stats?.unidadesOcupadas || 0 }} ocupadas</div>
-                </div>
-              </div>
-            </td>
-
-            <!-- Estado -->
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span 
-                [ngClass]="ESTADO_COLORS[consorcio.estado]"
-                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border"
-              >
-                {{ ESTADO_LABELS[consorcio.estado] }}
-              </span>
-            </td>
-
-            <!-- Acciones -->
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-              <div class="flex items-center justify-end gap-2">
-                <!-- Botón Editar -->
-                <button
-                  *ngIf="canEditConsorcio(consorcio)"
-                  (click)="editarConsorcio(consorcio.id, $event)"
-                  class="text-blue-600 hover:text-blue-900 transition"
-                  title="Editar"
-                >
-                  ✏️
-                </button>
-
-                <!-- Botón Activar/Desactivar -->
-                <button
-                  *ngIf="canEdit"
-                  (click)="toggleEstado(consorcio, $event)"
-                  [class]="consorcio.estado === 'activo' ? 'text-yellow-600 hover:text-yellow-900' : 'text-green-600 hover:text-green-900'"
-                  class="transition"
-                  [title]="consorcio.estado === 'activo' ? 'Desactivar' : 'Activar'"
-                >
-                  {{ consorcio.estado === 'activo' ? '⏸️' : '▶️' }}
-                </button>
-
-                <!-- Botón Eliminar -->
-                <button
-                  *ngIf="canDeleteConsorcio(consorcio)"
-                  (click)="confirmarEliminar(consorcio, $event)"
-                  class="text-red-600 hover:text-red-900 transition"
-                  title="Eliminar"
-                >
-                  🗑️
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Paginación -->
-    <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+    <!-- ===== HEADER ===== -->
+    <div class="mb-8">
       <div class="flex items-center justify-between">
-        <!-- Info de registros -->
-        <div class="text-sm text-gray-700">
-          Mostrando 
-          <span class="font-medium">{{ (currentPage - 1) * pageSize + 1 }}</span>
-          a
-          <span class="font-medium">{{ Math.min(currentPage * pageSize, totalItems) }}</span>
-          de
-          <span class="font-medium">{{ totalItems }}</span>
-          resultados
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <span class="text-4xl">🏢</span>
+            Consorcios
+          </h1>
+          <p class="mt-2 text-gray-600">
+            Gestiona los edificios y consorcios del sistema
+          </p>
+        </div>
+        
+        <div class="flex items-center gap-3">
+          <!-- Toggle Vista -->
+          <div class="flex items-center gap-2 bg-white rounded-lg shadow-sm border border-gray-200 p-1">
+            <button
+              (click)="viewMode = 'cards'"
+              [class]="viewMode === 'cards' 
+                ? 'bg-blue-600 text-white' 
+                : 'text-gray-600 hover:text-gray-900'"
+              class="p-2 rounded transition-colors"
+              title="Vista de tarjetas">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+              </svg>
+            </button>
+            
+            <button
+              (click)="viewMode = 'list'"
+              [class]="viewMode === 'list' 
+                ? 'bg-blue-600 text-white' 
+                : 'text-gray-600 hover:text-gray-900'"
+              class="p-2 rounded transition-colors"
+              title="Vista de lista">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Botón Nuevo -->
+          <button
+            *ngIf="canCreate"
+            (click)="crearConsorcio()"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Nuevo Consorcio
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TARJETAS INFORMATIVAS ===== -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <!-- Total Consorcios -->
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Total Consorcios</p>
+            <p class="text-2xl font-bold text-gray-900">{{ totalItems }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activos -->
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 bg-green-100 rounded-lg p-3">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Activos</p>
+            <p class="text-2xl font-bold text-gray-900">{{ getEstadisticas().activos }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inactivos -->
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 bg-yellow-100 rounded-lg p-3">
+            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Inactivos</p>
+            <p class="text-2xl font-bold text-gray-900">{{ getEstadisticas().inactivos }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Unidades -->
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 bg-purple-100 rounded-lg p-3">
+            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Total Unidades</p>
+            <p class="text-2xl font-bold text-gray-900">{{ getEstadisticas().totalUnidades }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== FILTROS ===== -->
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+      <!-- Header Filtros con botón colapsar -->
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+          </svg>
+          Filtros de Búsqueda
+        </h3>
+        
+        <button
+          (click)="toggleFilters()"
+          class="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  [attr.d]="showFilters ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'" />
+          </svg>
+          {{ showFilters ? 'Ocultar' : 'Mostrar' }} filtros
+        </button>
+      </div>
+
+      <!-- Panel de Filtros -->
+      <div *ngIf="showFilters" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <!-- Búsqueda -->
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Buscar</label>
+          <div class="relative">
+            <input
+              type="text"
+              [(ngModel)]="filters.search"
+              (keyup.enter)="applyFilters()"
+              placeholder="Nombre, dirección, CUIT..."
+              class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
         </div>
 
-        <!-- Controles de paginación -->
-        <div class="flex items-center gap-2">
-          <!-- Botón anterior -->
-          <button
-            (click)="changePage(currentPage - 1)"
-            [disabled]="currentPage === 1"
-            [class.opacity-50]="currentPage === 1"
-            [class.cursor-not-allowed]="currentPage === 1"
-            class="px-3 py-1 rounded border border-gray-300 hover:bg-gray-100 transition"
-          >
-            ◀
-          </button>
-
-          <!-- Números de página -->
-          <button
-            *ngFor="let page of getPagesArray()"
-            (click)="changePage(page)"
-            [class.bg-blue-600]="page === currentPage"
-            [class.text-white]="page === currentPage"
-            [class.border-blue-600]="page === currentPage"
-            class="px-3 py-1 rounded border border-gray-300 hover:bg-gray-100 transition"
-          >
-            {{ page }}
-          </button>
-
-          <!-- Botón siguiente -->
-          <button
-            (click)="changePage(currentPage + 1)"
-            [disabled]="currentPage === totalPages"
-            [class.opacity-50]="currentPage === totalPages"
-            [class.cursor-not-allowed]="currentPage === totalPages"
-            class="px-3 py-1 rounded border border-gray-300 hover:bg-gray-100 transition"
-          >
-            ▶
-          </button>
-        </div>
-
-        <!-- Selector de tamaño de página -->
-        <div class="flex items-center gap-2">
-          <span class="text-sm text-gray-700">Por página:</span>
+        <!-- Estado -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
           <select
-            [(ngModel)]="pageSize"
-            (change)="changePageSize(pageSize)"
-            class="rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none"
-          >
-            <option [value]="5">5</option>
-            <option [value]="10">10</option>
-            <option [value]="25">25</option>
-            <option [value]="50">50</option>
+            [(ngModel)]="filters.estado"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <option [ngValue]="undefined">Todos los estados</option>
+            <option value="activo">Activo</option>
+            <option value="inactivo">Inactivo</option>
           </select>
         </div>
+
+        <!-- Ciudad -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Ciudad</label>
+          <input
+            type="text"
+            [(ngModel)]="filters.ciudad"
+            placeholder="Ej: CABA"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        </div>
+
+        <!-- Provincia -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Provincia</label>
+          <select
+            [(ngModel)]="filters.provincia"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <option value="">Todas las provincias</option>
+            <option *ngFor="let provincia of PROVINCIAS" [value]="provincia">
+              {{ provincia }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Ordenar por -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Ordenar por</label>
+          <select
+            [(ngModel)]="filters.sortBy"
+            (ngModelChange)="applyFilters()"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <option value="nombre">Nombre</option>
+            <option value="ciudad">Ciudad</option>
+            <option value="creado_en">Fecha de creación</option>
+          </select>
+        </div>
+
+        <!-- Orden -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Orden</label>
+          <select
+            [(ngModel)]="filters.sortOrder"
+            (ngModelChange)="applyFilters()"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <option value="asc">Ascendente</option>
+            <option value="desc">Descendente</option>
+          </select>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="md:col-span-2 flex items-end gap-3">
+          <button
+            (click)="applyFilters()"
+            class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors">
+            Aplicar Filtros
+          </button>
+          <button
+            (click)="clearFilters()"
+            class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors">
+            Limpiar
+          </button>
+        </div>
+      </div>
+
+      <!-- Indicador de filtros activos -->
+      <div *ngIf="hasActiveFilters() && showFilters" class="mt-4 pt-4 border-t border-gray-200">
+        <div class="flex items-center gap-2 text-sm text-gray-600">
+          <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>{{ totalItems }} resultados encontrados</span>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Sin resultados -->
-  <div *ngIf="!loading && consorcios.length === 0" class="rounded-xl bg-white p-12 text-center shadow-sm">
-    <div class="text-6xl mb-4">🏢</div>
-    <h3 class="text-xl font-semibold text-gray-900 mb-2">
-      No se encontraron consorcios
-    </h3>
-    <p class="text-gray-600 mb-6">
-      {{ filters.search ? 'Intenta con otros criterios de búsqueda' : 'Comienza creando tu primer consorcio' }}
-    </p>
-    <button
-      *ngIf="canCreate && !filters.search"
-      (click)="crearConsorcio()"
-      class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700 transition"
-    >
-      <span class="text-xl">+</span>
-      <span>Crear Primer Consorcio</span>
-    </button>
+    <!-- ===== LOADING ===== -->
+    <div *ngIf="loading" class="flex justify-center items-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    </div>
+
+    <!-- ===== ERROR ===== -->
+    <div *ngIf="error && !loading" class="p-6">
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start">
+        <svg class="w-5 h-5 text-red-600 mt-0.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <div>
+          <h3 class="text-sm font-medium text-red-800">Error</h3>
+          <p class="text-sm text-red-700 mt-1">{{ error }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== VISTA TARJETAS ===== -->
+    <div *ngIf="viewMode === 'cards' && !loading && !error && consorcios.length > 0" 
+         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      
+      <div *ngFor="let consorcio of consorcios" 
+           class="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-200 cursor-pointer"
+           (click)="verDetalle(consorcio.id)">
+        
+        <!-- Header de la tarjeta -->
+        <div class="p-6 bg-gradient-to-r from-blue-50 to-blue-100">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-3">
+              <div class="bg-white rounded-full p-3 shadow-sm">
+                <span class="text-2xl">🏢</span>
+              </div>
+              <div>
+                <h3 class="font-bold text-gray-900 text-lg">{{ consorcio.nombre }}</h3>
+                <p *ngIf="consorcio.cuit" class="text-xs text-gray-600 mt-1">
+                  CUIT: {{ consorcio.cuit }}
+                </p>
+              </div>
+            </div>
+            
+            <span 
+              [ngClass]="ESTADO_COLORS[consorcio.estado]"
+              class="px-3 py-1 rounded-full text-xs font-medium border">
+              {{ ESTADO_LABELS[consorcio.estado] }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Cuerpo de la tarjeta -->
+        <div class="p-6 space-y-3">
+          <!-- Dirección -->
+          <div class="flex items-start text-sm text-gray-700">
+            <svg class="w-5 h-5 text-gray-400 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <div>
+              <p class="font-medium">{{ consorcio.direccion || 'Sin dirección' }}</p>
+              <p class="text-xs text-gray-500 mt-1">
+                {{ consorcio.ciudad }}{{ consorcio.provincia ? ', ' + consorcio.provincia : '' }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Responsable -->
+          <div *ngIf="getResponsable(consorcio)" class="flex items-center text-sm text-gray-700">
+            <svg class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <span>{{ getResponsable(consorcio) }}</span>
+          </div>
+
+          <!-- Estadísticas de unidades -->
+          <div class="pt-3 border-t border-gray-200">
+            <div class="flex items-center justify-between text-sm">
+              <div class="flex items-center gap-2">
+                <span class="text-2xl font-bold text-blue-600">{{ consorcio.stats?.totalUnidades || 0 }}</span>
+                <span class="text-gray-600">Unidades</span>
+              </div>
+              <div class="text-xs text-gray-500">
+                <span class="text-green-600 font-medium">{{ consorcio.stats?.unidadesOcupadas || 0 }}</span> ocupadas
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer con acciones -->
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-end gap-2">
+          <button
+            *ngIf="canEditConsorcio(consorcio)"
+            (click)="editarConsorcio(consorcio.id, $event)"
+            class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            title="Editar">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </button>
+
+          <button
+            *ngIf="canEdit"
+            (click)="toggleEstado(consorcio, $event)"
+            [class]="consorcio.estado === 'activo' ? 'text-yellow-600 hover:bg-yellow-50' : 'text-green-600 hover:bg-green-50'"
+            class="p-2 rounded-lg transition-colors"
+            [title]="consorcio.estado === 'activo' ? 'Desactivar' : 'Activar'">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    [attr.d]="consorcio.estado === 'activo' ? 'M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z' : 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z'" />
+            </svg>
+          </button>
+
+          <button
+            *ngIf="canDeleteConsorcio(consorcio)"
+            (click)="confirmarEliminar(consorcio, $event)"
+            class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            title="Eliminar">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== VISTA LISTA ===== -->
+    <div *ngIf="viewMode === 'list' && !loading && !error && consorcios.length > 0" 
+         class="bg-white rounded-xl shadow-sm overflow-hidden">
+      
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  (click)="sortBy('nombre')">
+                <div class="flex items-center gap-2">
+                  <span>Nombre</span>
+                  <svg *ngIf="filters.sortBy === 'nombre'" class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          [attr.d]="filters.sortOrder === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'" />
+                  </svg>
+                </div>
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Dirección</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  (click)="sortBy('ciudad')">
+                <div class="flex items-center gap-2">
+                  <span>Ciudad</span>
+                  <svg *ngIf="filters.sortBy === 'ciudad'" class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          [attr.d]="filters.sortOrder === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'" />
+                  </svg>
+                </div>
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Responsable</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Unidades</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Estado</th>
+              <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr *ngFor="let consorcio of consorcios" 
+                (click)="verDetalle(consorcio.id)"
+                class="hover:bg-gray-50 cursor-pointer transition-colors">
+              
+              <!-- Nombre -->
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <span class="text-2xl mr-3">🏢</span>
+                  <div>
+                    <div class="text-sm font-medium text-gray-900">{{ consorcio.nombre }}</div>
+                    <div *ngIf="consorcio.cuit" class="text-xs text-gray-500">CUIT: {{ consorcio.cuit }}</div>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Dirección -->
+              <td class="px-6 py-4">
+                <div class="text-sm text-gray-900">{{ consorcio.direccion || '-' }}</div>
+              </td>
+
+              <!-- Ciudad -->
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">{{ consorcio.ciudad || '-' }}</div>
+                <div *ngIf="consorcio.provincia" class="text-xs text-gray-500">{{ consorcio.provincia }}</div>
+              </td>
+
+              <!-- Responsable -->
+              <td class="px-6 py-4">
+                <div class="text-sm text-gray-900">{{ getResponsable(consorcio) || '-' }}</div>
+              </td>
+
+              <!-- Unidades -->
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center gap-2">
+                  <span class="text-xl font-bold text-blue-600">{{ consorcio.stats?.totalUnidades || 0 }}</span>
+                  <div class="text-xs text-gray-500">
+                    <div>{{ consorcio.stats?.unidadesOcupadas || 0 }} ocupadas</div>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Estado -->
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span 
+                  [ngClass]="ESTADO_COLORS[consorcio.estado]"
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border">
+                  {{ ESTADO_LABELS[consorcio.estado] }}
+                </span>
+              </td>
+
+              <!-- Acciones -->
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <div class="flex items-center justify-end gap-2">
+                  <button
+                    *ngIf="canEditConsorcio(consorcio)"
+                    (click)="editarConsorcio(consorcio.id, $event)"
+                    class="text-blue-600 hover:text-blue-900 transition"
+                    title="Editar">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+
+                  <button
+                    *ngIf="canEdit"
+                    (click)="toggleEstado(consorcio, $event)"
+                    [class]="consorcio.estado === 'activo' ? 'text-yellow-600 hover:text-yellow-900' : 'text-green-600 hover:text-green-900'"
+                    class="transition"
+                    [title]="consorcio.estado === 'activo' ? 'Desactivar' : 'Activar'">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            [attr.d]="consorcio.estado === 'activo' ? 'M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z' : 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z'" />
+                    </svg>
+                  </button>
+
+                  <button
+                    *ngIf="canDeleteConsorcio(consorcio)"
+                    (click)="confirmarEliminar(consorcio, $event)"
+                    class="text-red-600 hover:text-red-900 transition"
+                    title="Eliminar">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      <div *ngIf="totalPages > 1" class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+        <div class="flex items-center justify-between">
+          <div class="text-sm text-gray-700">
+            Mostrando 
+            <span class="font-medium">{{ (currentPage - 1) * pageSize + 1 }}</span>
+            a
+            <span class="font-medium">{{ Math.min(currentPage * pageSize, totalItems) }}</span>
+            de
+            <span class="font-medium">{{ totalItems }}</span>
+            resultados
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button
+              (click)="changePage(currentPage - 1)"
+              [disabled]="currentPage === 1"
+              class="px-3 py-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100">
+              Anterior
+            </button>
+            
+            <button
+              *ngFor="let page of getPagesArray()"
+              (click)="changePage(page)"
+              [class]="page === currentPage 
+                ? 'px-4 py-2 rounded-lg bg-blue-600 text-white font-medium' 
+                : 'px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50'">
+              {{ page }}
+            </button>
+            
+            <button
+              (click)="changePage(currentPage + 1)"
+              [disabled]="currentPage === totalPages"
+              class="px-3 py-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100">
+              Siguiente
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== EMPTY STATE ===== -->
+    <div *ngIf="!loading && !error && consorcios.length === 0" class="bg-white rounded-xl shadow-sm p-12 text-center">
+      <span class="text-6xl mb-4 block">🏢</span>
+      <h3 class="text-xl font-semibold text-gray-900 mb-2">
+        No se encontraron consorcios
+      </h3>
+      <p class="text-gray-600 mb-6">
+        {{ filters.search || hasActiveFilters() 
+           ? 'Intenta ajustar los filtros de búsqueda' 
+           : 'Comienza creando tu primer consorcio' }}
+      </p>
+      <button
+        *ngIf="canCreate && !hasActiveFilters()"
+        (click)="crearConsorcio()"
+        class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Crear Primer Consorcio
+      </button>
+    </div>
   </div>
 </div>
 
-<!-- Modal de confirmación de eliminación -->
-<div *ngIf="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-  <div class="bg-white rounded-xl shadow-xl p-6 max-w-md w-full mx-4">
-    <h3 class="text-lg font-semibold text-gray-900 mb-4">
-      ¿Eliminar consorcio?
-    </h3>
-    <p class="text-gray-600 mb-6">
+<!-- ===== MODAL ELIMINAR ===== -->
+<div *ngIf="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-fadeIn">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      </div>
+      <div>
+        <h3 class="text-lg font-bold text-gray-900">Confirmar Eliminación</h3>
+        <p class="text-sm text-gray-600">Esta acción no se puede deshacer</p>
+      </div>
+    </div>
+
+    <p class="text-gray-700 mb-6">
       ¿Estás seguro de que deseas eliminar el consorcio 
-      <strong>"{{ selectedConsorcio?.nombre }}"</strong>?
-      Esta acción desactivará el consorcio pero no eliminará sus datos.
+      <strong class="text-gray-900">{{ selectedConsorcio?.nombre }}</strong>?
     </p>
+
     <div class="flex gap-3">
       <button
         (click)="cancelarEliminar()"
-        class="flex-1 rounded-lg border border-gray-300 px-4 py-2 hover:bg-gray-50 transition"
-      >
+        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition-colors">
         Cancelar
       </button>
       <button
         (click)="eliminarConsorcio()"
-        class="flex-1 rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700 transition"
-      >
+        class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors">
         Eliminar
       </button>
     </div>

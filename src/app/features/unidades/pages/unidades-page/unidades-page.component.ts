@@ -8,6 +8,7 @@ import { Consorcio } from '../../../consorcios/models/consorcio.model';
 import { UnidadFiltersComponent } from '../../components/unidad-filters/unidad-filters.component';
 import { UnidadCardComponent } from '../../components/unidad-card/unidad-card.component';
 import { UnidadListComponent } from '../../components/unidad-list/unidad-list.component';
+import { UnidadFormComponent } from '../../components/unidad-form/unidad-form.component';
 
 @Component({
   selector: 'app-unidades-page',
@@ -16,7 +17,8 @@ import { UnidadListComponent } from '../../components/unidad-list/unidad-list.co
     CommonModule,
     UnidadFiltersComponent,
     UnidadCardComponent,
-    UnidadListComponent
+    UnidadListComponent,
+    UnidadFormComponent
   ],
   templateUrl: './unidades-page.component.html'
 })
@@ -30,6 +32,13 @@ export class UnidadesPageComponent implements OnInit {
 
   // Vista: 'grid' o 'list'
   viewMode: 'grid' | 'list' = 'grid';
+  
+  // Filtros colapsables
+  showFilters = true;
+
+  // Modal form
+  showFormModal = false;
+  editingUnidad: UnidadFuncional | null = null;
 
   currentPage = 1;
   pageSize = 12;
@@ -59,6 +68,10 @@ export class UnidadesPageComponent implements OnInit {
 
   toggleView(): void {
     this.viewMode = this.viewMode === 'grid' ? 'list' : 'grid';
+  }
+
+  toggleFilters(): void {
+    this.showFilters = !this.showFilters;
   }
 
   loadConsorcios(): void {
@@ -127,12 +140,20 @@ export class UnidadesPageComponent implements OnInit {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  // Métodos de CRUD con modal
+  onCreateUnidad(): void {
+    this.editingUnidad = null;
+    this.showFormModal = true;
+  }
+
   onViewUnidad(unidad: UnidadFuncional): void {
     this.router.navigate(['/unidades', unidad.id]);
   }
 
   onEditUnidad(unidad: UnidadFuncional): void {
-    this.router.navigate(['/unidades', unidad.id, 'editar']);
+    // Usar modal
+    this.editingUnidad = unidad;
+    this.showFormModal = true;
   }
 
   onDeleteUnidad(unidad: UnidadFuncional): void {
@@ -149,10 +170,17 @@ export class UnidadesPageComponent implements OnInit {
     }
   }
 
-  onCreateUnidad(): void {
-    this.router.navigate(['/unidades/nuevo']);
+  closeFormModal(): void {
+    this.showFormModal = false;
+    this.editingUnidad = null;
   }
 
+  onUnidadSaved(): void {
+    this.closeFormModal();
+    this.loadUnidades();
+  }
+
+  // Métodos de compatibilidad
   crearUnidad(): void {
     this.onCreateUnidad();
   }
@@ -163,19 +191,12 @@ export class UnidadesPageComponent implements OnInit {
   }
 
   eliminarUnidad(unidadOrId: number | UnidadFuncional): void {
-    const id = typeof unidadOrId === 'number' ? unidadOrId : unidadOrId.id;
-    const codigo = typeof unidadOrId === 'number' ? 'esta unidad' : unidadOrId.codigo;
+    const unidad = typeof unidadOrId === 'number' 
+      ? this.unidades.find(u => u.id === unidadOrId)
+      : unidadOrId;
     
-    if (confirm(`¿Estás seguro de que deseas eliminar ${codigo}?`)) {
-      this.unidadesService.deleteUnidad(id).subscribe({
-        next: () => {
-          this.loadUnidades();
-        },
-        error: (err) => {
-          console.error('Error al eliminar unidad:', err);
-          alert('Error al eliminar la unidad. Por favor, intente nuevamente.');
-        }
-      });
+    if (unidad) {
+      this.onDeleteUnidad(unidad);
     }
   }
 

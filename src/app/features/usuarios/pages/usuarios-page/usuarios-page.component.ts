@@ -15,12 +15,6 @@ import { UsuariosListComponent } from '../../components/usuarios-list/usuarios-l
 import { UsuariosCardsComponent } from '../../components/usuarios-cards/usuarios-cards.component';
 import { UsuarioFormModalComponent } from '../../components/usuario-form-modal/usuario-form-modal.component';
 
-/**
- * =========================================
- * USUARIOS PAGE COMPONENT
- * =========================================
- * Página principal para gestión de usuarios
- */
 @Component({
   selector: 'app-usuarios-page',
   standalone: true,
@@ -34,66 +28,10 @@ import { UsuarioFormModalComponent } from '../../components/usuario-form-modal/u
   templateUrl: './usuarios-page.component.html',
   styles: [`
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    .bg-white {
-      animation: fadeIn 0.3s ease-out;
-    }
-    * {
-      transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
-      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-      transition-duration: 150ms;
-    }
-    button:not(:disabled):hover {
-      transform: translateY(-1px);
-    }
-    button:not(:disabled):active {
-      transform: translateY(0);
-    }
-    input[type="text"]:focus, input[type="email"]:focus, select:focus {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-    .animate-spin {
-      animation: spin 1s linear infinite;
-    }
-    .bg-white:hover {
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-    button.bg-blue-600 {
-      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
-    }
-    ::-webkit-scrollbar {
-      width: 10px;
-      height: 10px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #f1f5f9;
-      border-radius: 10px;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 10px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
-    button:focus-visible, input:focus-visible, select:focus-visible {
-      outline: 2px solid #3b82f6;
-      outline-offset: 2px;
-    }
+    .bg-white { animation: fadeIn 0.3s ease-out; }
   `]
 })
 export class UsuariosPageComponent implements OnInit {
@@ -103,8 +41,9 @@ export class UsuariosPageComponent implements OnInit {
   loading = false;
   error: string | null = null;
 
-  // Vista activa (list o cards)
+  // Vista activa y filtros colapsables
   activeView: 'list' | 'cards' = 'list';
+  showFilters = true;
 
   // Paginación
   page = 1;
@@ -127,7 +66,7 @@ export class UsuariosPageComponent implements OnInit {
   isModalOpen = false;
   selectedUsuario: Usuario | null = null;
 
-  // Roles disponibles para el filtro
+  // Roles disponibles
   rolesDisponibles: { value: RolGlobal | ''; label: string }[] = [
     { value: '', label: 'Todos los roles' },
     { value: 'admin_global', label: ROL_LABELS.admin_global },
@@ -149,13 +88,6 @@ export class UsuariosPageComponent implements OnInit {
     this.loadPersonasDisponibles();
   }
 
-  // ========================================
-  // CARGA DE DATOS
-  // ========================================
-
-  /**
-   * Cargar usuarios con filtros
-   */
   loadUsuarios(): void {
     this.loading = true;
     this.error = null;
@@ -170,44 +102,33 @@ export class UsuariosPageComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error al cargar usuarios:', err);
-        this.error = 'Error al cargar los usuarios. Por favor, intenta nuevamente.';
+        this.error = 'Error al cargar los usuarios.';
         this.loading = false;
       }
     });
   }
 
-  /**
-   * Cargar personas disponibles (sin usuario asignado)
-   */
   loadPersonasDisponibles(): void {
     this.usuariosService.getPersonasSinUsuario().subscribe({
       next: (personas) => {
         this.personasDisponibles = personas;
       },
       error: (err) => {
-        // Si el endpoint no existe (404), no es crítico
-        // Solo logueamos y continuamos sin personas disponibles
-        console.warn('Endpoint de personas disponibles no encontrado (esto es opcional):', err);
-        this.personasDisponibles = []; // Array vacío para evitar errores
+        console.warn('Endpoint personas no disponible:', err);
+        this.personasDisponibles = [];
       }
     });
   }
 
-  // ========================================
-  // FILTROS Y BÚSQUEDA
-  // ========================================
+  toggleFilters(): void {
+    this.showFilters = !this.showFilters;
+  }
 
-  /**
-   * Aplicar filtros
-   */
   applyFilters(): void {
-    this.filters.page = 1; // Reset a la primera página
+    this.filters.page = 1;
     this.loadUsuarios();
   }
 
-  /**
-   * Limpiar filtros
-   */
   clearFilters(): void {
     this.filters = {
       search: '',
@@ -221,9 +142,6 @@ export class UsuariosPageComponent implements OnInit {
     this.loadUsuarios();
   }
 
-  /**
-   * Cambiar ordenamiento
-   */
   changeSort(field: 'fecha_creacion' | 'email' | 'username'): void {
     if (this.filters.sortBy === field) {
       this.filters.sortOrder = this.filters.sortOrder === 'asc' ? 'desc' : 'asc';
@@ -234,13 +152,6 @@ export class UsuariosPageComponent implements OnInit {
     this.loadUsuarios();
   }
 
-  // ========================================
-  // PAGINACIÓN
-  // ========================================
-
-  /**
-   * Cambiar página
-   */
   changePage(newPage: number): void {
     if (newPage < 1 || newPage > this.totalPages) return;
     this.filters.page = newPage;
@@ -248,9 +159,6 @@ export class UsuariosPageComponent implements OnInit {
     this.loadUsuarios();
   }
 
-  /**
-   * Cambiar límite de resultados
-   */
   changeLimit(newLimit: number): void {
     this.limit = newLimit;
     this.filters.limit = newLimit;
@@ -258,105 +166,75 @@ export class UsuariosPageComponent implements OnInit {
     this.loadUsuarios();
   }
 
-  // ========================================
-  // MODAL
-  // ========================================
+  setView(view: 'list' | 'cards'): void {
+    this.activeView = view;
+  }
 
-  /**
-   * Abrir modal para crear
-   */
   openCreateModal(): void {
     this.selectedUsuario = null;
     this.isModalOpen = true;
   }
 
-  /**
-   * Abrir modal para editar
-   */
   openEditModal(usuario: Usuario): void {
     this.selectedUsuario = usuario;
     this.isModalOpen = true;
   }
 
-  /**
-   * Cerrar modal
-   */
   closeModal(): void {
     this.isModalOpen = false;
     this.selectedUsuario = null;
   }
 
-  /**
-   * Guardar usuario (crear o editar)
-   */
   onSaveUsuario(data: CreateUsuarioDto | UpdateUsuarioDto): void {
     if (this.selectedUsuario) {
-      // Editar
       this.updateUsuario(this.selectedUsuario.id, data as UpdateUsuarioDto);
     } else {
-      // Crear
       this.createUsuario(data as CreateUsuarioDto);
     }
   }
 
-  // ========================================
-  // CRUD OPERATIONS
-  // ========================================
-
-  /**
-   * Crear usuario
-   */
   private createUsuario(data: CreateUsuarioDto): void {
     this.usuariosService.createUsuario(data).subscribe({
       next: () => {
         this.closeModal();
         this.loadUsuarios();
         this.loadPersonasDisponibles();
-        this.showSuccessMessage('Usuario creado exitosamente');
+        alert('Usuario creado exitosamente');
       },
       error: (err) => {
         console.error('Error al crear usuario:', err);
-        this.showErrorMessage('Error al crear el usuario');
+        alert('Error al crear el usuario');
       }
     });
   }
 
-  /**
-   * Actualizar usuario
-   */
   private updateUsuario(id: number, data: UpdateUsuarioDto): void {
     this.usuariosService.updateUsuario(id, data).subscribe({
       next: () => {
         this.closeModal();
         this.loadUsuarios();
-        this.showSuccessMessage('Usuario actualizado exitosamente');
+        alert('Usuario actualizado exitosamente');
       },
       error: (err) => {
         console.error('Error al actualizar usuario:', err);
-        this.showErrorMessage('Error al actualizar el usuario');
+        alert('Error al actualizar el usuario');
       }
     });
   }
 
-  /**
-   * Eliminar usuario
-   */
   onDeleteUsuario(id: number): void {
     this.usuariosService.deleteUsuario(id).subscribe({
       next: () => {
         this.loadUsuarios();
-        this.showSuccessMessage('Usuario eliminado exitosamente');
+        alert('Usuario eliminado exitosamente');
       },
       error: (err) => {
         console.error('Error al eliminar usuario:', err);
-        this.showErrorMessage('Error al eliminar el usuario');
+        alert('Error al eliminar el usuario');
       }
     });
   }
 
-  /**
-   * Toggle estado activo/inactivo
-   */
   onToggleActive(usuario: Usuario): void {
     const action = usuario.activo ? 'desactivarUsuario' : 'activarUsuario';
     
@@ -364,71 +242,31 @@ export class UsuariosPageComponent implements OnInit {
       next: () => {
         this.loadUsuarios();
         const message = usuario.activo ? 'Usuario desactivado' : 'Usuario activado';
-        this.showSuccessMessage(message);
+        alert(message);
       },
       error: (err) => {
         console.error('Error al cambiar estado:', err);
-        this.showErrorMessage('Error al cambiar el estado del usuario');
+        alert('Error al cambiar el estado');
       }
     });
   }
 
-  /**
-   * Reset password
-   */
   onResetPassword(usuario: Usuario): void {
     this.usuariosService.resetearPassword(usuario.id).subscribe({
       next: (response) => {
-        this.showSuccessMessage(response.message || 'Email de reset enviado exitosamente');
+        alert(response.message || 'Email enviado');
       },
       error: (err) => {
         console.error('Error al resetear password:', err);
-        this.showErrorMessage('Error al enviar email de reset');
+        alert('Error al enviar email');
       }
     });
   }
 
-  /**
-   * Ver roles específicos
-   */
   onViewRoles(usuario: Usuario): void {
-    // TODO: Implementar modal para ver/editar roles específicos
-    console.log('Ver roles de:', usuario);
-    alert('Funcionalidad de roles específicos en desarrollo');
+    alert('Funcionalidad en desarrollo');
   }
 
-  // ========================================
-  // CAMBIO DE VISTA
-  // ========================================
-
-  /**
-   * Cambiar vista (list/cards)
-   */
-  setView(view: 'list' | 'cards'): void {
-    this.activeView = view;
-  }
-
-  // ========================================
-  // MENSAJES
-  // ========================================
-
-  private showSuccessMessage(message: string): void {
-    // TODO: Implementar toast/notification service
-    alert(message);
-  }
-
-  private showErrorMessage(message: string): void {
-    // TODO: Implementar toast/notification service
-    alert(message);
-  }
-
-  // ========================================
-  // HELPERS
-  // ========================================
-
-  /**
-   * Obtener rango de páginas para la paginación
-   */
   getPageRange(): number[] {
     const range: number[] = [];
     const maxPages = 5;
@@ -447,9 +285,6 @@ export class UsuariosPageComponent implements OnInit {
     return range;
   }
 
-  /**
-   * Verificar si hay filtros activos
-   */
   hasActiveFilters(): boolean {
     return !!(
       this.filters.search ||
@@ -458,23 +293,14 @@ export class UsuariosPageComponent implements OnInit {
     );
   }
 
-  /**
-   * Contar usuarios activos
-   */
   getActivosCount(): number {
     return this.usuarios?.filter(u => u.activo).length || 0;
   }
 
-  /**
-   * Contar usuarios inactivos
-   */
   getInactivosCount(): number {
     return this.usuarios?.filter(u => !u.activo).length || 0;
   }
 
-  /**
-   * Obtener máximo de resultados para paginación
-   */
   getMaxResult(): number {
     return Math.min(this.page * this.limit, this.total);
   }
