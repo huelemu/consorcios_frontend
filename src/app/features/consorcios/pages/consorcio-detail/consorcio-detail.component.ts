@@ -6,6 +6,9 @@ import { AuthService } from '../../../../auth/auth.service';
 import { ModalService } from '../../../../core/services/modal.service';
 import { TicketFormDialogComponent } from '../../../tickets/components/ticket-form-dialog/ticket-form-dialog.component';
 import { ToastrService } from 'ngx-toastr';
+import { MatDialog } from '@angular/material/dialog';
+import { TicketFormComponent } from '../../../tickets/components/ticket-form/ticket-form.component';
+
 
 import {
   Consorcio,
@@ -54,6 +57,7 @@ export class ConsorcioDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private modalService: ModalService,
      private toastr: ToastrService,
+      private dialog: MatDialog 
   ) {}
 
   ngOnInit(): void {
@@ -335,42 +339,29 @@ crearUnidad(): void {
  * - Si se llama desde el consorcio → precarga consorcio_id y nombre
  * - Si se llama desde una unidad funcional → también precarga unidad_funcional_id
  */
-async crearTicket(unidadFuncionalId?: number): Promise<void> {
-  try {
-    const modalRef: any = await this.modalService.open(
-      'Nuevo Ticket',
-      TicketFormDialogComponent,
-      'ticket'
-    );
-
-    if (modalRef?.componentRef?.instance) {
-      const instance = modalRef.componentRef.instance;
-
-      // Info del Consorcio
-      instance.consorcio_id = this.consorcioId;
-      instance.consorcio_nombre = this.consorcio?.codigo_ext
-        ? `${this.consorcio?.nombre} (${this.consorcio?.codigo_ext})`
-        : this.consorcio?.nombre;
-
-      // Info de la unidad funcional (opcional)
-      if (unidadFuncionalId) {
-        const unidad = this.consorcio?.unidades?.find((u: any) => u.id === unidadFuncionalId);
-        instance.unidad_funcional_id = unidadFuncionalId;
-        instance.unidad_funcional_nombre = unidad ? (unidad.codigo ? unidad.codigo : `UF ${unidad.id}`): `UF ${unidadFuncionalId}`;
-
-      }
-    }
-
-    modalRef?.result
-      ?.then((res: any) => {
-        if (res === 'saved') {
-          this.toastr.success('Ticket creado correctamente', 'Éxito');
-          // Refresh opcional
-        }
-      })
-      .catch(() => {});
-  } catch (error) {
-    console.error('Error al abrir el modal de ticket:', error);
+crearTicket(): void {
+  if (!this.consorcio) {
+    console.error('No hay consorcio cargado');
+    return;
   }
+  
+  const dialogRef = this.dialog.open(TicketFormComponent, {
+    width: '900px',
+    maxHeight: '90vh',
+    disableClose: false,
+    data: {
+      consorcioId: this.consorcio.id,
+      consorcioNombre: this.consorcio.nombre,
+      unidadId: null,
+      unidadNombre: null
+    }
+  });
+
+  dialogRef.afterClosed().subscribe((ticket) => {
+    if (ticket) {
+      console.log('✅ Ticket creado:', ticket);
+      this.loadConsorcio();
+    }
+  });
 }
 }

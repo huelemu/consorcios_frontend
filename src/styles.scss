@@ -86,3 +86,43 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 /* Evitar footer por defecto del ModalBase (evita botones duplicados) */
 .modal-footer { display: none !important; }
 
+.dialog-fullscreen .mat-mdc-dialog-container {
+  padding: 0 !important;
+  border-radius: 0.75rem; /* bordes suaves */
+  max-width: 100% !important;
+  width: 95vw !important;
+  height: 90vh !important;
+}
+
+.dialog-fullscreen .mat-mdc-dialog-surface {
+  background-color: #f9fafb; /* gris muy claro */
+}
+
+.dialog-fullscreen .mat-mdc-dialog-container {
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.15);
+}
+
+/* ==== FULLSCREEN DIALOG ==== */
+.dialog-fullscreen .mat-mdc-dialog-container {
+  padding: 0 !important;
+  border-radius: 0.75rem;
+  max-width: 100% !important;
+  width: 95vw !important;
+  height: 90vh !important;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.15);
+}
+
+.dialog-fullscreen .mat-mdc-dialog-surface {
+  background-color: #f9fafb; /* fondo gris claro */
+  overflow: hidden;
+}
+
+/* scrollbar estético */
+.dialog-fullscreen ::-webkit-scrollbar {
+  width: 8px;
+}
+.dialog-fullscreen ::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 4px;
+}
+

@@ -1,0 +1,67 @@
+// ticket-edit-dialog.component.scss
+
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+// Ajustes para el dialog fullscreen
+::ng-deep .dialog-fullscreen {
+  .mat-mdc-dialog-container {
+    padding: 0;
+    border-radius: 0;
+    max-height: 100vh;
+    height: 100vh;
+
+    .mat-mdc-dialog-surface {
+      padding: 0;
+      border-radius: 0;
+    }
+  }
+
+
+// Scrollbar personalizada
+.overflow-y-auto {
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 4px;
+    
+    &:hover {
+      background: #a0aec0;
+    }
+  }
+}
+
+// Animaciones suaves
+button,
+input,
+select,
+textarea {
+  transition: all 0.2s ease;
+}
+
+// Focus states mejorados
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+// Mejoras para mobile
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+}

@@ -9,6 +9,8 @@ import {
   ESTADO_UNIDAD_COLORS,
   ESTADO_UNIDAD_ICONS 
 } from '../../models/unidad.model';
+import { MatDialog } from '@angular/material/dialog';
+import { TicketFormComponent } from '../../../tickets/components/ticket-form/ticket-form.component';
 
 /**
  * =========================================
@@ -46,7 +48,8 @@ export class UnidadDetailComponent implements OnInit {
     private unidadesService: UnidadesService,
     private authService: AuthService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -223,4 +226,33 @@ export class UnidadDetailComponent implements OnInit {
     };
     return classes[rol] || classes['otro']; // ✅ CORREGIDO
   }
+
+  /**
+   * Abre el modal para crear un nuevo ticket asociado a esta unidad
+   */
+  crearTicket(): void {
+  if (!this.unidad) {
+    console.error('No hay unidad cargada');
+    return;
+  }
+  
+  const dialogRef = this.dialog.open(TicketFormComponent, {
+    width: '900px',
+    maxHeight: '90vh',
+    disableClose: false,
+    data: {
+      consorcioId: this.unidad.consorcio_id,
+      consorcioNombre: this.unidad.consorcio?.nombre,
+      unidadId: this.unidad.id,
+      unidadNombre: `${this.unidad.codigo} - Piso ${this.unidad.piso}`
+    }
+  });
+
+  dialogRef.afterClosed().subscribe((ticket) => {
+    if (ticket) {
+      console.log('✅ Ticket creado:', ticket);
+      this.loadUnidad();
+    }
+  });
+}
 }

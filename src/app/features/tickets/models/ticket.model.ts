@@ -77,21 +77,19 @@ export interface Ticket {
   historial: TicketHistoryEntry[];
   adjuntos: TicketAttachment[];
   notificaciones: TicketNotificationSettings;
+  updatedAt?: string; 
 }
 
 export interface TicketFilters {
+  search?: string;
+  estado?: string;
+  tipo?: string;
+  prioridad?: string;
   consorcioId?: number;
   unidadId?: number;
-  prioridad?: TicketPriority;
-  estado?: TicketState;
-  tipo?: TicketType;
-  asignadoRol?: Ticket['asignadoRol'];
+  asignadoRol?: string;
   proveedorId?: number;
   searchTerm?: string;
-  page?: number;
-  limit?: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
 }
 
 export interface TicketMetricSummary {

@@ -1,328 +1,139 @@
 <div class="p-6 space-y-6">
-  <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between">
     <div>
-      <h1 class="text-2xl font-semibold text-gray-900">Gestión de Tickets</h1>
-      <p class="text-sm text-gray-500">
-        Control centralizado de reclamos, pedidos de mantenimiento y solicitudes internas vinculadas a cada unidad funcional.
-      </p>
-    </div>
-<button
-  type="button"
-  class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-  (click)="openCreateDialog()"
->
-  <span class="text-lg">➕</span>
-  Nuevo ticket
-</button>
-
-  </div>
-
-<div *ngIf="errorMessages.length > 0" class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-    <ul class="list-disc space-y-1 pl-4">
-      <li *ngFor="let message of errorMessages">{{ message }}</li>
-    </ul>
-  </div>
-
-
-  <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-    <div
-      *ngFor="let item of summary"
-      class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
-    >
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-medium text-gray-500">{{ item.label }}</p>
-          <p class="mt-2 text-2xl font-semibold text-gray-900">{{ item.count }}</p>
-        </div>
-        <div class="h-12 w-12 rounded-full bg-blue-50 text-2xl flex items-center justify-center">
-          {{ item.icon }}
-        </div>
-      </div>
-      <div class="mt-3 text-xs text-gray-400">
-        Tendencia: {{ item.trend === 'up' ? '↑' : item.trend === 'down' ? '↓' : '→' }} {{ item.variation | number:'1.0-0' }}%
-      </div>
-    </div>
-  </div>
-
-  <form [formGroup]="filtersForm" class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-    <div class="grid gap-4 lg:grid-cols-4">
-      <div class="flex flex-col gap-2">
-        <label class="text-xs font-semibold uppercase tracking-wide text-gray-500">Consorcio</label>
-        <select formControlName="consorcioId" class="form-select">
-          <option [ngValue]="null">Todos</option>
-          <option *ngFor="let consorcio of consorcios" [ngValue]="consorcio.id">
-            {{ consorcio.nombre }}
-          </option>
-        </select>
-      </div>
-
-      <div class="flex flex-col gap-2">
-        <label class="text-xs font-semibold uppercase tracking-wide text-gray-500">Unidad funcional</label>
-        <select formControlName="unidadId" class="form-select">
-          <option [ngValue]="null">Todas</option>
-          <option *ngFor="let unidad of unidades" [ngValue]="unidad.id">
-            {{ unidad.nombre }} · {{ unidad.piso }}{{ unidad.unidad }} · {{ unidad.consorcioNombre }}
-          </option>
-        </select>
-      </div>
-
-      <div class="flex flex-col gap-2">
-        <label class="text-xs font-semibold uppercase tracking-wide text-gray-500">Prioridad</label>
-        <select formControlName="prioridad" class="form-select">
-          <option [ngValue]="null">Todas</option>
-          <option *ngFor="let prioridad of prioridades" [ngValue]="prioridad">
-            {{ prioridad | titlecase }}
-          </option>
-        </select>
-      </div>
-
-      <div class="flex flex-col gap-2">
-        <label class="text-xs font-semibold uppercase tracking-wide text-gray-500">Estado</label>
-        <select formControlName="estado" class="form-select">
-          <option [ngValue]="null">Todos</option>
-          <option *ngFor="let estado of estados" [ngValue]="estado.value">
-            {{ estado.label }}
-          </option>
-        </select>
-      </div>
-
-      <div class="flex flex-col gap-2">
-        <label class="text-xs font-semibold uppercase tracking-wide text-gray-500">Tipo</label>
-        <select formControlName="tipo" class="form-select">
-          <option [ngValue]="null">Todos</option>
-          <option *ngFor="let tipo of tipos" [ngValue]="tipo">
-            {{ tipo | titlecase }}
-          </option>
-        </select>
-      </div>
-
-      <div class="flex flex-col gap-2">
-        <label class="text-xs font-semibold uppercase tracking-wide text-gray-500">Responsable</label>
-        <select formControlName="asignadoRol" class="form-select">
-          <option [ngValue]="null">Todos</option>
-          <option *ngFor="let rol of rolesAsignado" [ngValue]="rol.value">
-            {{ rol.label }}
-          </option>
-        </select>
-      </div>
-
-      <div class="flex flex-col gap-2">
-        <label class="text-xs font-semibold uppercase tracking-wide text-gray-500">Proveedor</label>
-        <select formControlName="proveedorId" class="form-select">
-          <option [ngValue]="null">Todos</option>
-          <option *ngFor="let proveedor of proveedores" [ngValue]="proveedor.id">
-            {{ proveedor.razonSocial }} ({{ proveedor.rubro }})
-          </option>
-        </select>
-      </div>
-
-      <div class="flex flex-col gap-2">
-        <label class="text-xs font-semibold uppercase tracking-wide text-gray-500">Buscar</label>
-        <input
-          type="search"
-          formControlName="searchTerm"
-          placeholder="Buscar por título, descripción o unidad"
-          class="form-input"
-        />
-      </div>
+      <h1 class="text-2xl font-semibold text-gray-900">Tickets</h1>
+      <p class="text-sm text-gray-500">Gestión de reclamos y solicitudes por unidad funcional</p>
     </div>
 
-    <div class="mt-4 flex justify-end">
-      <button type="button" (click)="clearFilters()" class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100">
-        Limpiar filtros
+    <div class="flex items-center gap-3 mt-4 md:mt-0">
+      <div class="flex items-center gap-1 bg-white rounded-lg shadow-sm border p-1">
+        <button (click)="setView('list')" class="p-2 rounded-md"
+                [class.bg-blue-600]="activeView === 'list'"
+                [class.text-white]="activeView === 'list'">📋</button>
+        <button (click)="setView('cards')" class="p-2 rounded-md"
+                [class.bg-blue-600]="activeView === 'cards'"
+                [class.text-white]="activeView === 'cards'">🗂️</button>
+      </div>
+
+      <button (click)="toggleFilters()"
+              class="rounded-md border bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
+        {{ showFilters ? 'Ocultar filtros' : 'Mostrar filtros' }}
+      </button>
+
+      <button (click)="openCreateDialog()"
+              class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
+        <span class="text-lg">➕</span> Nuevo
       </button>
     </div>
-  </form>
+  </div>
 
-<!-- ============================
-     FORMULARIO DE NUEVO TICKET
-     ============================ -->
-<!-- <app-ticket-form
-  (ticketCreated)="loadTickets()"
-  [consorcioId]="null"
-  [unidadId]="null"
-></app-ticket-form> -->
+  <!-- Estadísticas -->
+  <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+    <div class="rounded-xl bg-blue-50 border border-blue-200 p-4 text-center">
+      <div class="text-xs text-blue-700 uppercase">Total</div>
+      <div class="text-2xl font-semibold text-blue-900">{{ stats.total }}</div>
+    </div>
+    <div class="rounded-xl bg-green-50 border border-green-200 p-4 text-center">
+      <div class="text-xs text-green-700 uppercase">Abiertos</div>
+      <div class="text-2xl font-semibold text-green-900">{{ stats.abiertos }}</div>
+    </div>
+    <div class="rounded-xl bg-yellow-50 border border-yellow-200 p-4 text-center">
+      <div class="text-xs text-yellow-700 uppercase">En proceso</div>
+      <div class="text-2xl font-semibold text-yellow-900">{{ stats.proceso }}</div>
+    </div>
+    <div class="rounded-xl bg-orange-50 border border-orange-200 p-4 text-center">
+      <div class="text-xs text-orange-700 uppercase">Pendientes</div>
+      <div class="text-2xl font-semibold text-orange-900">{{ stats.pendientes }}</div>
+    </div>
+    <div class="rounded-xl bg-gray-50 border border-gray-200 p-4 text-center">
+      <div class="text-xs text-gray-700 uppercase">Cerrados</div>
+      <div class="text-2xl font-semibold text-gray-900">{{ stats.cerrados }}</div>
+    </div>
+  </div>
 
-<!-- ============================
-     LISTADO DE TICKETS EXISTENTES
-     ============================ -->
+  <!-- Filtros -->
+  <div *ngIf="showFilters" class="rounded-xl border bg-white p-4">
+    <form [formGroup]="filtersForm" class="grid grid-cols-1 gap-4 md:grid-cols-4">
+      <input formControlName="search" type="text" placeholder="Buscar..."
+             class="rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+      <select formControlName="estado" class="rounded-md border px-3 py-2 text-sm">
+        <option value="">Todos los estados</option>
+        <option value="abierto">Abierto</option>
+        <option value="en_proceso">En proceso</option>
+        <option value="pendiente">Pendiente</option>
+        <option value="resuelto">Resuelto</option>
+        <option value="cerrado">Cerrado</option>
+      </select>
+      <select formControlName="prioridad" class="rounded-md border px-3 py-2 text-sm">
+        <option value="">Todas las prioridades</option>
+        <option value="baja">Baja</option>
+        <option value="media">Media</option>
+        <option value="alta">Alta</option>
+        <option value="critica">Crítica</option>
+      </select>
+      <select formControlName="tipo" class="rounded-md border px-3 py-2 text-sm">
+        <option value="">Todos los tipos</option>
+        <option value="mantenimiento">Mantenimiento</option>
+        <option value="reclamo">Reclamo</option>
+        <option value="limpieza">Limpieza</option>
+        <option value="administrativo">Administrativo</option>
+        <option value="mejora">Mejora</option>
+      </select>
+    </form>
+  </div>
 
-  <div class="grid gap-6 xl:grid-cols-[2fr_1fr]">
-    <div class="rounded-xl border border-gray-200 bg-white shadow-sm">
-      <div class="border-b border-gray-100 px-5 py-4">
-        <h2 class="text-lg font-semibold text-gray-900">Tickets registrados</h2>
-        <p class="text-sm text-gray-500">{{ filteredTickets.length }} resultados</p>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
-            <tr>
-              <th class="px-5 py-3 text-left font-medium">Ticket</th>
-              <th class="px-5 py-3 text-left font-medium">Prioridad</th>
-              <th class="px-5 py-3 text-left font-medium">Estado</th>
-              <th class="px-5 py-3 text-left font-medium">Responsable</th>
-              <th class="px-5 py-3 text-left font-medium">Costos</th>
-              <th class="px-5 py-3 text-left font-medium">Última actualización</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100 text-sm text-gray-700">
-            <tr
-              *ngFor="let ticket of filteredTickets; trackBy: trackByTicketId"
-              (click)="onSelectTicket(ticket)"
-              class="cursor-pointer transition-colors hover:bg-blue-50"
-              [class.bg-blue-50]="selectedTicket?.id === ticket.id"
-            >
-              <td class="px-5 py-4 align-top">
-                <div class="font-semibold text-gray-900">{{ ticket.titulo }}</div>
-                <div class="mt-1 text-xs text-gray-500">
-                  {{ getUnidadDisplay(ticket) }}
-                </div>
-                <div class="mt-1 text-xs text-gray-400">
-                  Creado por {{ ticket.creadoPorNombre }} · {{ formatDate(ticket.fechaCreacion, true) }}
-                </div>
-              </td>
-              <td class="px-5 py-4 align-top">
-                <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium" [ngClass]="getPrioridadBadgeClass(ticket.prioridad)">
-                  {{ ticket.prioridad | titlecase }}
-                </span>
-              </td>
-              <td class="px-5 py-4 align-top">
-                <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium" [ngClass]="getEstadoBadgeClass(ticket.estado)">
-                  {{ getEstadoIcon(ticket.estado) }}
-                  <span class="ml-1">{{ getEstadoLabel(ticket.estado) }}</span>
-                </span>
-              </td>
-              <td class="px-5 py-4 align-top">
-                <div class="font-medium text-gray-800">
-                  {{ ticket.asignadoANombre || ticket.proveedorNombre || 'Sin asignar' }}
-                </div>
-                <div class="mt-1 text-xs text-gray-500">
-                  {{ getResponsableDisplay(ticket) }}
-                </div>
-              </td>
-              <td class="px-5 py-4 align-top">
-                <div class="font-medium text-gray-800">{{ getCostoDisplay(ticket) }}</div>
-                <div class="mt-1 text-xs text-gray-500">
-                  Estimado: {{ ticket.estimacionCosto ? (ticket.estimacionCosto | currency:'ARS':'symbol-narrow':'1.0-0') : 'N/D' }}
-                </div>
-              </td>
-              <td class="px-5 py-4 align-top">
-                <div class="text-sm font-medium text-gray-800">
-                  {{ formatDate(ticket.fechaActualizacion || ticket.fechaCreacion, true) }}
-                </div>
-                <div class="mt-1 text-xs text-gray-500">
-                  Estado actual: {{ getEstadoLabel(ticket.estado) }}
-                </div>
-              </td>
-            </tr>
-             <tr *ngIf="isLoadingTickets">
-              <td colspan="6" class="px-5 py-10 text-center text-sm text-gray-500">
-                Cargando tickets...
-              </td>
-            </tr>
-            <tr *ngIf="!isLoadingTickets && filteredTickets.length === 0">
-              <td colspan="6" class="px-5 py-10 text-center text-sm text-gray-500">
-                No se encontraron tickets con los filtros seleccionados.
-              </td>
-            </tr>
-          </tbody>
-        </table>
+  <!-- Contenido -->
+  <div *ngIf="!isLoading" class="mt-4">
+    <!-- Vista de tarjetas -->
+    <div *ngIf="activeView === 'cards'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div *ngFor="let ticket of filteredTickets"
+           (click)="openEditDialog(ticket)"
+           class="rounded-xl border bg-white p-4 cursor-pointer hover:shadow transition">
+        <div class="flex justify-between items-start">
+          <h3 class="font-semibold text-gray-900">{{ ticket.titulo }}</h3>
+          <span class="text-xs rounded-full px-2 py-1 border"
+                [ngClass]="{
+                  'bg-green-100 text-green-700 border-green-200': ticket.estado==='abierto',
+                  'bg-yellow-100 text-yellow-700 border-yellow-200': ticket.estado==='en_proceso',
+                  'bg-orange-100 text-orange-700 border-orange-200': ticket.estado==='pendiente',
+                  'bg-gray-100 text-gray-700 border-gray-200': ticket.estado==='cerrado' || ticket.estado==='resuelto'
+                }">
+            {{ ticket.estado | titlecase }}
+          </span>
+        </div>
+        <p class="mt-2 text-sm text-gray-600 line-clamp-3">{{ ticket.descripcion }}</p>
+        <div class="mt-3 text-xs text-gray-500">
+          {{ ticket.consorcioNombre }} · UF: {{ ticket.unidadNombre }}
+        </div>
+        <div class="mt-2 text-xs text-gray-400">
+          {{ formatDate(ticket.updatedAt) }}
+        </div>
       </div>
     </div>
 
-    <div class="rounded-xl border border-gray-200 bg-white shadow-sm" *ngIf="selectedTicket; else emptySelection">
-      <div class="border-b border-gray-100 px-5 py-4">
-        <h2 class="text-lg font-semibold text-gray-900">Detalle del ticket</h2>
-        <p class="text-sm text-gray-500">Información completa y línea de tiempo de actualizaciones.</p>
-      </div>
-      <div class="space-y-6 p-5 text-sm text-gray-700">
-        <section>
-          <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-500">Descripción</h3>
-          <p class="mt-2 text-gray-700">{{ selectedTicket!.descripcion }}</p>
-        </section>
-
-        <section class="grid gap-3 sm:grid-cols-2">
-          <div>
-            <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-500">Unidad funcional</h3>
-            <p class="mt-1 text-gray-700">{{ getUnidadDisplay(selectedTicket!) }}</p>
-          </div>
-          <div>
-            <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-500">Responsable</h3>
-            <p class="mt-1 text-gray-700">{{ getResponsableDisplay(selectedTicket!) }}</p>
-          </div>
-          <div>
-            <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-500">Fechas</h3>
-            <p class="mt-1 text-gray-700">
-              Creado: {{ formatDate(selectedTicket!.fechaCreacion, true) }}<br />
-              Actualizado: {{ formatDate(selectedTicket!.fechaActualizacion, true) }}<br />
-              Resuelto: {{ formatDate(selectedTicket!.fechaResolucion, true) }}<br />
-              Cierre: {{ formatDate(selectedTicket!.fechaCierre, true) }}
-            </p>
-          </div>
-          <div>
-            <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-500">Notificaciones</h3>
-            <p class="mt-1 text-gray-700">{{ getNotificationSummary(selectedTicket!) }}</p>
-          </div>
-        </section>
-
-        <section>
-          <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-500">Comentarios</h3>
-          <ul class="mt-3 space-y-3">
-            <li *ngFor="let comentario of selectedTicket!.comentarios" class="rounded-lg border border-gray-100 bg-gray-50 p-3">
-              <div class="flex items-center justify-between text-xs text-gray-500">
-                <span class="font-medium text-gray-700">{{ comentario.authorName }}</span>
-                <span>{{ formatDate(comentario.createdAt, true) }}</span>
-              </div>
-              <p class="mt-2 text-sm text-gray-700">{{ comentario.message }}</p>
-            </li>
-            <li *ngIf="selectedTicket!.comentarios.length === 0" class="text-xs text-gray-400">
-              Sin comentarios registrados.
-            </li>
-          </ul>
-        </section>
-
-        <section>
-          <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-500">Adjuntos</h3>
-          <ul class="mt-3 space-y-2">
-            <li *ngFor="let adjunto of selectedTicket!.adjuntos" class="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-xs">
-              <div class="flex items-center gap-2">
-                <span class="text-lg">📎</span>
-                <div>
-                  <p class="font-medium text-gray-700">{{ adjunto.fileName }}</p>
-                  <p class="text-gray-500">{{ adjunto.fileType }} · {{ formatDate(adjunto.uploadedAt, true) }}</p>
-                </div>
-              </div>
-              <a href="{{ adjunto.url }}" class="text-blue-600 hover:underline">Ver</a>
-            </li>
-            <li *ngIf="selectedTicket!.adjuntos.length === 0" class="text-xs text-gray-400">
-              Sin archivos adjuntos.
-            </li>
-          </ul>
-        </section>
-
-        <section>
-          <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-500">Historial</h3>
-          <ol class="mt-3 space-y-3 border-l border-gray-200 pl-4">
-            <li *ngFor="let evento of selectedTicket!.historial" class="relative">
-              <span class="absolute -left-4 flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-sm">
-                {{ getHistorialIcon(evento.action) }}
-              </span>
-              <div class="rounded-lg border border-gray-100 bg-white p-3 shadow-sm">
-                <div class="flex items-center justify-between text-xs text-gray-500">
-                  <span class="font-medium text-gray-700">{{ evento.userName }}</span>
-                  <span>{{ formatDate(evento.date, true) }}</span>
-                </div>
-                <p class="mt-2 text-sm text-gray-700">{{ evento.description }}</p>
-              </div>
-            </li>
-          </ol>
-        </section>
-      </div>
+    <!-- Vista de lista -->
+    <div *ngIf="activeView === 'list'" class="overflow-hidden rounded-xl border bg-white">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-gray-700">
+          <tr>
+            <th class="px-5 py-3 text-left font-medium">Título</th>
+            <th class="px-5 py-3 text-left font-medium">Estado</th>
+            <th class="px-5 py-3 text-left font-medium">Unidad</th>
+            <th class="px-5 py-3 text-left font-medium">Actualización</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 text-gray-700">
+          <tr *ngFor="let ticket of filteredTickets"
+              (click)="openEditDialog(ticket)"
+              class="cursor-pointer transition hover:bg-blue-50">
+            <td class="px-5 py-3 font-semibold text-gray-900">{{ ticket.titulo }}</td>
+            <td class="px-5 py-3">{{ ticket.estado | titlecase }}</td>
+            <td class="px-5 py-3">{{ ticket.consorcioNombre }} · {{ ticket.unidadNombre }}</td>
+            <td class="px-5 py-3">{{ formatDate(ticket.updatedAt) }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-    <ng-template #emptySelection>
-      <div class="rounded-xl border border-dashed border-gray-300 bg-white p-8 text-center text-sm text-gray-500">
-        Seleccioná un ticket de la lista para ver su detalle.
-      </div>
-    </ng-template>
   </div>
 </div>

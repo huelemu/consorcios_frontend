@@ -214,4 +214,114 @@ export class TicketsService {
 
     return [];
   }
+
+  /** =============================
+   *  🔄 ACTUALIZAR ESTADO
+   * ============================= */
+  updateTicketEstado(ticketId: number, estado: string): Observable<Ticket> {
+    return this.http.patch<Ticket>(`${this.apiUrl}/${ticketId}/estado`, { estado }).pipe(
+      map(ticket => {
+        console.log('✅ Estado actualizado:', ticket);
+        return ticket;
+      }),
+      catchError(error => {
+        console.error('❌ Error al actualizar estado:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /** =============================
+   *  💬 AGREGAR COMENTARIO
+   * ============================= */
+  addComentario(payload: {
+    ticketId: number;
+    authorId: number;
+    message: string;
+    isInternal?: boolean;
+  }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${payload.ticketId}/comentarios`, payload).pipe(
+      map(response => {
+        console.log('✅ Comentario agregado:', response);
+        return response;
+      }),
+      catchError(error => {
+        console.error('❌ Error al agregar comentario:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /** =============================
+   *  💰 ACTUALIZAR COSTOS
+   * ============================= */
+  updateTicketCostos(
+    ticketId: number,
+    payload: { estimacionCosto?: number | null; costoFinal?: number | null }
+  ): Observable<Ticket> {
+    return this.http.patch<Ticket>(`${this.apiUrl}/${ticketId}/costos`, payload).pipe(
+      map(ticket => {
+        console.log('✅ Costos actualizados:', ticket);
+        return ticket;
+      }),
+      catchError(error => {
+        console.error('❌ Error al actualizar costos:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /** =============================
+   *  📎 SUBIR ADJUNTO
+   * ============================= */
+  uploadAttachment(ticketId: number, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post(`${this.apiUrl}/${ticketId}/adjuntos`, formData).pipe(
+      map(response => {
+        console.log('✅ Archivo subido:', response);
+        return response;
+      }),
+      catchError(error => {
+        console.error('❌ Error al subir archivo:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+    /** =============================
+   *  👤 REASIGNAR TICKET
+   * ============================= */
+  updateTicketAsignacion(
+    ticketId: number,
+    payload: { asignadoANombre?: string | null; asignadoRol?: 'proveedor'|'encargado'|'admin_consorcio'|'otro'|null; proveedorId?: number | null }
+  ): Observable<Ticket> {
+    return this.http.patch<Ticket>(`${this.apiUrl}/${ticketId}/asignacion`, payload).pipe(
+      map(ticket => ticket),
+      catchError(error => {
+        console.error('❌ Error al reasignar ticket:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+    /** =============================
+   *  📎 SUBIR ADJUNTO
+   * ============================= */
+  uploadAdjunto(ticketId: number, file: File): Observable<void> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<void>(`${this.apiUrl}/${ticketId}/adjuntos`, formData).pipe(
+      catchError(error => {
+        console.error('❌ Error al subir adjunto:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  getTicketHistorial(ticketId: number): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}/${ticketId}/historial`);
+}
+
 }
