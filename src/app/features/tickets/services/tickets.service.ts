@@ -53,8 +53,10 @@ export class TicketsService {
     return this.http.put<any>(`${this.ticketsUrl}/${id}`, data);
   }
 
-  updateTicketEstado(id: number, estado: string): Observable<any> {
-    return this.http.patch<any>(`${this.ticketsUrl}/${id}/estado`, { estado });
+  updateTicketEstado(id: number, estado: string, userId?: number): Observable<any> {
+    const body: any = { estado };
+    if (userId) body.userId = userId;
+    return this.http.patch<any>(`${this.ticketsUrl}/${id}/estado`, body);
   }
 
   updateTicketAsignacion(id: number, data: any): Observable<any> {

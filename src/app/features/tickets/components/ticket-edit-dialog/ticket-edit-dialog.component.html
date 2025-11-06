@@ -3,9 +3,9 @@
   <!-- HEADER -->
   <div class="sticky top-0 z-10 bg-white border-b px-6 py-4 flex justify-between items-start shadow-sm">
     <div>
-      <h2 class="text-xl font-bold text-gray-900">{{ ticket.titulo }}</h2>
+      <h2 class="text-xl font-bold text-gray-900">#{{ ticket.id }} - {{ ticket.titulo }}</h2>
       <p class="text-sm text-gray-500">
-        {{ ticket.consorcioNombre }} · UF {{ ticket.unidadNombre }} • #{{ ticket.id }}
+        {{ ticket.consorcioNombre }} · UF {{ ticket.unidadNombre }}
       </p>
     </div>
     <span class="px-3 py-1 text-xs rounded-full border font-medium"
@@ -33,9 +33,28 @@
           <p class="text-sm text-gray-700 whitespace-pre-line">{{ ticket.descripcion }}</p>
         </div>
 
-        <!-- Historial de Comentarios (solo lectura) -->
+        <!-- NUEVO COMENTARIO (obligatorio) -->
+        <div class="rounded-xl border bg-red-50 p-4 shadow-sm">
+          <h3 class="font-semibold text-gray-800 mb-3">
+            💬 Agregar Comentario <span class="text-red-600">*</span>
+          </h3>
+          <textarea formControlName="comentario" 
+                    rows="4" 
+                    placeholder="Describí los cambios realizados..."
+                    class="w-full border rounded-md px-3 py-2 text-sm resize-none mb-2"></textarea>
+          <label class="flex items-center gap-2 text-sm">
+            <input type="checkbox" formControlName="comentarioInterno" />
+            <span>Comentario interno (no visible para propietarios)</span>
+          </label>
+          <p *ngIf="ticketForm.get('comentario')?.invalid && ticketForm.get('comentario')?.touched" 
+             class="text-xs text-red-600 mt-1">
+            El comentario es obligatorio (mínimo 5 caracteres)
+          </p>
+        </div>
+
+        <!-- Historial (solo lectura) -->
         <div class="rounded-xl border bg-white p-4 shadow-sm">
-          <h3 class="font-semibold text-gray-800 mb-3">💬 Historial</h3>
+          <h3 class="font-semibold text-gray-800 mb-3">📜 Historial</h3>
           <div class="space-y-3 max-h-96 overflow-y-auto">
             <div *ngFor="let h of historial" class="border-l-4 border-blue-300 pl-3 py-2 bg-gray-50 rounded">
               <div class="flex justify-between text-xs text-gray-500 mb-1">
@@ -101,25 +120,6 @@
                  (change)="onFileSelect($event)" 
                  class="w-full text-sm" />
           <p class="text-xs text-gray-400 mt-1">Máx 10MB</p>
-        </div>
-
-        <!-- Comentario OBLIGATORIO -->
-        <div class="rounded-xl border bg-red-50 p-4 shadow-sm">
-          <label class="block font-semibold text-gray-800 mb-2">
-            💬 Comentario <span class="text-red-600">*</span>
-          </label>
-          <textarea formControlName="comentario" 
-                    rows="4" 
-                    placeholder="Describí los cambios realizados..."
-                    class="w-full border rounded-md px-3 py-2 text-sm resize-none"></textarea>
-          <label class="flex items-center gap-2 mt-2 text-sm">
-            <input type="checkbox" formControlName="comentarioInterno" />
-            <span>Comentario interno (no visible para propietarios)</span>
-          </label>
-          <p *ngIf="ticketForm.get('comentario')?.invalid && ticketForm.get('comentario')?.touched" 
-             class="text-xs text-red-600 mt-1">
-            El comentario es obligatorio (mínimo 5 caracteres)
-          </p>
         </div>
 
       </div>

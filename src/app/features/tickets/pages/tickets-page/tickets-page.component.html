@@ -11,6 +11,9 @@
         <button (click)="setView('list')" class="p-2 rounded-md"
                 [class.bg-blue-600]="activeView === 'list'"
                 [class.text-white]="activeView === 'list'">📋</button>
+        <button (click)="setView('kanban')" class="p-2 rounded-md"
+                [class.bg-blue-600]="activeView === 'kanban'"
+                [class.text-white]="activeView === 'kanban'">📊</button>
         <button (click)="setView('cards')" class="p-2 rounded-md"
                 [class.bg-blue-600]="activeView === 'cards'"
                 [class.text-white]="activeView === 'cards'">🗂️</button>
@@ -18,57 +21,45 @@
 
       <button (click)="toggleFilters()"
               class="rounded-md border bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
-        {{ showFilters ? 'Ocultar filtros' : 'Mostrar filtros' }}
+        {{ showFilters ? '✖️ Ocultar filtros' : '🔍 Filtros' }}
       </button>
 
-    <button
-      (click)="openCreateDialog()"
-      class="flex items-center bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition gap-2">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-      </svg>
-      Nuevo Ticket
-    </button>
+      <button (click)="openCreateDialog()"
+              class="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700">
+        ➕ Nuevo Ticket
+      </button>
     </div>
   </div>
 
-  <!-- Estadísticas -->
+  <!-- Stats -->
   <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-    <div class="rounded-xl bg-blue-50 border border-blue-200 p-4 text-center">
-      <div class="text-xs text-blue-700 uppercase">Total</div>
-      <div class="text-2xl font-semibold text-blue-900">{{ stats.total }}</div>
+    <div class="rounded-lg bg-white border p-4">
+      <div class="text-2xl font-bold text-gray-900">{{ stats.total }}</div>
+      <div class="text-sm text-gray-500">Total</div>
     </div>
-    <div class="rounded-xl bg-green-50 border border-green-200 p-4 text-center">
-      <div class="text-xs text-green-700 uppercase">Abiertos</div>
-      <div class="text-2xl font-semibold text-green-900">{{ stats.abiertos }}</div>
+    <div class="rounded-lg bg-green-50 border border-green-200 p-4">
+      <div class="text-2xl font-bold text-green-700">{{ stats.abiertos }}</div>
+      <div class="text-sm text-green-600">Abiertos</div>
     </div>
-    <div class="rounded-xl bg-yellow-50 border border-yellow-200 p-4 text-center">
-      <div class="text-xs text-yellow-700 uppercase">En proceso</div>
-      <div class="text-2xl font-semibold text-yellow-900">{{ stats.proceso }}</div>
+    <div class="rounded-lg bg-yellow-50 border border-yellow-200 p-4">
+      <div class="text-2xl font-bold text-yellow-700">{{ stats.proceso }}</div>
+      <div class="text-sm text-yellow-600">En Proceso</div>
     </div>
-    <div class="rounded-xl bg-orange-50 border border-orange-200 p-4 text-center">
-      <div class="text-xs text-orange-700 uppercase">Pendientes</div>
-      <div class="text-2xl font-semibold text-orange-900">{{ stats.pendientes }}</div>
+    <div class="rounded-lg bg-orange-50 border border-orange-200 p-4">
+      <div class="text-2xl font-bold text-orange-700">{{ stats.pendientes }}</div>
+      <div class="text-sm text-orange-600">Pendientes</div>
     </div>
-    <div class="rounded-xl bg-gray-50 border border-gray-200 p-4 text-center">
-      <div class="text-xs text-gray-700 uppercase">Cerrados</div>
-      <div class="text-2xl font-semibold text-gray-900">{{ stats.cerrados }}</div>
+    <div class="rounded-lg bg-gray-50 border border-gray-200 p-4">
+      <div class="text-2xl font-bold text-gray-700">{{ stats.cerrados }}</div>
+      <div class="text-sm text-gray-600">Cerrados</div>
     </div>
   </div>
 
   <!-- Filtros -->
-  <div *ngIf="showFilters" class="rounded-xl border bg-white p-4">
-    <form [formGroup]="filtersForm" class="grid grid-cols-1 gap-4 md:grid-cols-4">
+  <div *ngIf="showFilters" class="rounded-lg bg-white border p-4">
+    <form [formGroup]="filtersForm" class="grid grid-cols-1 md:grid-cols-3 gap-3">
       <input formControlName="search" type="text" placeholder="Buscar..."
              class="rounded-md border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500" />
-      <select formControlName="estado" class="rounded-md border px-3 py-2 text-sm">
-        <option value="">Todos los estados</option>
-        <option value="abierto">Abierto</option>
-        <option value="en_proceso">En proceso</option>
-        <option value="pendiente">Pendiente</option>
-        <option value="resuelto">Resuelto</option>
-        <option value="cerrado">Cerrado</option>
-      </select>
       <select formControlName="prioridad" class="rounded-md border px-3 py-2 text-sm">
         <option value="">Todas las prioridades</option>
         <option value="baja">Baja</option>
@@ -89,23 +80,174 @@
 
   <!-- Contenido -->
   <div *ngIf="!isLoading" class="mt-4">
-    <!-- Vista de tarjetas -->
+    
+    <!-- VISTA KANBAN -->
+    <div *ngIf="activeView === 'kanban'" class="flex gap-4 overflow-x-auto pb-4">
+      
+      <!-- Columna ABIERTO -->
+      <div class="flex-shrink-0 w-80 bg-green-50 rounded-lg p-4 border-2 border-green-200"
+           (dragover)="onDragOver($event)"
+           (drop)="onDrop($event, 'abierto')">
+        <h3 class="font-semibold text-green-800 mb-3 flex items-center justify-between">
+          <span>🟢 Abierto</span>
+          <span class="text-sm bg-green-200 px-2 py-1 rounded-full">{{ getTicketsByEstado('abierto').length }}</span>
+        </h3>
+        <div class="space-y-3">
+          <div *ngFor="let ticket of getTicketsByEstado('abierto')"
+               draggable="true"
+               (dragstart)="onDragStart($event, ticket)"
+               (click)="openEditDialog(ticket)"
+               class="bg-white rounded-lg p-3 shadow-sm border cursor-move hover:shadow-md transition">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-xs font-mono text-gray-500">#{{ ticket.id }}</span>
+              <span *ngIf="ticket.prioridad === 'alta' || ticket.prioridad === 'critica'"
+                    class="text-xs px-2 py-1 rounded-full bg-red-100 text-red-700">
+                🔥 {{ ticket.prioridad }}
+              </span>
+            </div>
+            <h4 class="font-semibold text-gray-900 text-sm mb-2">{{ ticket.titulo }}</h4>
+            <p class="text-xs text-gray-600 line-clamp-2 mb-2">{{ ticket.descripcion }}</p>
+            <div class="text-xs text-gray-500">
+              {{ ticket.consorcioNombre }} · {{ ticket.unidadNombre }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna EN PROCESO -->
+      <div class="flex-shrink-0 w-80 bg-yellow-50 rounded-lg p-4 border-2 border-yellow-200"
+           (dragover)="onDragOver($event)"
+           (drop)="onDrop($event, 'en_proceso')">
+        <h3 class="font-semibold text-yellow-800 mb-3 flex items-center justify-between">
+          <span>🟡 En Proceso</span>
+          <span class="text-sm bg-yellow-200 px-2 py-1 rounded-full">{{ getTicketsByEstado('en_proceso').length }}</span>
+        </h3>
+        <div class="space-y-3">
+          <div *ngFor="let ticket of getTicketsByEstado('en_proceso')"
+               draggable="true"
+               (dragstart)="onDragStart($event, ticket)"
+               (click)="openEditDialog(ticket)"
+               class="bg-white rounded-lg p-3 shadow-sm border cursor-move hover:shadow-md transition">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-xs font-mono text-gray-500">#{{ ticket.id }}</span>
+              <span *ngIf="ticket.prioridad === 'alta' || ticket.prioridad === 'critica'"
+                    class="text-xs px-2 py-1 rounded-full bg-red-100 text-red-700">
+                🔥 {{ ticket.prioridad }}
+              </span>
+            </div>
+            <h4 class="font-semibold text-gray-900 text-sm mb-2">{{ ticket.titulo }}</h4>
+            <p class="text-xs text-gray-600 line-clamp-2 mb-2">{{ ticket.descripcion }}</p>
+            <div class="text-xs text-gray-500">
+              {{ ticket.consorcioNombre }} · {{ ticket.unidadNombre }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna PENDIENTE -->
+      <div class="flex-shrink-0 w-80 bg-orange-50 rounded-lg p-4 border-2 border-orange-200"
+           (dragover)="onDragOver($event)"
+           (drop)="onDrop($event, 'pendiente')">
+        <h3 class="font-semibold text-orange-800 mb-3 flex items-center justify-between">
+          <span>🟠 Pendiente</span>
+          <span class="text-sm bg-orange-200 px-2 py-1 rounded-full">{{ getTicketsByEstado('pendiente').length }}</span>
+        </h3>
+        <div class="space-y-3">
+          <div *ngFor="let ticket of getTicketsByEstado('pendiente')"
+               draggable="true"
+               (dragstart)="onDragStart($event, ticket)"
+               (click)="openEditDialog(ticket)"
+               class="bg-white rounded-lg p-3 shadow-sm border cursor-move hover:shadow-md transition">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-xs font-mono text-gray-500">#{{ ticket.id }}</span>
+              <span *ngIf="ticket.prioridad === 'alta' || ticket.prioridad === 'critica'"
+                    class="text-xs px-2 py-1 rounded-full bg-red-100 text-red-700">
+                🔥 {{ ticket.prioridad }}
+              </span>
+            </div>
+            <h4 class="font-semibold text-gray-900 text-sm mb-2">{{ ticket.titulo }}</h4>
+            <p class="text-xs text-gray-600 line-clamp-2 mb-2">{{ ticket.descripcion }}</p>
+            <div class="text-xs text-gray-500">
+              {{ ticket.consorcioNombre }} · {{ ticket.unidadNombre }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna RESUELTO -->
+      <div class="flex-shrink-0 w-80 bg-blue-50 rounded-lg p-4 border-2 border-blue-200"
+           (dragover)="onDragOver($event)"
+           (drop)="onDrop($event, 'resuelto')">
+        <h3 class="font-semibold text-blue-800 mb-3 flex items-center justify-between">
+          <span>🔵 Resuelto</span>
+          <span class="text-sm bg-blue-200 px-2 py-1 rounded-full">{{ getTicketsByEstado('resuelto').length }}</span>
+        </h3>
+        <div class="space-y-3">
+          <div *ngFor="let ticket of getTicketsByEstado('resuelto')"
+               draggable="true"
+               (dragstart)="onDragStart($event, ticket)"
+               (click)="openEditDialog(ticket)"
+               class="bg-white rounded-lg p-3 shadow-sm border cursor-move hover:shadow-md transition">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-xs font-mono text-gray-500">#{{ ticket.id }}</span>
+            </div>
+            <h4 class="font-semibold text-gray-900 text-sm mb-2">{{ ticket.titulo }}</h4>
+            <p class="text-xs text-gray-600 line-clamp-2 mb-2">{{ ticket.descripcion }}</p>
+            <div class="text-xs text-gray-500">
+              {{ ticket.consorcioNombre }} · {{ ticket.unidadNombre }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna CERRADO -->
+      <div class="flex-shrink-0 w-80 bg-gray-50 rounded-lg p-4 border-2 border-gray-300"
+           (dragover)="onDragOver($event)"
+           (drop)="onDrop($event, 'cerrado')">
+        <h3 class="font-semibold text-gray-800 mb-3 flex items-center justify-between">
+          <span>⚫ Cerrado</span>
+          <span class="text-sm bg-gray-200 px-2 py-1 rounded-full">{{ getTicketsByEstado('cerrado').length }}</span>
+        </h3>
+        <div class="space-y-3">
+          <div *ngFor="let ticket of getTicketsByEstado('cerrado')"
+               draggable="true"
+               (dragstart)="onDragStart($event, ticket)"
+               (click)="openEditDialog(ticket)"
+               class="bg-white rounded-lg p-3 shadow-sm border cursor-move hover:shadow-md transition">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-xs font-mono text-gray-500">#{{ ticket.id }}</span>
+            </div>
+            <h4 class="font-semibold text-gray-900 text-sm mb-2">{{ ticket.titulo }}</h4>
+            <p class="text-xs text-gray-600 line-clamp-2 mb-2">{{ ticket.descripcion }}</p>
+            <div class="text-xs text-gray-500">
+              {{ ticket.consorcioNombre }} · {{ ticket.unidadNombre }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Vista de tarjetas (original) -->
     <div *ngIf="activeView === 'cards'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <div *ngFor="let ticket of filteredTickets"
            (click)="openEditDialog(ticket)"
            class="rounded-xl border bg-white p-4 cursor-pointer hover:shadow transition">
-        <div class="flex justify-between items-start">
-          <h3 class="font-semibold text-gray-900">{{ ticket.titulo }}</h3>
-          <span class="text-xs rounded-full px-2 py-1 border"
-                [ngClass]="{
-                  'bg-green-100 text-green-700 border-green-200': ticket.estado==='abierto',
-                  'bg-yellow-100 text-yellow-700 border-yellow-200': ticket.estado==='en_proceso',
-                  'bg-orange-100 text-orange-700 border-orange-200': ticket.estado==='pendiente',
-                  'bg-gray-100 text-gray-700 border-gray-200': ticket.estado==='cerrado' || ticket.estado==='resuelto'
-                }">
-            {{ ticket.estado | titlecase }}
-          </span>
+        <div class="flex justify-between items-start mb-2">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono text-gray-500">#{{ ticket.id }}</span>
+            <span class="text-xs rounded-full px-2 py-1 border"
+                  [ngClass]="{
+                    'bg-green-100 text-green-700 border-green-200': ticket.estado==='abierto',
+                    'bg-yellow-100 text-yellow-700 border-yellow-200': ticket.estado==='en_proceso',
+                    'bg-orange-100 text-orange-700 border-orange-200': ticket.estado==='pendiente',
+                    'bg-gray-100 text-gray-700 border-gray-200': ticket.estado==='cerrado' || ticket.estado==='resuelto'
+                  }">
+              {{ ticket.estado | titlecase }}
+            </span>
+          </div>
         </div>
+        <h3 class="font-semibold text-gray-900 mb-2">{{ ticket.titulo }}</h3>
         <p class="mt-2 text-sm text-gray-600 line-clamp-3">{{ ticket.descripcion }}</p>
         <div class="mt-3 text-xs text-gray-500">
           {{ ticket.consorcioNombre }} · UF: {{ ticket.unidadNombre }}
@@ -121,6 +263,7 @@
       <table class="w-full text-sm">
         <thead class="bg-gray-50 text-gray-700">
           <tr>
+            <th class="px-5 py-3 text-left font-medium">#</th>
             <th class="px-5 py-3 text-left font-medium">Título</th>
             <th class="px-5 py-3 text-left font-medium">Estado</th>
             <th class="px-5 py-3 text-left font-medium">Unidad</th>
@@ -131,6 +274,7 @@
           <tr *ngFor="let ticket of filteredTickets"
               (click)="openEditDialog(ticket)"
               class="cursor-pointer transition hover:bg-blue-50">
+            <td class="px-5 py-3 font-mono text-xs text-gray-500">#{{ ticket.id }}</td>
             <td class="px-5 py-3 font-semibold text-gray-900">{{ ticket.titulo }}</td>
             <td class="px-5 py-3">{{ ticket.estado | titlecase }}</td>
             <td class="px-5 py-3">{{ ticket.consorcioNombre }} · {{ ticket.unidadNombre }}</td>
