@@ -112,11 +112,6 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   box-shadow: 0 0 25px rgba(0, 0, 0, 0.15);
 }
 
-.dialog-fullscreen .mat-mdc-dialog-surface {
-  background-color: #f9fafb; /* fondo gris claro */
-  overflow: hidden;
-}
-
 /* scrollbar estético */
 .dialog-fullscreen ::-webkit-scrollbar {
   width: 8px;
@@ -125,4 +120,15 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   background-color: #cbd5e1;
   border-radius: 4px;
 }
+
+
+.dialog-fullscreen .mat-mdc-dialog-surface {
+  border-radius: 0 !important;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #f9fafb; /* fondo gris claro */
+  overflow: hidden;
+}
+
 

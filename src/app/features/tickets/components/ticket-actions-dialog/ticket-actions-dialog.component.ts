@@ -1,7 +1,7 @@
-import { CommonModule } from '@angular/common';
 import { Component, Inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { TicketsService } from '../../services/tickets.service';
 import { Ticket, TicketState } from '../../models/ticket.model';
 
@@ -12,28 +12,27 @@ type ActionTab = 'estado' | 'asignacion' | 'costos' | 'comentario' | 'adjunto';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, MatDialogModule],
   template: `
-    <div class="p-4 space-y-4">
-      <h2 class="text-lg font-semibold">Acciones del ticket</h2>
-
+    <h2 mat-dialog-title>Acciones del Ticket</h2>
+    <div mat-dialog-content class="space-y-4">
       <!-- Tabs -->
-      <div class="flex gap-2">
-        <button *ngFor="let tab of tabs"
+      <div class="flex gap-2 border-b pb-2">
+        <button *ngFor="let tab of tabs" 
+                type="button"
                 (click)="activeTab = tab"
-                class="px-3 py-1 rounded-md border text-sm"
-                [class.bg-blue-600]="activeTab === tab"
-                [class.text-white]="activeTab === tab">
+                [class.bg-blue-100]="activeTab === tab"
+                class="px-3 py-1 rounded text-sm">
           {{ tab | titlecase }}
         </button>
       </div>
 
       <!-- Estado -->
       <form *ngIf="activeTab==='estado'" [formGroup]="estadoForm" (ngSubmit)="saveEstado()" class="space-y-3">
-        <select class="w-full rounded-md border px-3 py-2 text-sm" formControlName="estado">
+        <select formControlName="estado" class="w-full rounded-md border px-3 py-2 text-sm">
           <option *ngFor="let e of estados" [ngValue]="e">{{ e | titlecase }}</option>
         </select>
         <div class="flex justify-end gap-2">
           <button type="button" class="px-3 py-2 rounded-md border" (click)="close()">Cancelar</button>
-          <button type="submit" class="px-3 py-2 rounded-md bg-blue-600 text-white" [disabled]="estadoForm.invalid">Guardar</button>
+          <button type="submit" class="px-3 py-2 rounded-md bg-blue-600 text-white">Guardar</button>
         </div>
       </form>
 
@@ -169,7 +168,8 @@ export class TicketActionsDialogComponent implements OnInit {
   onFileSelect(ev: Event) {
     const file = (ev.target as HTMLInputElement).files?.[0];
     if (!file) return;
-    this.ticketsService.uploadAdjunto(this.data.ticket.id, file)
+    const userId = this.data.currentUserId ?? 0;
+    this.ticketsService.uploadAdjunto(this.data.ticket.id, file, userId)
       .subscribe(() => this.dialogRef.close(true));
   }
 }

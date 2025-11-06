@@ -1,246 +1,144 @@
-<!-- CONTENEDOR PRINCIPAL -->
 <div class="flex flex-col h-full w-full bg-gray-50">
 
-  <!-- HEADER FIJO -->
+  <!-- HEADER -->
   <div class="sticky top-0 z-10 bg-white border-b px-6 py-4 flex justify-between items-start shadow-sm">
     <div>
       <h2 class="text-xl font-bold text-gray-900">{{ ticket.titulo }}</h2>
       <p class="text-sm text-gray-500">
-        {{ ticket.consorcioNombre }} · UF {{ ticket.unidadNombre }} • Ticket #{{ ticket.id }}
+        {{ ticket.consorcioNombre }} · UF {{ ticket.unidadNombre }} • #{{ ticket.id }}
       </p>
     </div>
-
-    <div class="flex flex-col items-end gap-1">
-      <span class="px-3 py-1 text-xs rounded-full border font-medium"
-            [ngClass]="{
-              'bg-green-100 text-green-700 border-green-200': ticket.estado==='abierto',
-              'bg-yellow-100 text-yellow-700 border-yellow-200': ticket.estado==='en_proceso',
-              'bg-orange-100 text-orange-700 border-orange-200': ticket.estado==='pendiente',
-              'bg-blue-100 text-blue-700 border-blue-200': ticket.estado==='resuelto',
-              'bg-gray-100 text-gray-700 border-gray-200': ticket.estado==='cerrado'
-            }">
-        {{ ticket.estado | titlecase }}
-      </span>
-      <span class="text-xs text-gray-400">
-        Última actualización: {{ formatDate(ticket.updatedAt) }}
-      </span>
-    </div>
+    <span class="px-3 py-1 text-xs rounded-full border font-medium"
+          [ngClass]="{
+            'bg-green-100 text-green-700 border-green-200': ticket.estado==='abierto',
+            'bg-yellow-100 text-yellow-700 border-yellow-200': ticket.estado==='en_proceso',
+            'bg-orange-100 text-orange-700 border-orange-200': ticket.estado==='pendiente',
+            'bg-blue-100 text-blue-700 border-blue-200': ticket.estado==='resuelto',
+            'bg-gray-100 text-gray-700 border-gray-200': ticket.estado==='cerrado'
+          }">
+      {{ ticket.estado | titlecase }}
+    </span>
   </div>
 
-  <!-- CONTENIDO SCROLLEABLE -->
+  <!-- CONTENIDO -->
   <div class="flex-1 overflow-y-auto p-6">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <form [formGroup]="ticketForm" (ngSubmit)="save()" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       
-      <!-- COLUMNA IZQUIERDA (2/3) -->
+      <!-- COLUMNA IZQUIERDA -->
       <div class="lg:col-span-2 space-y-4">
         
-        <!-- Descripción -->
+        <!-- Descripción original (solo lectura) -->
         <div class="rounded-xl border bg-white p-4 shadow-sm">
-          <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-            <span class="text-blue-600">📋</span> Descripción
-          </h3>
-          <p class="text-sm text-gray-700 whitespace-pre-line leading-relaxed">{{ ticket.descripcion }}</p>
+          <h3 class="font-semibold text-gray-800 mb-3">📋 Descripción Original</h3>
+          <p class="text-sm text-gray-700 whitespace-pre-line">{{ ticket.descripcion }}</p>
         </div>
 
-        <!-- Comentarios -->
+        <!-- Historial de Comentarios (solo lectura) -->
         <div class="rounded-xl border bg-white p-4 shadow-sm">
-          <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-            <span class="text-blue-600">💬</span> Comentarios
-          </h3>
-          
-          <!-- Form agregar comentario -->
-          <form [formGroup]="comentarioForm" (ngSubmit)="saveComentario()" class="space-y-3 mb-4 pb-4 border-b">
-            <textarea 
-              formControlName="mensaje" 
-              rows="3"
-              class="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Agregar comentario..."></textarea>
-            <div class="flex items-center justify-between">
-              <label class="inline-flex items-center gap-2 text-sm text-gray-600">
-                <input type="checkbox" formControlName="interno" class="rounded" /> 
-                Comentario interno
-              </label>
-              <button 
-                type="submit"
-                [disabled]="comentarioForm.invalid"
-                class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                💾 Guardar
-              </button>
-            </div>
-          </form>
-
-          <!-- Lista comentarios -->
-          <div *ngIf="comentariosHistorial.length > 0; else sinComentarios" class="space-y-3">
-            <div *ngFor="let h of comentariosHistorial" class="border-b pb-3 last:border-b-0">
-              <div class="flex items-start gap-2">
-                <div class="flex-1">
-                  <div class="text-sm text-gray-700">
-                    <strong class="text-gray-900">{{ h.autor }}</strong> 
-                    <span class="text-gray-600">— {{ h.mensaje }}</span>
-                  </div>
-                  <div class="text-xs text-gray-400 mt-1">{{ h.fecha | date:'short' }}</div>
-                </div>
+          <h3 class="font-semibold text-gray-800 mb-3">💬 Historial</h3>
+          <div class="space-y-3 max-h-96 overflow-y-auto">
+            <div *ngFor="let h of historial" class="border-l-4 border-blue-300 pl-3 py-2 bg-gray-50 rounded">
+              <div class="flex justify-between text-xs text-gray-500 mb-1">
+                <span class="font-medium">{{ h.autor || h.authorName }}</span>
+                <span>{{ formatDate(h.fecha || h.createdAt) }}</span>
               </div>
+              <p class="text-sm text-gray-700">{{ h.mensaje || h.message }}</p>
             </div>
           </div>
-          
-          <ng-template #sinComentarios>
-            <div class="text-sm text-gray-400 italic text-center py-4">
-              No hay comentarios aún
-            </div>
-          </ng-template>
-        </div>
-
-        <!-- Historial -->
-        <div class="rounded-xl border bg-white p-4 shadow-sm">
-          <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-            <span class="text-blue-600">📜</span> Historial de cambios
-          </h3>
-          
-          <div *ngIf="historial.length > 0; else noData" class="relative pl-6">
-            <div class="absolute top-0 left-1.5 h-full w-0.5 bg-gray-200"></div>
-
-            <div *ngFor="let item of historial"
-                 class="relative mb-4 last:mb-0 flex items-start transition-all hover:bg-gray-50 rounded-lg p-2 -ml-2">
-              <div
-                class="absolute -left-[22px] flex h-6 w-6 items-center justify-center rounded-full border-2 text-white shadow-sm text-xs"
-                [ngClass]="{
-                  'bg-blue-500 border-blue-400': item.tipo === 'comentario',
-                  'bg-green-500 border-green-400': item.tipo === 'estado',
-                  'bg-yellow-500 border-yellow-400': item.tipo === 'adjunto',
-                  'bg-purple-500 border-purple-400': item.tipo === 'costos',
-                  'bg-gray-500 border-gray-400': item.tipo === 'asignado'
-                }">
-                <ng-container [ngSwitch]="item.tipo">
-                  <span *ngSwitchCase="'estado'">⚙️</span>
-                  <span *ngSwitchCase="'comentario'">💬</span>
-                  <span *ngSwitchCase="'adjunto'">📎</span>
-                  <span *ngSwitchCase="'costos'">💰</span>
-                  <span *ngSwitchCase="'asignado'">👤</span>
-                  <span *ngSwitchDefault>🕓</span>
-                </ng-container>
-              </div>
-              <div class="ml-4 flex-1">
-                <div class="text-sm text-gray-800">
-                  <strong class="text-gray-900">{{ item.autor }}</strong> 
-                  <span class="text-gray-600">{{ item.mensaje }}</span>
-                </div>
-                <div class="text-xs text-gray-400 mt-1">{{ item.fecha | date:'short' }}</div>
-              </div>
-            </div>
-          </div>
-          
-          <ng-template #noData>
-            <div class="text-sm text-gray-400 italic text-center py-4">
-              No hay historial disponible
-            </div>
-          </ng-template>
         </div>
 
       </div>
 
-      <!-- COLUMNA DERECHA (1/3) -->
+      <!-- COLUMNA DERECHA: FORMULARIO EDICIÓN -->
       <div class="space-y-4">
         
         <!-- Estado -->
         <div class="rounded-xl border bg-white p-4 shadow-sm">
-          <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-            <span class="text-green-600">⚙️</span> Estado
-          </h3>
-          <form [formGroup]="estadoForm" (ngSubmit)="saveEstado()" class="space-y-2">
-            <select 
-              formControlName="estado" 
-              class="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-              <option *ngFor="let e of estados" [ngValue]="e">{{ e | titlecase }}</option>
-            </select>
-            <button 
-              type="submit" 
-              [disabled]="estadoForm.invalid"
-              class="w-full bg-blue-600 text-white px-3 py-2 rounded-md text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-              💾 Actualizar
-            </button>
-          </form>
+          <label class="block font-semibold text-gray-800 mb-2">⚙️ Estado</label>
+          <select formControlName="estado" 
+                  class="w-full border rounded-md px-3 py-2 text-sm">
+            <option *ngFor="let e of estados" [ngValue]="e">{{ e | titlecase }}</option>
+          </select>
         </div>
 
         <!-- Asignación -->
         <div class="rounded-xl border bg-white p-4 shadow-sm">
-          <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-            <span class="text-orange-600">👤</span> Reasignar
-          </h3>
-          <form [formGroup]="asignForm" (ngSubmit)="saveAsignacion()" class="space-y-2">
-            <input 
-              formControlName="asignadoANombre" 
-              placeholder="Nombre responsable" 
-              class="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-            <select 
-              formControlName="asignadoRol" 
-              class="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-              <option [ngValue]="null">Seleccionar rol</option>
-              <option value="proveedor">Proveedor</option>
-              <option value="encargado">Encargado</option>
-              <option value="admin_consorcio">Admin Consorcio</option>
-              <option value="otro">Otro</option>
-            </select>
-            <input 
-              formControlName="proveedorId" 
-              type="number" 
-              placeholder="ID Proveedor (opcional)"
-              class="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-            <button 
-              type="submit"
-              class="w-full bg-blue-600 text-white px-3 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors">
-              💾 Guardar
-            </button>
-          </form>
+          <label class="block font-semibold text-gray-800 mb-2">👤 Asignación</label>
+          <input formControlName="asignadoANombre" 
+                 placeholder="Nombre responsable" 
+                 class="w-full border rounded-md px-3 py-2 text-sm mb-2" />
+          <select formControlName="asignadoRol" 
+                  class="w-full border rounded-md px-3 py-2 text-sm mb-2">
+            <option [ngValue]="null">Seleccionar rol</option>
+            <option value="proveedor">Proveedor</option>
+            <option value="encargado">Encargado</option>
+            <option value="admin_consorcio">Admin Consorcio</option>
+            <option value="otro">Otro</option>
+          </select>
+          <input formControlName="proveedorId" 
+                 type="number" 
+                 placeholder="ID Proveedor (opcional)"
+                 class="w-full border rounded-md px-3 py-2 text-sm" />
         </div>
 
         <!-- Costos -->
         <div class="rounded-xl border bg-white p-4 shadow-sm">
-          <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-            <span class="text-purple-600">💰</span> Costos
-          </h3>
-          <form [formGroup]="costoForm" (ngSubmit)="saveCostos()" class="space-y-2">
-            <input 
-              type="number" 
-              formControlName="estimado" 
-              placeholder="Costo estimado"
-              class="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-            <input 
-              type="number" 
-              formControlName="final" 
-              placeholder="Costo final"
-              class="w-full border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-            <button 
-              type="submit"
-              class="w-full bg-blue-600 text-white px-3 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors">
-              💾 Actualizar
-            </button>
-          </form>
+          <label class="block font-semibold text-gray-800 mb-2">💰 Costos</label>
+          <input formControlName="estimacionCosto" 
+                 type="number" 
+                 placeholder="Costo estimado"
+                 class="w-full border rounded-md px-3 py-2 text-sm mb-2" />
+          <input formControlName="costoFinal" 
+                 type="number" 
+                 placeholder="Costo final"
+                 class="w-full border rounded-md px-3 py-2 text-sm" />
         </div>
 
-        <!-- Adjuntos -->
+        <!-- Archivo -->
         <div class="rounded-xl border bg-white p-4 shadow-sm">
-          <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-            <span class="text-yellow-600">📎</span> Adjuntar archivo
-          </h3>
-          <input 
-            type="file" 
-            (change)="onFileSelect($event)" 
-            class="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />
-          <p class="text-xs text-gray-400 mt-2">Máx. 10MB por archivo</p>
+          <label class="block font-semibold text-gray-800 mb-2">📎 Adjuntar</label>
+          <input type="file" 
+                 (change)="onFileSelect($event)" 
+                 class="w-full text-sm" />
+          <p class="text-xs text-gray-400 mt-1">Máx 10MB</p>
+        </div>
+
+        <!-- Comentario OBLIGATORIO -->
+        <div class="rounded-xl border bg-red-50 p-4 shadow-sm">
+          <label class="block font-semibold text-gray-800 mb-2">
+            💬 Comentario <span class="text-red-600">*</span>
+          </label>
+          <textarea formControlName="comentario" 
+                    rows="4" 
+                    placeholder="Describí los cambios realizados..."
+                    class="w-full border rounded-md px-3 py-2 text-sm resize-none"></textarea>
+          <label class="flex items-center gap-2 mt-2 text-sm">
+            <input type="checkbox" formControlName="comentarioInterno" />
+            <span>Comentario interno (no visible para propietarios)</span>
+          </label>
+          <p *ngIf="ticketForm.get('comentario')?.invalid && ticketForm.get('comentario')?.touched" 
+             class="text-xs text-red-600 mt-1">
+            El comentario es obligatorio (mínimo 5 caracteres)
+          </p>
         </div>
 
       </div>
 
-    </div>
+    </form>
   </div>
 
-  <!-- FOOTER FIJO -->
-  <div class="sticky bottom-0 z-10 bg-white border-t px-6 py-3 flex justify-end shadow-lg">
-    <button 
-      (click)="close()" 
-      class="px-6 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium">
-      ✖️ Cerrar
+  <!-- FOOTER -->
+  <div class="sticky bottom-0 z-10 bg-white border-t px-6 py-3 flex justify-between shadow-lg">
+    <button type="button"
+            (click)="close()" 
+            class="px-6 py-2 rounded-md border text-gray-700 hover:bg-gray-50">
+      ✖️ Cancelar
+    </button>
+    <button type="button"
+            (click)="save()"
+            [disabled]="ticketForm.invalid || saving"
+            class="px-6 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+      {{ saving ? '⏳ Guardando...' : '💾 Guardar Cambios' }}
     </button>
   </div>
 

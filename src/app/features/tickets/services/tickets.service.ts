@@ -4,9 +4,6 @@ import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 
-// =====================================================
-// 🔹 Tipos auxiliares
-// =====================================================
 export interface TicketConsorcioOption {
   id: number;
   nombre: string;
@@ -20,13 +17,9 @@ export interface TicketUnidadOption {
   consorcioId?: number;
 }
 
-// =====================================================
-// 🔹 Servicio principal
-// =====================================================
 @Injectable({ providedIn: 'root' })
 export class TicketsService {
   private readonly baseUrl = environment.apiUrl;
-
   private readonly ticketsUrl = `${this.baseUrl}/tickets`;
   private readonly consorciosUrl = `${this.baseUrl}/consorcios`;
   private readonly unidadesUrl = `${this.baseUrl}/unidades`;
@@ -34,13 +27,9 @@ export class TicketsService {
 
   constructor(private http: HttpClient) {}
 
-  // =====================================================
-  // 🧾 TICKETS
-  // =====================================================
   getTickets(params?: any): Observable<any[]> {
     return this.http.get<any>(this.ticketsUrl, { params }).pipe(
       map((res) => {
-        // Si el backend devuelve { data: [...] }, tomamos esa propiedad
         if (Array.isArray(res)) return res;
         if (res && Array.isArray(res.data)) return res.data;
         return [];
@@ -51,7 +40,6 @@ export class TicketsService {
       })
     );
   }
-
 
   getTicketById(id: number): Observable<any> {
     return this.http.get<any>(`${this.ticketsUrl}/${id}`);
@@ -69,7 +57,6 @@ export class TicketsService {
     return this.http.patch<any>(`${this.ticketsUrl}/${id}/estado`, { estado });
   }
 
-  // 🔹 Ahora acepta objeto con múltiples campos (usuarioId, proveedorId, etc.)
   updateTicketAsignacion(id: number, data: any): Observable<any> {
     return this.http.patch<any>(`${this.ticketsUrl}/${id}/asignacion`, data);
   }
@@ -78,10 +65,6 @@ export class TicketsService {
     return this.http.patch<any>(`${this.ticketsUrl}/${id}/costos`, data);
   }
 
-  // =====================================================
-  // 💬 COMENTARIOS
-  // =====================================================
-  // Permite llamar con (ticketId, comentario) o directamente con { ticketId, texto, ... }
   addComentario(ticketIdOrData: any, comentario?: any): Observable<any> {
     if (comentario === undefined) {
       const data = ticketIdOrData;
@@ -94,19 +77,14 @@ export class TicketsService {
     return this.http.get<any[]>(`${this.ticketsUrl}/${ticketId}/comentarios`);
   }
 
-  // =====================================================
-  // 📜 HISTORIAL
-  // =====================================================
   getTicketHistorial(ticketId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.ticketsUrl}/${ticketId}/historial`);
   }
 
-  // =====================================================
-  // 📎 ADJUNTOS
-  // =====================================================
-  uploadAdjunto(ticketId: number, file: File): Observable<any> {
+  uploadAdjunto(ticketId: number, file: File, userId: number): Observable<any> {
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('userId', userId.toString());
     return this.http.post<any>(`${this.ticketsUrl}/${ticketId}/adjuntos`, formData);
   }
 
@@ -114,9 +92,6 @@ export class TicketsService {
     return this.http.get<any[]>(`${this.ticketsUrl}/${ticketId}/adjuntos`);
   }
 
-  // =====================================================
-  // 🏢 CONSORCIOS
-  // =====================================================
   getConsorcios(): Observable<TicketConsorcioOption[]> {
     return this.http.get<any>(this.consorciosUrl).pipe(
       map((res) => {
@@ -133,9 +108,6 @@ export class TicketsService {
     );
   }
 
-  // =====================================================
-  // 🏠 UNIDADES
-  // =====================================================
   getUnidades(): Observable<TicketUnidadOption[]> {
     return this.http.get<any>(this.unidadesUrl).pipe(
       map((res) => Array.isArray(res) ? res : res.data || []),
@@ -143,34 +115,10 @@ export class TicketsService {
     );
   }
 
-  // =====================================================
-  // 🧰 PROVEEDORES
-  // =====================================================
   getProveedores(): Observable<any[]> {
     return this.http.get<any>(this.proveedoresUrl).pipe(
       map((res) => Array.isArray(res) ? res : res.data || []),
       catchError(() => of([]))
     );
-  }
-
-  // =====================================================
-  // 📊 LISTAS ESTÁTICAS
-  // =====================================================
-  getPrioridades(): any[] {
-    return [
-      { value: 'baja', label: 'Baja' },
-      { value: 'media', label: 'Media' },
-      { value: 'alta', label: 'Alta' },
-      { value: 'critica', label: 'Crítica' },
-    ];
-  }
-
-  getTipos(): any[] {
-    return [
-      { value: 'mantenimiento', label: 'Mantenimiento' },
-      { value: 'limpieza', label: 'Limpieza' },
-      { value: 'seguridad', label: 'Seguridad' },
-      { value: 'otros', label: 'Otros' },
-    ];
   }
 }

@@ -1,10 +1,7 @@
-// ticket-edit-dialog.component.ts - REEMPLAZAR TODO EL ARCHIVO
-
 import { CommonModule } from '@angular/common';
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { finalize } from 'rxjs';
 import { Ticket } from '../../models/ticket.model';
 import { TicketsService } from '../../services/tickets.service';
 import { AuthService } from '../../../../auth/auth.service';
@@ -19,13 +16,10 @@ import { AuthService } from '../../../../auth/auth.service';
 export class TicketEditDialogComponent implements OnInit {
   ticket!: Ticket;
   historial: any[] = [];
-
-  estadoForm!: FormGroup;
-  asignForm!: FormGroup;
-  comentarioForm!: FormGroup;
-  costoForm!: FormGroup;
-
+  ticketForm!: FormGroup;
   estados = ['abierto', 'en_proceso', 'pendiente', 'resuelto', 'cerrado'];
+  selectedFile: File | null = null;
+  saving = false;
 
   constructor(
     private fb: FormBuilder,
@@ -37,29 +31,20 @@ export class TicketEditDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.ticket = this.data.ticket;
-    this.initForms();
+    this.initForm();
     this.loadHistorial();
   }
 
-  private initForms(): void {
-    this.estadoForm = this.fb.group({
+  private initForm(): void {
+    this.ticketForm = this.fb.group({
       estado: [this.ticket.estado, Validators.required],
-    });
-
-    this.asignForm = this.fb.group({
       asignadoANombre: [this.ticket.asignadoANombre || ''],
       asignadoRol: [this.ticket.asignadoRol || null],
       proveedorId: [this.ticket.proveedorId || null],
-    });
-
-    this.comentarioForm = this.fb.group({
-      mensaje: ['', [Validators.required, Validators.minLength(3)]],
-      interno: [false],
-    });
-
-    this.costoForm = this.fb.group({
-      estimado: [this.ticket.estimacionCosto || null, [Validators.min(0)]],
-      final: [this.ticket.costoFinal || null, [Validators.min(0)]],
+      estimacionCosto: [this.ticket.estimacionCosto || null, [Validators.min(0)]],
+      costoFinal: [this.ticket.costoFinal || null, [Validators.min(0)]],
+      comentario: ['', [Validators.required, Validators.minLength(5)]],
+      comentarioInterno: [false]
     });
   }
 
@@ -67,17 +52,96 @@ export class TicketEditDialogComponent implements OnInit {
     this.ticketsService.getTicketHistorial(this.ticket.id).subscribe({
       next: (data) => {
         this.historial = data;
-        console.log('✅ Historial cargado:', data);
       },
       error: (err) => {
-        console.error('❌ Error al cargar historial:', err);
+        console.error('Error al cargar historial:', err);
         this.historial = [];
       },
     });
   }
 
-  get comentariosHistorial(): any[] {
-    return (this.historial || []).filter((x) => x.tipo === 'comentario');
+  onFileSelect(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.selectedFile = input.files?.[0] || null;
+  }
+
+  save(): void {
+    if (this.ticketForm.invalid) {
+      this.ticketForm.markAllAsTouched();
+      alert('Completá todos los campos obligatorios, incluido el comentario.');
+      return;
+    }
+
+    this.saving = true;
+    const form = this.ticketForm.value;
+    const updates: Promise<any>[] = [];
+
+    // 1. Actualizar Estado (si cambió)
+    if (form.estado !== this.ticket.estado) {
+      updates.push(
+        this.ticketsService.updateTicketEstado(this.ticket.id, form.estado).toPromise()
+      );
+    }
+
+    // 2. Actualizar Asignación (si cambió)
+    if (
+      form.asignadoANombre !== this.ticket.asignadoANombre ||
+      form.asignadoRol !== this.ticket.asignadoRol ||
+      form.proveedorId !== this.ticket.proveedorId
+    ) {
+      updates.push(
+        this.ticketsService.updateTicketAsignacion(this.ticket.id, {
+          asignadoANombre: form.asignadoANombre,
+          asignadoRol: form.asignadoRol,
+          proveedorId: form.proveedorId
+        }).toPromise()
+      );
+    }
+
+    // 3. Actualizar Costos (si cambió)
+    if (
+      form.estimacionCosto !== this.ticket.estimacionCosto ||
+      form.costoFinal !== this.ticket.costoFinal
+    ) {
+      updates.push(
+        this.ticketsService.updateTicketCostos(this.ticket.id, {
+          estimacionCosto: form.estimacionCosto,
+          costoFinal: form.costoFinal
+        }).toPromise()
+      );
+    }
+
+    // 4. Subir archivo (si existe)
+    if (this.selectedFile) {
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      updates.push(
+        this.ticketsService.uploadAdjunto(this.ticket.id, this.selectedFile, user?.id || 1).toPromise()
+      );
+    }
+
+    // 5. SIEMPRE agregar comentario
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    updates.push(
+      this.ticketsService.addComentario({
+        ticketId: this.ticket.id,
+        authorId: user?.id || 1,
+        authorName: user?.username || 'Usuario',
+        mensaje: form.comentario,
+        isInternal: form.comentarioInterno
+      }).toPromise()
+    );
+
+    // Ejecutar todas las actualizaciones
+    Promise.all(updates)
+      .then(() => {
+        this.saving = false;
+        this.dialogRef.close(true);
+      })
+      .catch((err) => {
+        this.saving = false;
+        console.error('Error al guardar:', err);
+        alert('Error al guardar los cambios');
+      });
   }
 
   close(): void {
@@ -85,137 +149,11 @@ export class TicketEditDialogComponent implements OnInit {
   }
 
   formatDate(value?: string): string {
-    if (!value) return 'N/D';
+    if (!value) return '';
+    const d = new Date(value);
     return new Intl.DateTimeFormat('es-AR', {
-      dateStyle: 'medium',
+      dateStyle: 'short',
       timeStyle: 'short',
-    }).format(new Date(value));
-  }
-
-  saveEstado(): void {
-    if (this.estadoForm.invalid) {
-      this.estadoForm.markAllAsTouched();
-      return;
-    }
-
-    const nuevoEstado = this.estadoForm.value.estado!;
-    
-    this.ticketsService.updateTicketEstado(this.ticket.id, nuevoEstado)
-      .pipe(finalize(() => {}))
-      .subscribe({
-        next: (ticketActualizado) => {
-          console.log('✅ Estado actualizado:', ticketActualizado);
-          this.ticket.estado = nuevoEstado as any;
-          this.loadHistorial();
-        },
-        error: (err) => {
-          console.error('❌ Error al actualizar estado:', err);
-          alert('Error al actualizar el estado del ticket');
-        },
-      });
-  }
-
-  saveAsignacion(): void {
-    if (this.asignForm.invalid) {
-      this.asignForm.markAllAsTouched();
-      return;
-    }
-
-    const payload = this.asignForm.getRawValue();
-    
-    this.ticketsService.updateTicketAsignacion(this.ticket.id, payload)
-      .pipe(finalize(() => {}))
-      .subscribe({
-        next: (ticketActualizado) => {
-          console.log('✅ Asignación actualizada:', ticketActualizado);
-          this.ticket.asignadoANombre = payload.asignadoANombre;
-          this.ticket.asignadoRol = payload.asignadoRol;
-          this.ticket.proveedorId = payload.proveedorId;
-          this.loadHistorial();
-        },
-        error: (err) => {
-          console.error('❌ Error al actualizar asignación:', err);
-          alert('Error al actualizar la asignación');
-        },
-      });
-  }
-
-  saveComentario(): void {
-    if (this.comentarioForm.invalid) {
-      this.comentarioForm.markAllAsTouched();
-      return;
-    }
-
-    const payload = this.comentarioForm.getRawValue();
-    const currentUser = this.authService.getCurrentUser();
-    const authorId = currentUser?.id || 1;
-    
-    this.ticketsService
-      .addComentario({
-        ticketId: this.ticket.id,
-        authorId: authorId,
-        message: payload.mensaje!,
-        isInternal: !!payload.interno,
-      })
-      .pipe(finalize(() => {}))
-      .subscribe({
-        next: () => {
-          console.log('✅ Comentario agregado');
-          this.comentarioForm.reset();
-          this.loadHistorial();
-        },
-        error: (err) => {
-          console.error('❌ Error al agregar comentario:', err);
-          alert('Error al agregar el comentario');
-        },
-      });
-  }
-
-  saveCostos(): void {
-    if (this.costoForm.invalid) {
-      this.costoForm.markAllAsTouched();
-      return;
-    }
-
-    const payload = {
-      estimacionCosto: this.costoForm.value.estimado,
-      costoFinal: this.costoForm.value.final
-    };
-    
-    this.ticketsService.updateTicketCostos(this.ticket.id, payload)
-      .pipe(finalize(() => {}))
-      .subscribe({
-        next: (ticketActualizado) => {
-          console.log('✅ Costos actualizados:', ticketActualizado);
-          this.ticket.estimacionCosto = payload.estimacionCosto;
-          this.ticket.costoFinal = payload.costoFinal;
-          this.loadHistorial();
-        },
-        error: (err) => {
-          console.error('❌ Error al actualizar costos:', err);
-          alert('Error al actualizar los costos');
-        },
-      });
-  }
-
-  onFileSelect(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    
-    if (!file) return;
-
-    this.ticketsService.uploadAdjunto(this.ticket.id, file)
-      .pipe(finalize(() => {}))
-      .subscribe({
-        next: () => {
-          console.log('✅ Archivo subido');
-          this.loadHistorial();
-          input.value = '';
-        },
-        error: (err) => {
-          console.error('❌ Error al subir archivo:', err);
-          alert('Error al subir el archivo');
-        },
-      });
+    }).format(d);
   }
 }
