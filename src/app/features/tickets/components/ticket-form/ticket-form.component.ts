@@ -1,168 +1,141 @@
+import { Component, Inject, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { finalize } from 'rxjs';
-import { TicketsService, TicketConsorcioOption, TicketUnidadOption } from '../../services/tickets.service';
-import { TicketPriority, TicketType } from '../../models/ticket.model';
-import { AuthService } from '../../../../auth/auth.service';
-
-export interface TicketFormData {
-  consorcioId?: number;
-  consorcioNombre?: string;
-  unidadId?: number;
-  unidadNombre?: string;
-}
+import { FormsModule, NgForm } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { TicketsService } from '../../services/tickets.service';
+import { ConsorciosService } from '../../../consorcios/services/consorcios.service';
+import { UnidadesService } from '../../../unidades/services/unidades.service';
 
 @Component({
   selector: 'app-ticket-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './ticket-form.component.html',
   styleUrls: ['./ticket-form.component.scss']
 })
 export class TicketFormComponent implements OnInit {
-  form: FormGroup;
-  isSubmitting = false;
-  errorMessage: string | null = null;
+  @Output() saved = new EventEmitter<any>();
 
-  consorcios: TicketConsorcioOption[] = [];
-  unidades: TicketUnidadOption[] = [];
-  prioridades: TicketPriority[] = [];
-  tipos: TicketType[] = [];
+  loading = false;
+  error: string | null = null;
+  successMessage: string | null = null;
 
-  consorcioNombre: string | null = null;
-  unidadNombre: string | null = null;
+  consorcios: any[] = [];
+  unidades: any[] = [];
+  createdTicket: any = null;
+
+  ticket: any = {
+    consorcio_id: 0,
+    unidad_id: 0,
+    tipo: '',
+    prioridad: '',
+    titulo: '',
+    descripcion: '',
+    creado_por: 0
+  };
+
+  tiposDisponibles = [
+    { value: 'mantenimiento', label: 'Mantenimiento' },
+    { value: 'limpieza', label: 'Limpieza' },
+    { value: 'seguridad', label: 'Seguridad' },
+    { value: 'otros', label: 'Otros' }
+  ];
+
+  prioridadesDisponibles = [
+    { value: 'baja', label: 'Baja' },
+    { value: 'media', label: 'Media' },
+    { value: 'alta', label: 'Alta' },
+    { value: 'critica', label: 'Crítica' }
+  ];
 
   constructor(
-    private fb: FormBuilder,
     private ticketsService: TicketsService,
-    private authService: AuthService,
+    private consorciosService: ConsorciosService,
+    private unidadesService: UnidadesService,
     private dialogRef: MatDialogRef<TicketFormComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: TicketFormData
-  ) {
-    this.form = this.fb.group({
-      consorcioId: [data.consorcioId ?? null, Validators.required],
-      unidadId: [data.unidadId ?? null],
-      tipo: ['mantenimiento', Validators.required],
-      prioridad: ['media', Validators.required],
-      titulo: ['', [Validators.required, Validators.minLength(5)]],
-      descripcion: ['', [Validators.required, Validators.minLength(10)]]
-    });
-
-    this.consorcioNombre = data.consorcioNombre || null;
-    this.unidadNombre = data.unidadNombre || null;
-  }
+    @Inject(MAT_DIALOG_DATA) public data: { userId?: number }
+  ) {}
 
   ngOnInit(): void {
-    this.prioridades = this.ticketsService.getPrioridades();
-    this.tipos = this.ticketsService.getTipos();
-
-    if (!this.data.consorcioId) {
-      this.loadConsorcios();
-    } else {
-      this.loadUnidades(this.data.consorcioId);
-    }
-
-    if (!this.data.unidadId && this.data.consorcioId) {
-      this.loadUnidades(this.data.consorcioId);
-    }
+    // creado_por obligatorio
+    this.ticket.creado_por = this.data?.userId || 1;
+    this.loadConsorcios();
   }
 
   private loadConsorcios(): void {
-    this.ticketsService.getConsorcios().subscribe({
-      next: consorcios => {
-        this.consorcios = consorcios;
-      },
-      error: err => {
-        console.error('Error al cargar consorcios:', err);
-        this.errorMessage = 'No se pudieron cargar los consorcios disponibles';
-      }
-    });
-  }
-
-  private loadUnidades(consorcioId: number): void {
-    this.ticketsService.getUnidades().subscribe({
-      next: unidades => {
-        this.unidades = unidades.filter(u => u.consorcioId === consorcioId);
-      },
-      error: err => {
-        console.error('Error al cargar unidades:', err);
-        this.errorMessage = 'No se pudieron cargar las unidades disponibles';
-      }
+    this.consorciosService.getConsorciosActivos({ limit: 100 }).subscribe({
+      next: (res: any) => (this.consorcios = res?.data || []),
+      error: () => (this.error = 'No se pudo cargar la lista de consorcios.')
     });
   }
 
   onConsorcioChange(): void {
-    const consorcioId = this.form.get('consorcioId')?.value;
-    if (consorcioId) {
-      this.form.patchValue({ unidadId: null });
-      this.loadUnidades(consorcioId);
-    } else {
+    const id = this.ticket.consorcio_id;
+    if (!id) {
       this.unidades = [];
+      this.ticket.unidad_id = 0;
+      return;
     }
+    this.unidadesService.getUnidades().subscribe({
+      next: (res: any) => {
+        const list = Array.isArray(res) ? res : res?.data || [];
+        this.unidades = list.filter((u: any) => u.consorcioId === id);
+      },
+      error: () => (this.error = 'No se pudieron cargar las unidades.')
+    });
   }
 
-  getTipoLabel(tipo: TicketType): string {
-    const labels: Record<TicketType, string> = {
-      mantenimiento: '🔧 Mantenimiento',
-      reclamo: '⚠️ Reclamo',
-      limpieza: '🧹 Limpieza',
-      administrativo: '📋 Administrativo',
-      mejora: '✨ Mejora',
-      otro: '📌 Otro'
-    };
-    return labels[tipo] || tipo;
-  }
-
-  getPrioridadLabel(prioridad: TicketPriority): string {
-    const labels: Record<TicketPriority, string> = {
-      baja: '🟢 Baja',
-      media: '🟡 Media',
-      alta: '🟠 Alta',
-      critica: '🔴 Crítica'
-    };
-    return labels[prioridad] || prioridad;
-  }
-
-  onSubmit(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+  onSubmit(form: NgForm): void {
+    if (form.invalid) {
+      this.error = 'Por favor, completá todos los campos obligatorios.';
+      return;
+    }
+    if (!this.ticket.consorcio_id) {
+      this.error = 'Debes seleccionar un consorcio.';
+      return;
+    }
+    if (!this.ticket.creado_por) {
+      this.error = 'Falta el ID del usuario creador.';
       return;
     }
 
-    this.isSubmitting = true;
-    this.errorMessage = null;
+    this.error = null;
+    this.loading = true;
 
-    const user = this.authService.getCurrentUser();
-    const userId = user?.id || 1;
-
-    const payload = {
-      consorcio_id: this.form.value.consorcioId,
-      unidad_id: this.form.value.unidadId,
-      tipo: this.form.value.tipo,
-      prioridad: this.form.value.prioridad,
-      titulo: this.form.value.titulo,
-      descripcion: this.form.value.descripcion,
-      creado_por: userId
+    const dto = {
+      consorcio_id: this.ticket.consorcio_id,
+      unidad_id: this.ticket.unidad_id || null,
+      tipo: this.ticket.tipo,
+      prioridad: this.ticket.prioridad,
+      titulo: this.ticket.titulo.trim(),
+      descripcion: this.ticket.descripcion.trim(),
+      creado_por: this.ticket.creado_por
     };
 
-    this.ticketsService
-      .createTicket(payload)
-      .pipe(finalize(() => (this.isSubmitting = false)))
-      .subscribe({
-        next: ticket => {
-          console.log('✅ Ticket creado:', ticket);
-          this.dialogRef.close(ticket);
-        },
-        error: err => {
-          console.error('❌ Error al crear ticket:', err);
-          this.errorMessage = err.error?.message || 'Ocurrió un error al crear el ticket. Por favor, intentá nuevamente.';
-        }
-      });
+    this.ticketsService.createTicket(dto).subscribe({
+      next: (response) => {
+        this.loading = false;
+        const tk = response?.data || response;
+        this.createdTicket = tk;
+        this.successMessage = `Ticket #${tk.id} creado correctamente.`;
+
+        // Autoabrir editor luego de 2s
+        setTimeout(() => this.openEdit(tk), 2000);
+      },
+      error: (err) => {
+        this.loading = false;
+        this.error = err?.error?.message || 'Error al crear el ticket.';
+      }
+    });
   }
 
-  onCancel(): void {
-    this.dialogRef.close();
+  // Abre editor en el padre y cierra el diálogo
+  openEdit(ticket: any): void {
+    this.saved.emit(ticket);
+    this.dialogRef.close(true);
+  }
+
+  onClose(): void {
+    this.dialogRef.close(false);
   }
 }

@@ -1,21 +1,16 @@
+// src/app/features/tickets/models/ticket.model.ts - REEMPLAZAR COMPLETO
+
 export type TicketPriority = 'baja' | 'media' | 'alta' | 'critica';
 export type TicketState = 'abierto' | 'en_proceso' | 'pendiente' | 'resuelto' | 'cerrado';
-
-export type TicketType =
-  | 'mantenimiento'
-  | 'reclamo'
-  | 'limpieza'
-  | 'administrativo'
-  | 'mejora'
-  | 'otro';
+export type TicketType = 'mantenimiento' | 'reclamo' | 'limpieza' | 'administrativo' | 'mejora' | 'otro';
 
 export interface TicketAttachment {
   id: number;
   fileName: string;
   fileType: string;
   uploadedAt: string;
-  uploadedBy: string;
-  url?: string;
+  uploadedBy: number;
+  url: string;
   size?: number;
 }
 
@@ -26,42 +21,34 @@ export interface TicketComment {
   authorName: string;
   message: string;
   createdAt: string;
-  isInternal?: boolean;
+  isInternal: boolean;
 }
 
 export interface TicketHistoryEntry {
   id: number;
   date: string;
-  userId: number;
+  userId: number | null;
   userName: string;
   action: 'creado' | 'actualizado' | 'estado' | 'asignado' | 'comentario' | 'adjunto' | 'costos';
   description: string;
   metadata?: Record<string, unknown>;
 }
 
-export interface TicketNotificationSettings {
-  notifyCreator: boolean;
-  notifyProvider: boolean;
-  notifyPropietario: boolean;
-  notifyInquilino: boolean;
-  notifyEncargado: boolean;
-}
-
 export interface Ticket {
   id: number;
   consorcioId: number;
   consorcioNombre: string;
-  unidadId: number;
-  unidadNombre: string;
+  unidadId: number | null;
+  unidadNombre: string | null;
   creadoPorId: number;
   creadoPorNombre: string;
-  creadorRol: 'admin_global' | 'tenant_admin' | 'admin_consorcio' | 'admin_edificio' | 'propietario' | 'inquilino';
-  asignadoAId?: number;
-  asignadoANombre?: string;
-  asignadoRol?: 'proveedor' | 'encargado' | 'admin_consorcio' | 'otro';
-  proveedorId?: number;
-  proveedorNombre?: string;
-  proveedorRubro?: string;
+  creadorRol: string;
+  asignadoAId?: number | null;
+  asignadoANombre?: string | null;
+  asignadoRol?: string | null;
+  proveedorId?: number | null;
+  proveedorNombre?: string | null;
+  proveedorRubro?: string | null;
   tipo: TicketType;
   titulo: string;
   descripcion: string;
@@ -69,15 +56,14 @@ export interface Ticket {
   estado: TicketState;
   fechaCreacion: string;
   fechaActualizacion: string;
-  fechaResolucion?: string;
-  fechaCierre?: string;
-  estimacionCosto?: number;
-  costoFinal?: number;
+  fechaResolucion?: string | null;
+  fechaCierre?: string | null;
+  estimacionCosto?: number | null;
+  costoFinal?: number | null;
   comentarios: TicketComment[];
   historial: TicketHistoryEntry[];
   adjuntos: TicketAttachment[];
-  notificaciones: TicketNotificationSettings;
-  updatedAt?: string; 
+  updatedAt: string;
 }
 
 export interface TicketFilters {
@@ -90,13 +76,4 @@ export interface TicketFilters {
   asignadoRol?: string;
   proveedorId?: number;
   searchTerm?: string;
-}
-
-export interface TicketMetricSummary {
-  estado: TicketState;
-  label: string;
-  count: number;
-  icon: string;
-  trend?: 'up' | 'down' | 'stable';
-  variation?: number;
 }

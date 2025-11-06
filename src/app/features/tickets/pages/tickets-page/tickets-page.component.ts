@@ -7,6 +7,7 @@ import { TicketsService } from '../../services/tickets.service';
 import { Ticket, TicketFilters } from '../../models/ticket.model';
 import { TicketFormComponent } from '../../components/ticket-form/ticket-form.component';
 import { TicketEditDialogComponent } from '../../components/ticket-edit-dialog/ticket-edit-dialog.component';
+import { AuthService } from '../../../../auth/auth.service'; // ✅ agregado
 
 @Component({
   selector: 'app-tickets-page',
@@ -19,6 +20,7 @@ export class TicketsPageComponent implements OnInit {
   private fb = inject(FormBuilder);
   private dialog = inject(MatDialog);
   private ticketsService = inject(TicketsService);
+  private authService = inject(AuthService); // ✅ agregado correctamente
 
   activeView: 'list' | 'cards' = 'cards';
   showFilters = true;
@@ -80,31 +82,43 @@ export class TicketsPageComponent implements OnInit {
     this.activeView = view;
   }
 
-  openCreateDialog(): void {
-    const dialogRef = this.dialog.open(TicketFormComponent, {
-      width: '700px',
-      maxHeight: '90vh',
-      panelClass: 'custom-dialog-container',
+  // === Abrir modal de creación ===
+openCreateDialog(): void {
+  const currentUser = this.authService.getCurrentUser();
+  const userId = currentUser?.id || 1;
+
+const dialogRef = this.dialog.open(TicketFormComponent, {
+  width: '95vw',
+  maxWidth: '1200px',
+  height: '90vh',
+  panelClass: 'dialog-fullscreen',
+  data: { userId },
+});
+
+  dialogRef.componentInstance.saved.subscribe((ticket) => {
+    // 🔹 Ahora abrimos el editor automáticamente con el ticket emitido
+    this.openEditDialog(ticket);
+  });
+
+  dialogRef.afterClosed().subscribe(() => {
+    this.loadTickets();
+  });
+}
+
+  // === Abrir modal de edición ===
+  openEditDialog(ticket: Ticket): void {
+    const dialogRef = this.dialog.open(TicketEditDialogComponent, {
+      width: '95vw',
+      height: '90vh',
+      maxWidth: 'none',
+      panelClass: 'dialog-fullscreen',
+      data: { ticket },
     });
+
     dialogRef.afterClosed().subscribe((result) => {
       if (result) this.loadTickets();
     });
   }
-
-openEditDialog(ticket: Ticket): void {
-  const dialogRef = this.dialog.open(TicketEditDialogComponent, {
-    width: '95vw',
-    height: '90vh',
-    maxWidth: 'none',
-    panelClass: 'dialog-fullscreen',
-    data: { ticket },
-  });
-
-  dialogRef.afterClosed().subscribe((result) => {
-    if (result) this.loadTickets();
-  });
-}
-
 
   formatDate(value?: string): string {
     if (!value) return '';
