@@ -26,7 +26,7 @@ interface ResumenGeneral {
 
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
-   private apiUrl = environment.apiUrl;
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
