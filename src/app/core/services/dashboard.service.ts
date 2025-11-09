@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 interface Consorcio {
   id: number;
@@ -25,7 +26,7 @@ interface ResumenGeneral {
 
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
-  private apiUrl = 'http://localhost:7000'; // ⚙️ Cambiar por enviroment.prod.apiUrl
+   private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
