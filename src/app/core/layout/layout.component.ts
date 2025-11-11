@@ -67,7 +67,17 @@ export class LayoutComponent implements OnInit {
     const apellido = this.currentUser.apellido || '';
     return `${nombre} ${apellido}`.trim() || 'Usuario';
   }
+  
+configMenuOpen = false;
 
+toggleConfigMenu(): void {
+  this.configMenuOpen = !this.configMenuOpen;
+}
+
+navigateTo(route: string): void {
+  this.router.navigate([route]);
+  this.closeUserMenu();
+}
   // Obtener rol formateado
   getRoleDisplay(): string {
     if (!this.currentUser?.rol) return 'Usuario';

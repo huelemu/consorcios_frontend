@@ -20,6 +20,7 @@ import { TicketsPageComponent } from './features/tickets/pages/tickets-page/tick
 import { ProveedoresPageComponent } from './features/proveedores/pages/proveedores-page/proveedores-page.component';
 import { ProveedorDetalleComponent } from './features/proveedores/pages/proveedor-detalle/proveedor-detalle.component';
 import { ConsorciosUploadComponent } from './features/consorcios/components/consorcios-upload/consorcios-upload.component';
+import { UnidadesBulkPageComponent } from './features/unidades/pages/unidades-bulk-page/unidades-bulk-page.component';
 
 
 export const appRoutes: Routes = [
@@ -131,6 +132,13 @@ export const appRoutes: Routes = [
           title: 'Nueva Unidad Funcional'
         }
       },
+            {
+        path: 'unidades/bulk-create',
+        component: UnidadesBulkPageComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['admin_global', 'tenant_admin', 'admin_consorcio'] }
+      },
+      
       { 
         path: 'unidades/:id/editar', 
         component: UnidadFormComponent, 
@@ -158,6 +166,8 @@ export const appRoutes: Routes = [
           title: 'Unidades Funcionales'
         }
       },
+
+
 
       // ========================================
       // TICKETS

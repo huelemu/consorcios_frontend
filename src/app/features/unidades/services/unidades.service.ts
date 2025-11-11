@@ -72,4 +72,20 @@ export class UnidadesService {
   getUnidadesByConsorcio(consorcioId: number): Observable<UnidadFuncional[]> {
     return this.http.get<UnidadFuncional[]>(`${this.apiUrl}/consorcio/${consorcioId}`);
   }
+
+  /**
+   * ⭐ NUEVA: Creación masiva de unidades
+   */
+  bulkCreate(data: {
+    consorcio_id: number;
+    cantidad: number;
+    prefijo: string;
+    tipo: string;
+    estado: string;
+  }): Observable<{ success: boolean; creadas: number }> {
+    return this.http.post<{ success: boolean; creadas: number }>(
+      `${this.apiUrl}/bulk-create`,
+      data
+    );
+  }
 }

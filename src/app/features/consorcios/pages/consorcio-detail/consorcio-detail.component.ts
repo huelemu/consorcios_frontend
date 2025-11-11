@@ -1,367 +1,262 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { ConsorciosService } from '../../services/consorcios.service';
 import { AuthService } from '../../../../auth/auth.service';
-import { ModalService } from '../../../../core/services/modal.service';
-import { TicketFormDialogComponent } from '../../../tickets/components/ticket-form-dialog/ticket-form-dialog.component';
-import { ToastrService } from 'ngx-toastr';
-import { MatDialog } from '@angular/material/dialog';
-import { TicketFormComponent } from '../../../tickets/components/ticket-form/ticket-form.component';
-
-
-import {
+import { 
   Consorcio,
   ESTADO_LABELS,
   ESTADO_COLORS,
-  ESTADO_ICONS,
-  getDireccionCompleta,
-  getNombreResponsable
+  ESTADO_ICONS
 } from '../../models/consorcio.model';
+import { 
+  ESTADO_UNIDAD_LABELS,
+  ESTADO_UNIDAD_COLORS 
+} from '../../../unidades/models/unidad.model';
+import { TicketFormComponent } from '../../../tickets/components/ticket-form/ticket-form.component';
+import { UnidadesBulkCreateComponent } from '../../../unidades/components/unidades-bulk-create/unidades-bulk-create.component';
+import Swal from 'sweetalert2';
 
-/**
- * =========================================
- * CONSORCIO DETAIL COMPONENT
- * =========================================
- * Vista detallada de un consorcio específico
- */
 @Component({
   selector: 'app-consorcio-detail',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    UnidadesBulkCreateComponent
+  ],
   templateUrl: './consorcio-detail.component.html',
   styleUrls: ['./consorcio-detail.component.scss']
 })
 export class ConsorcioDetailComponent implements OnInit {
+  consorcioId!: number;
   consorcio: Consorcio | null = null;
-  loading: boolean = false;
-  error: string = '';
-  consorcioId: number | null = null;
+  loading = true;
+  error: string | null = null;
+  
+  mostrarBulkCreate = false;
+  showDeleteModal = false;
 
   // Permisos
-  canEdit: boolean = false;
-  canDelete: boolean = false;
+  canEdit = false;
+  canDelete = false;
 
-  // Constantes para el template
+  // Constantes para template
   readonly ESTADO_LABELS = ESTADO_LABELS;
   readonly ESTADO_COLORS = ESTADO_COLORS;
   readonly ESTADO_ICONS = ESTADO_ICONS;
 
-  // Modales
-  showDeleteModal: boolean = false;
-
   constructor(
+    private route: ActivatedRoute,
+    private router: Router,
     private consorciosService: ConsorciosService,
     private authService: AuthService,
-    private router: Router,
-    private route: ActivatedRoute,
-    private modalService: ModalService,
-     private toastr: ToastrService,
-      private dialog: MatDialog 
+    public dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
     this.checkPermissions();
-    this.getConsorcioIdFromRoute();
-    this.loadConsorcio();
+    this.route.params.subscribe(params => {
+      this.consorcioId = +params['id'];
+      if (this.consorcioId) {
+        this.loadConsorcio();
+      }
+    });
   }
 
-  /**
-   * Verificar permisos del usuario
-   */
   checkPermissions(): void {
-    this.canEdit = this.authService.hasAnyRole(['admin_global', 'tenant_admin', 'admin_consorcio']);
-    this.canDelete = this.authService.hasAnyRole(['admin_global', 'tenant_admin']);
+    this.canEdit = this.authService.hasAnyRole([
+      'admin_global', 
+      'tenant_admin', 
+      'admin_consorcio'
+    ]);
+
+    this.canDelete = this.authService.hasAnyRole([
+      'admin_global', 
+      'tenant_admin'
+    ]);
   }
 
-  /**
-   * Obtener ID del consorcio desde la ruta
-   */
-  getConsorcioIdFromRoute(): void {
-    const id = this.route.snapshot.params['id'];
-    if (id) {
-      this.consorcioId = parseInt(id);
-    } else {
-      this.error = 'ID de consorcio no válido';
-      this.router.navigate(['/consorcios']);
-    }
-  }
-
-  /**
-   * Cargar datos del consorcio
-   */
   loadConsorcio(): void {
-    if (!this.consorcioId) return;
-
     this.loading = true;
-    this.error = '';
+    this.error = null;
 
     this.consorciosService.getConsorcioById(this.consorcioId).subscribe({
       next: (data) => {
         this.consorcio = data;
         this.loading = false;
-        this.checkEditPermissions();
       },
-      error: (error) => {
-        console.error('Error al cargar consorcio:', error);
-        this.error = error.error?.message || 'Error al cargar el consorcio';
+      error: (err) => {
+        console.error('Error cargando consorcio:', err);
+        this.error = 'Error al cargar el consorcio';
         this.loading = false;
       }
     });
   }
 
-  /**
-   * Verificar permisos específicos para este consorcio
-   */
-  checkEditPermissions(): void {
-    if (!this.consorcio) return;
-
-    const user = this.authService.getCurrentUser();
-    if (!user) {
-      this.canEdit = false;
-      this.canDelete = false;
-      return;
-    }
-
-    // Admin global puede todo
-    if (user.rol === 'admin_global') {
-      this.canEdit = true;
-      this.canDelete = true;
-      return;
-    }
-
-    // Tenant admin solo sus consorcios
-    if (user.rol === 'tenant_admin') {
-      this.canEdit = this.consorcio.tenant_id === user.id;
-      this.canDelete = this.consorcio.tenant_id === user.id;
-      return;
-    }
-
-    // Admin consorcio solo si es responsable
-    if (user.rol === 'admin_consorcio') {
-      this.canEdit = this.consorcio.responsable_id === user.id;
-      this.canDelete = false;
-      return;
-    }
-
-    // Otros roles no pueden editar
-    this.canEdit = false;
-    this.canDelete = false;
-  }
-
-  /**
-   * Volver a la lista
-   */
   volver(): void {
     this.router.navigate(['/consorcios']);
   }
 
-  /**
-   * Ir a editar consorcio
-   */
   editarConsorcio(): void {
-    if (!this.consorcioId || !this.canEdit) return;
     this.router.navigate(['/consorcios', this.consorcioId, 'editar']);
   }
 
-  /**
-   * Abrir modal de confirmación para eliminar
-   */
-  confirmarEliminar(): void {
-    this.showDeleteModal = true;
+  verUnidad(unidadId: number): void {
+    this.router.navigate(['/unidades', unidadId]);
   }
 
-  /**
-   * Cancelar eliminación
-   */
-  cancelarEliminar(): void {
-    this.showDeleteModal = false;
-  }
-
-  /**
-   * Eliminar consorcio
-   */
-  eliminarConsorcio(): void {
-    if (!this.consorcioId) return;
-
-    this.loading = true;
-    this.consorciosService.deleteConsorcio(this.consorcioId).subscribe({
-      next: (response) => {
-        console.log('Consorcio eliminado:', response.message);
-        this.showDeleteModal = false;
-        // Redirigir a la lista después de eliminar
-        setTimeout(() => {
-          this.router.navigate(['/consorcios']);
-        }, 500);
-      },
-      error: (error) => {
-        console.error('Error al eliminar consorcio:', error);
-        this.error = error.error?.message || 'Error al eliminar el consorcio';
-        this.loading = false;
-        this.showDeleteModal = false;
-      }
-    });
-  }
-
-  /**
-   * Cambiar estado del consorcio (activar/desactivar)
-   */
-  toggleEstado(): void {
-    if (!this.consorcio || !this.consorcioId) return;
-
-    const action = this.consorcio.estado === 'activo' 
-      ? this.consorciosService.desactivarConsorcio(this.consorcioId)
-      : this.consorciosService.activarConsorcio(this.consorcioId);
-
-    action.subscribe({
-      next: (response) => {
-        console.log('Estado actualizado:', response.message);
-        this.loadConsorcio(); // Recargar datos
-      },
-      error: (error) => {
-        console.error('Error al cambiar estado:', error);
-        this.error = error.error?.message || 'Error al cambiar el estado';
-      }
-    });
-  }
-
-  /**
-   * Obtener dirección completa formateada
-   */
   getDireccion(): string {
     if (!this.consorcio) return '';
-    return getDireccionCompleta(this.consorcio);
+    const partes = [this.consorcio.direccion, this.consorcio.ciudad, this.consorcio.provincia]
+      .filter(Boolean);
+    return partes.join(', ');
   }
 
-  /**
-   * Obtener nombre del responsable
-   */
-  getResponsable(): string {
-    if (!this.consorcio) return '';
-    return getNombreResponsable(this.consorcio);
-  }
-
-  /**
-   * Obtener email del responsable
-   */
-  getResponsableEmail(): string {
-    if (!this.consorcio?.responsable) return 'Sin email';
-    return this.consorcio.responsable.email || 'Sin email';
-  }
-
-  /**
-   * Obtener teléfono del responsable
-   */
-  getResponsableTelefono(): string {
-    if (!this.consorcio?.responsable?.persona) return 'Sin teléfono';
-    return this.consorcio.responsable.persona.telefono || 'Sin teléfono';
-  }
-
-  /**
-   * Obtener porcentaje de ocupación
-   */
   getPorcentajeOcupacion(): number {
     if (!this.consorcio?.stats) return 0;
-    const { totalUnidades, unidadesOcupadas } = this.consorcio.stats;
-    if (totalUnidades === 0) return 0;
-    return Math.round((unidadesOcupadas / totalUnidades) * 100);
+    const total = this.consorcio.stats.totalUnidades;
+    const ocupadas = this.consorcio.stats.unidadesOcupadas;
+    return total > 0 ? Math.round((ocupadas / total) * 100) : 0;
   }
 
-  /**
-   * Obtener clase CSS para el badge de estado de unidad
-   */
-  getUnidadEstadoClass(estado: string): string {
-    const classes: Record<string, string> = {
-      'ocupado': 'bg-green-100 text-green-800 border-green-200',
-      'vacante': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      'mantenimiento': 'bg-orange-100 text-orange-800 border-orange-200'
-    };
-    return classes[estado] || 'bg-gray-100 text-gray-800 border-gray-200';
-  }
-
-  /**
-   * Obtener label para el estado de unidad
-   */
-  getUnidadEstadoLabel(estado: string): string {
-    const labels: Record<string, string> = {
-      'ocupado': 'Ocupado',
-      'vacante': 'Vacante',
-      'mantenimiento': 'Mantenimiento'
-    };
-    return labels[estado] || estado;
-  }
-
-  /**
-   * Navegar a la gestión de unidades (próximo a implementar)
-   */
-  gestionarUnidades(): void {
-    // TODO: Implementar cuando esté el módulo de unidades
-    console.log('Gestionar unidades del consorcio:', this.consorcioId);
-    alert('Funcionalidad de gestión de unidades próximamente');
-  }
-
-  /**
-   * Verificar si hay datos de contacto
-   */
   hasDatosContacto(): boolean {
-    if (!this.consorcio) return false;
-    return !!(
-      this.consorcio.telefono_contacto || 
-      this.consorcio.email_contacto
-    );
+    return !!(this.consorcio?.telefono_contacto || this.consorcio?.email_contacto);
   }
 
-  /**
-   * Verificar si hay responsable asignado
-   */
+  hasContactInfo(): boolean {
+    return !!(this.consorcio?.telefono_contacto || this.consorcio?.email_contacto);
+  }
+
   hasResponsable(): boolean {
     return !!(this.consorcio?.responsable);
   }
 
-  /**
-   * Verificar si hay unidades
-   */
   hasUnidades(): boolean {
     return !!(this.consorcio?.unidades && this.consorcio.unidades.length > 0);
   }
 
-  /**
- * Abrir modal para crear una nueva unidad funcional
- */
-crearUnidad(): void {
-  console.log('Abrir modal para crear unidad del consorcio:', this.consorcioId);
-  // TODO: usar modalService cuando esté disponible
-  alert('Abrir modal para crear una nueva unidad funcional');
-}
-
-/**
- * Abrir modal para crear un nuevo ticket (contextual)
- * - Si se llama desde el consorcio → precarga consorcio_id y nombre
- * - Si se llama desde una unidad funcional → también precarga unidad_funcional_id
- */
-crearTicket(): void {
-  if (!this.consorcio) {
-    console.error('No hay consorcio cargado');
-    return;
+  getResponsable(): string {
+    if (!this.consorcio?.responsable?.persona) return 'Sin asignar';
+    const p = this.consorcio.responsable.persona;
+    return `${p.nombre} ${p.apellido}`;
   }
-  
-  const dialogRef = this.dialog.open(TicketFormComponent, {
-    width: '900px',
-    maxHeight: '90vh',
-    disableClose: false,
-    data: {
-      consorcioId: this.consorcio.id,
-      consorcioNombre: this.consorcio.nombre,
-      unidadId: null,
-      unidadNombre: null
-    }
-  });
 
-  dialogRef.afterClosed().subscribe((ticket) => {
-    if (ticket) {
-      console.log('✅ Ticket creado:', ticket);
+  getResponsableEmail(): string {
+    return this.consorcio?.responsable?.email || '';
+  }
+
+  getResponsableTelefono(): string {
+    return this.consorcio?.responsable?.persona?.telefono || '';
+  }
+
+  getUnidadEstadoClass(estado: string): string {
+    return ESTADO_UNIDAD_COLORS[estado as keyof typeof ESTADO_UNIDAD_COLORS] || '';
+  }
+
+  getUnidadEstadoLabel(estado: string): string {
+    return ESTADO_UNIDAD_LABELS[estado as keyof typeof ESTADO_UNIDAD_LABELS] || estado;
+  }
+
+  crearUnidad(): void {
+    this.router.navigate(['/unidades/nuevo'], {
+      queryParams: { consorcio_id: this.consorcioId }
+    });
+  }
+
+  gestionarUnidades(): void {
+    this.router.navigate(['/unidades'], {
+      queryParams: { consorcio_id: this.consorcioId }
+    });
+  }
+
+  abrirCreacionMasiva(): void {
+    this.mostrarBulkCreate = true;
+  }
+
+  cerrarBulkCreate(recarga: boolean): void {
+    this.mostrarBulkCreate = false;
+    if (recarga) {
       this.loadConsorcio();
     }
-  });
-}
+  }
+
+  toggleEstado(): void {
+    if (!this.consorcio) return;
+    
+    const nuevoEstado = this.consorcio.estado === 'activo' ? 'inactivo' : 'activo';
+    
+    Swal.fire({
+      title: '¿Cambiar estado?',
+      text: `El consorcio pasará a estado ${nuevoEstado}`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, cambiar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed && this.consorcio) {
+        this.consorciosService.updateConsorcio(this.consorcio.id, { estado: nuevoEstado }).subscribe({
+          next: () => {
+            Swal.fire('Éxito', 'Estado actualizado', 'success');
+            this.loadConsorcio();
+          },
+          error: (err) => {
+            console.error('Error:', err);
+            Swal.fire('Error', 'No se pudo actualizar el estado', 'error');
+          }
+        });
+      }
+    });
+  }
+
+  confirmarEliminar(): void {
+    this.showDeleteModal = true;
+  }
+
+  cancelarEliminar(): void {
+    this.showDeleteModal = false;
+  }
+
+  eliminarConsorcio(): void {
+    if (!this.consorcio) return;
+
+    this.consorciosService.deleteConsorcio(this.consorcio.id).subscribe({
+      next: () => {
+        Swal.fire('Eliminado', 'Consorcio eliminado correctamente', 'success');
+        this.router.navigate(['/consorcios']);
+      },
+      error: (err) => {
+        console.error('Error:', err);
+        Swal.fire('Error', 'No se pudo eliminar el consorcio', 'error');
+        this.showDeleteModal = false;
+      }
+    });
+  }
+
+  crearTicket(): void {
+    if (!this.consorcio) {
+      console.error('No hay consorcio cargado');
+      return;
+    }
+    
+    const dialogRef = this.dialog.open(TicketFormComponent, {
+      width: '900px',
+      maxHeight: '90vh',
+      disableClose: false,
+      data: {
+        consorcioId: this.consorcio.id,
+        consorcioNombre: this.consorcio.nombre,
+        unidadId: null,
+        unidadNombre: null
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((ticket) => {
+      if (ticket) {
+        console.log('✅ Ticket creado:', ticket);
+        this.loadConsorcio();
+      }
+    });
+  }
 }
