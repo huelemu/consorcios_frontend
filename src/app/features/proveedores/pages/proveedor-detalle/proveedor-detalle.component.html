@@ -125,8 +125,107 @@
         </div>
       </div>
 
-      <!-- Grid de Información y Consorcios -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Tabs Navigation -->
+      <div class="bg-white rounded-lg shadow mb-6">
+        <div class="border-b border-gray-200">
+          <nav class="flex -mb-px">
+            <button
+              (click)="setActiveTab('informacion')"
+              [class.border-blue-600]="activeTab === 'informacion'"
+              [class.text-blue-600]="activeTab === 'informacion'"
+              [class.border-transparent]="activeTab !== 'informacion'"
+              [class.text-gray-500]="activeTab !== 'informacion'"
+              [class.hover:text-gray-700]="activeTab !== 'informacion'"
+              [class.hover:border-gray-300]="activeTab !== 'informacion'"
+              class="px-6 py-4 border-b-2 font-medium text-sm transition-colors"
+            >
+              <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M12 16v-4"></path>
+                  <path d="M12 8h.01"></path>
+                </svg>
+                Información
+              </div>
+            </button>
+            <button
+              (click)="setActiveTab('personas')"
+              [class.border-blue-600]="activeTab === 'personas'"
+              [class.text-blue-600]="activeTab === 'personas'"
+              [class.border-transparent]="activeTab !== 'personas'"
+              [class.text-gray-500]="activeTab !== 'personas'"
+              [class.hover:text-gray-700]="activeTab !== 'personas'"
+              [class.hover:border-gray-300]="activeTab !== 'personas'"
+              class="px-6 py-4 border-b-2 font-medium text-sm transition-colors"
+            >
+              <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                Personas Vinculadas
+                <span *ngIf="proveedor.personas && proveedor.personas.length > 0" class="ml-1 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">
+                  {{ proveedor.personas.length }}
+                </span>
+              </div>
+            </button>
+            <button
+              (click)="setActiveTab('cuentas')"
+              [class.border-blue-600]="activeTab === 'cuentas'"
+              [class.text-blue-600]="activeTab === 'cuentas'"
+              [class.border-transparent]="activeTab !== 'cuentas'"
+              [class.text-gray-500]="activeTab !== 'cuentas'"
+              [class.hover:text-gray-700]="activeTab !== 'cuentas'"
+              [class.hover:border-gray-300]="activeTab !== 'cuentas'"
+              class="px-6 py-4 border-b-2 font-medium text-sm transition-colors"
+            >
+              <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect width="20" height="14" x="2" y="5" rx="2"></rect>
+                  <path d="M2 10h20"></path>
+                </svg>
+                Cuentas Bancarias
+                <span *ngIf="proveedor.cuentas_bancarias && proveedor.cuentas_bancarias.length > 0" class="ml-1 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">
+                  {{ proveedor.cuentas_bancarias.length }}
+                </span>
+              </div>
+            </button>
+          </nav>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="p-6">
+          <!-- Tab: Información -->
+          <div *ngIf="activeTab === 'informacion'">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <!-- Content moved from below -->
+            </div>
+          </div>
+
+          <!-- Tab: Personas -->
+          <div *ngIf="activeTab === 'personas'">
+            <app-proveedor-personas-section
+              [proveedorId]="proveedor.id"
+              [personas]="proveedor.personas || []"
+              (personasChanged)="onPersonasChanged()"
+            ></app-proveedor-personas-section>
+          </div>
+
+          <!-- Tab: Cuentas -->
+          <div *ngIf="activeTab === 'cuentas'">
+            <app-proveedor-cuentas-section
+              [proveedorId]="proveedor.id"
+              [cuentas]="proveedor.cuentas_bancarias || []"
+              (cuentasChanged)="onCuentasChanged()"
+            ></app-proveedor-cuentas-section>
+          </div>
+        </div>
+      </div>
+
+      <!-- Original Grid (now only shown in informacion tab) -->
+      <div *ngIf="activeTab === 'informacion'" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Información del Proveedor -->
         <div class="bg-white rounded-lg shadow">
           <div class="px-6 py-4 border-b border-gray-200">

@@ -3,11 +3,18 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ProveedoresService } from '../../services/proveedores.service';
 import { Proveedor, formatCUIT, ESTADO_PROVEEDOR_COLORS, ESTADO_PROVEEDOR_ICONS } from '../../models/proveedor.model';
+import { ProveedorPersonasSectionComponent } from '../../components/proveedor-personas-section/proveedor-personas-section.component';
+import { ProveedorCuentasSectionComponent } from '../../components/proveedor-cuentas-section/proveedor-cuentas-section.component';
 
 @Component({
   selector: 'app-proveedor-detalle',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    ProveedorPersonasSectionComponent,
+    ProveedorCuentasSectionComponent
+  ],
   templateUrl: './proveedor-detalle.component.html',
   styleUrls: ['./proveedor-detalle.component.scss']
 })
@@ -16,6 +23,9 @@ export class ProveedorDetalleComponent implements OnInit {
   tickets: any[] = [];
   loading = false;
   error: string | null = null;
+
+  // Tabs
+  activeTab: 'informacion' | 'personas' | 'cuentas' = 'informacion';
 
   constructor(
     private route: ActivatedRoute,
@@ -106,12 +116,31 @@ export class ProveedorDetalleComponent implements OnInit {
 
   getTicketsColor(tipo: 'pendientes' | 'resueltos'): string {
     if (!this.proveedor) return 'text-gray-600';
-    
+
     if (tipo === 'resueltos') return 'text-green-600';
-    
+
     const pendientes = this.proveedor.tickets_pendientes || 0;
     if (pendientes === 0) return 'text-green-600';
     if (pendientes <= 3) return 'text-yellow-600';
     return 'text-red-600';
+  }
+
+  // Tab methods
+  setActiveTab(tab: 'informacion' | 'personas' | 'cuentas'): void {
+    this.activeTab = tab;
+  }
+
+  onPersonasChanged(): void {
+    // Reload proveedor to get updated data
+    if (this.proveedor) {
+      this.loadProveedor(this.proveedor.id);
+    }
+  }
+
+  onCuentasChanged(): void {
+    // Reload proveedor to get updated data
+    if (this.proveedor) {
+      this.loadProveedor(this.proveedor.id);
+    }
   }
 }
