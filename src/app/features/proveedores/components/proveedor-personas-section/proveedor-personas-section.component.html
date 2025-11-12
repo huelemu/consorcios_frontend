@@ -1,0 +1,355 @@
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-4">
+    <div class="flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+      </svg>
+      <h3 class="text-lg font-semibold text-gray-900">Personas Vinculadas</h3>
+      <span class="text-sm text-gray-500">({{ personas.length }})</span>
+    </div>
+    <button
+      (click)="openAddModal()"
+      class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 5v14m-7-7h14"></path>
+      </svg>
+      Agregar Persona
+    </button>
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="error" class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+    {{ error }}
+  </div>
+
+  <!-- Loading state -->
+  <div *ngIf="loading && personas.length === 0" class="flex justify-center py-8">
+    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="!loading && personas.length === 0" class="text-center py-12">
+    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-gray-400 mb-3">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+      <circle cx="9" cy="7" r="4"></circle>
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+    </svg>
+    <p class="text-gray-600">No hay personas vinculadas</p>
+    <p class="text-sm text-gray-500 mt-1">Agregue contactos con roles específicos</p>
+  </div>
+
+  <!-- Personas list -->
+  <div *ngIf="!loading && personas.length > 0" class="space-y-3">
+    <div
+      *ngFor="let persona of personas"
+      class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+    >
+      <!-- Left: Avatar + Info -->
+      <div class="flex items-center gap-3 flex-1">
+        <!-- Avatar -->
+        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+          {{ getInitials(persona) }}
+        </div>
+
+        <!-- Info -->
+        <div class="flex-1">
+          <div class="flex items-center gap-2">
+            <h4 class="font-semibold text-gray-900">{{ getPersonaNombre(persona) }}</h4>
+            <span
+              *ngIf="persona.es_principal"
+              class="px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full border border-yellow-200"
+            >
+              ⭐ Principal
+            </span>
+          </div>
+
+          <div class="flex items-center gap-3 mt-1 text-sm text-gray-600">
+            <span class="px-2 py-1 rounded-md border {{ getRolColor(persona.rol) }} text-xs font-medium">
+              {{ getRolLabel(persona.rol) }}
+            </span>
+            <span>Desde: {{ formatDate(persona.desde) }}</span>
+            <span *ngIf="persona.hasta">Hasta: {{ formatDate(persona.hasta) }}</span>
+          </div>
+
+          <div *ngIf="persona.persona" class="mt-1 text-sm text-gray-500 flex items-center gap-3">
+            <span *ngIf="persona.persona.email">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline mr-1">
+                <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+              </svg>
+              {{ persona.persona.email }}
+            </span>
+            <span *ngIf="persona.persona.telefono">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline mr-1">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+              </svg>
+              {{ persona.persona.telefono }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Actions -->
+      <div class="flex items-center gap-2">
+        <button
+          *ngIf="!persona.es_principal"
+          (click)="onTogglePrincipal(persona)"
+          class="p-2 text-gray-600 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
+          title="Marcar como principal"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+        </button>
+        <button
+          (click)="openEditModal(persona)"
+          class="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+          title="Editar"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+          </svg>
+        </button>
+        <button
+          (click)="onDelete(persona)"
+          class="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+          title="Desvincular"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18"></path>
+            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Modal -->
+<div
+  *ngIf="showAddModal"
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+  (click)="closeAddModal()"
+>
+  <div
+    class="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Modal Header -->
+    <div class="flex justify-between items-center p-6 border-b border-gray-200">
+      <h3 class="text-lg font-semibold text-gray-900">Vincular Persona</h3>
+      <button (click)="closeAddModal()" class="text-gray-400 hover:text-gray-600">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 6 6 18M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <form (ngSubmit)="onSubmitAdd()" class="p-6 space-y-4">
+      <!-- Persona Select (TODO: implement persona selector) -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Persona *</label>
+        <input
+          type="number"
+          [(ngModel)]="formData.persona_id"
+          name="persona_id"
+          required
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="ID de persona (temporal)"
+        />
+        <p class="mt-1 text-xs text-gray-500">Por ahora ingrese el ID de la persona. Selector próximamente.</p>
+      </div>
+
+      <!-- Rol -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Rol *</label>
+        <select
+          [(ngModel)]="formData.rol"
+          name="rol"
+          required
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        >
+          <option *ngFor="let rol of rolesDisponibles" [value]="rol">
+            {{ getRolLabel(rol) }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Desde -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Desde *</label>
+        <input
+          type="date"
+          [(ngModel)]="formData.desde"
+          name="desde"
+          required
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+      </div>
+
+      <!-- Hasta -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Hasta (opcional)</label>
+        <input
+          type="date"
+          [(ngModel)]="formData.hasta"
+          name="hasta"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+      </div>
+
+      <!-- Es Principal -->
+      <div class="flex items-center gap-2">
+        <input
+          type="checkbox"
+          [(ngModel)]="formData.es_principal"
+          name="es_principal"
+          id="es_principal_add"
+          class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+        />
+        <label for="es_principal_add" class="text-sm text-gray-700">Marcar como contacto principal</label>
+      </div>
+
+      <!-- Error -->
+      <div *ngIf="error" class="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+        {{ error }}
+      </div>
+
+      <!-- Actions -->
+      <div class="flex gap-3 pt-4">
+        <button
+          type="button"
+          (click)="closeAddModal()"
+          class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          [disabled]="loading"
+          class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {{ loading ? 'Guardando...' : 'Vincular' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div
+  *ngIf="showEditModal && selectedPersona"
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+  (click)="closeEditModal()"
+>
+  <div
+    class="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Modal Header -->
+    <div class="flex justify-between items-center p-6 border-b border-gray-200">
+      <h3 class="text-lg font-semibold text-gray-900">Editar Vinculación</h3>
+      <button (click)="closeEditModal()" class="text-gray-400 hover:text-gray-600">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 6 6 18M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <form (ngSubmit)="onSubmitEdit()" class="p-6 space-y-4">
+      <!-- Persona (read-only) -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Persona</label>
+        <input
+          type="text"
+          [value]="getPersonaNombre(selectedPersona)"
+          readonly
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
+        />
+      </div>
+
+      <!-- Rol -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Rol *</label>
+        <select
+          [(ngModel)]="formData.rol"
+          name="rol"
+          required
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        >
+          <option *ngFor="let rol of rolesDisponibles" [value]="rol">
+            {{ getRolLabel(rol) }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Desde -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Desde *</label>
+        <input
+          type="date"
+          [(ngModel)]="formData.desde"
+          name="desde"
+          required
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+      </div>
+
+      <!-- Hasta -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Hasta (opcional)</label>
+        <input
+          type="date"
+          [(ngModel)]="formData.hasta"
+          name="hasta"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+      </div>
+
+      <!-- Es Principal -->
+      <div class="flex items-center gap-2">
+        <input
+          type="checkbox"
+          [(ngModel)]="formData.es_principal"
+          name="es_principal"
+          id="es_principal_edit"
+          class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+        />
+        <label for="es_principal_edit" class="text-sm text-gray-700">Marcar como contacto principal</label>
+      </div>
+
+      <!-- Error -->
+      <div *ngIf="error" class="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+        {{ error }}
+      </div>
+
+      <!-- Actions -->
+      <div class="flex gap-3 pt-4">
+        <button
+          type="button"
+          (click)="closeEditModal()"
+          class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          [disabled]="loading"
+          class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {{ loading ? 'Guardando...' : 'Guardar' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

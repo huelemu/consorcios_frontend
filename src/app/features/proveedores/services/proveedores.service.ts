@@ -9,7 +9,13 @@ import {
   CreateProveedorDto,
   UpdateProveedorDto,
   ProveedorFilters,
-  AsignarConsorcioDto
+  AsignarConsorcioDto,
+  ProveedorPersona,
+  CreateProveedorPersonaDto,
+  UpdateProveedorPersonaDto,
+  ProveedorCuentaBancaria,
+  CreateProveedorCuentaBancariaDto,
+  UpdateProveedorCuentaBancariaDto
 } from '../models/proveedor.model';
 
 @Injectable({
@@ -94,5 +100,121 @@ export class ProveedoresService {
 
   toggleEstado(id: number): Observable<Proveedor> {
     return this.http.patch<Proveedor>(`${this.apiUrl}/${id}/toggle-estado`, {});
+  }
+
+  // ========================================
+  // Métodos para Personas Vinculadas
+  // ========================================
+
+  /**
+   * Obtener todas las personas vinculadas a un proveedor
+   */
+  getPersonasVinculadas(proveedorId: number): Observable<ProveedorPersona[]> {
+    return this.http.get<ProveedorPersona[]>(`${this.apiUrl}/${proveedorId}/personas`);
+  }
+
+  /**
+   * Vincular una persona a un proveedor con un rol
+   */
+  vincularPersona(data: CreateProveedorPersonaDto): Observable<ProveedorPersona> {
+    return this.http.post<ProveedorPersona>(
+      `${this.apiUrl}/${data.proveedor_id}/personas`,
+      data
+    );
+  }
+
+  /**
+   * Actualizar la vinculación de una persona (cambiar rol, fechas, etc.)
+   */
+  updatePersonaVinculada(
+    proveedorId: number,
+    personaVinculadaId: number,
+    data: UpdateProveedorPersonaDto
+  ): Observable<ProveedorPersona> {
+    return this.http.put<ProveedorPersona>(
+      `${this.apiUrl}/${proveedorId}/personas/${personaVinculadaId}`,
+      data
+    );
+  }
+
+  /**
+   * Desvincular una persona de un proveedor
+   */
+  desvincularPersona(proveedorId: number, personaVinculadaId: number): Observable<void> {
+    return this.http.delete<void>(
+      `${this.apiUrl}/${proveedorId}/personas/${personaVinculadaId}`
+    );
+  }
+
+  /**
+   * Marcar una persona como principal
+   */
+  marcarPersonaPrincipal(proveedorId: number, personaVinculadaId: number): Observable<ProveedorPersona> {
+    return this.http.patch<ProveedorPersona>(
+      `${this.apiUrl}/${proveedorId}/personas/${personaVinculadaId}/principal`,
+      {}
+    );
+  }
+
+  // ========================================
+  // Métodos para Cuentas Bancarias
+  // ========================================
+
+  /**
+   * Obtener todas las cuentas bancarias de un proveedor
+   */
+  getCuentasBancarias(proveedorId: number): Observable<ProveedorCuentaBancaria[]> {
+    return this.http.get<ProveedorCuentaBancaria[]>(`${this.apiUrl}/${proveedorId}/cuentas`);
+  }
+
+  /**
+   * Agregar una cuenta bancaria a un proveedor
+   */
+  agregarCuentaBancaria(data: CreateProveedorCuentaBancariaDto): Observable<ProveedorCuentaBancaria> {
+    return this.http.post<ProveedorCuentaBancaria>(
+      `${this.apiUrl}/${data.proveedor_id}/cuentas`,
+      data
+    );
+  }
+
+  /**
+   * Actualizar una cuenta bancaria
+   */
+  updateCuentaBancaria(
+    proveedorId: number,
+    cuentaId: number,
+    data: UpdateProveedorCuentaBancariaDto
+  ): Observable<ProveedorCuentaBancaria> {
+    return this.http.put<ProveedorCuentaBancaria>(
+      `${this.apiUrl}/${proveedorId}/cuentas/${cuentaId}`,
+      data
+    );
+  }
+
+  /**
+   * Eliminar una cuenta bancaria
+   */
+  deleteCuentaBancaria(proveedorId: number, cuentaId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${proveedorId}/cuentas/${cuentaId}`);
+  }
+
+  /**
+   * Marcar una cuenta bancaria como predeterminada
+   */
+  marcarCuentaPredeterminada(proveedorId: number, cuentaId: number): Observable<ProveedorCuentaBancaria> {
+    return this.http.patch<ProveedorCuentaBancaria>(
+      `${this.apiUrl}/${proveedorId}/cuentas/${cuentaId}/predeterminada`,
+      {}
+    );
+  }
+
+  /**
+   * Activar/Desactivar una cuenta bancaria
+   */
+  toggleCuentaActiva(proveedorId: number, cuentaId: number): Observable<ProveedorCuentaBancaria> {
+    return this.http.patch<ProveedorCuentaBancaria>(
+      `${this.apiUrl}/${proveedorId}/cuentas/${cuentaId}/toggle-activa`,
+      {}
+    );
   }
 }
