@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AuthService, User } from '../../auth/auth.service';
@@ -14,11 +14,14 @@ export class LayoutComponent implements OnInit {
   sidebarOpen = true;
   userMenuOpen = false;
   currentUser: User | null = null;
+  isMobileView = false;
 
   constructor(
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) {
+    this.checkScreenSize();
+  }
 
   ngOnInit() {
     this.authService.currentUser$.subscribe(user => {
@@ -26,8 +29,27 @@ export class LayoutComponent implements OnInit {
     });
   }
 
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.checkScreenSize();
+  }
+
+  private checkScreenSize() {
+    this.isMobileView = window.innerWidth < 1024; // lg breakpoint en Tailwind
+    // En móviles, el sidebar comienza cerrado
+    if (this.isMobileView) {
+      this.sidebarOpen = false;
+    }
+  }
+
   toggleSidebar() {
     this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  closeSidebarOnMobile() {
+    if (this.isMobileView) {
+      this.sidebarOpen = false;
+    }
   }
 
   toggleUserMenu() {
