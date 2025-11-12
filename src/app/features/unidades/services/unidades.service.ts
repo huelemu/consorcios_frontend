@@ -74,6 +74,13 @@ export class UnidadesService {
   }
 
   /**
+   * Obtener estadísticas de unidades
+   */
+  getStats(): Observable<UnidadesStats> {
+    return this.http.get<UnidadesStats>(`${this.apiUrl}/stats`);
+  }
+
+  /**
    * ⭐ NUEVA: Creación masiva de unidades
    */
   bulkCreate(data: {
