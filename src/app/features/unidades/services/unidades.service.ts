@@ -29,8 +29,10 @@ export class UnidadesService {
     if (filters.search) params = params.set('search', filters.search);
     if (filters.consorcio_id) params = params.set('consorcio_id', filters.consorcio_id.toString());
     if (filters.estado) params = params.set('estado', filters.estado);
-    if (filters.tiene_tickets_pendientes !== undefined) {
-      params = params.set('tiene_tickets_pendientes', filters.tiene_tickets_pendientes.toString());
+    if (filters.piso) params = params.set('piso', filters.piso);
+    // Solo enviar el parámetro si es true
+    if (filters.tiene_tickets_pendientes === true) {
+      params = params.set('tiene_tickets_pendientes', 'true');
     }
     if (filters.sortBy) params = params.set('sortBy', filters.sortBy);
     if (filters.sortOrder) params = params.set('sortOrder', filters.sortOrder);
