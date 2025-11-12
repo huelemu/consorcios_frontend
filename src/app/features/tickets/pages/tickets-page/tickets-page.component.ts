@@ -24,6 +24,7 @@ export class TicketsPageComponent implements OnInit {
 
   activeView: 'list' | 'cards' | 'kanban' = 'kanban';
   showFilters = true;
+  showCerradosColumn = false; // Columna de cerrados oculta por defecto
   isLoading = false;
 
   tickets: Ticket[] = [];
