@@ -1,0 +1,320 @@
+<div
+  *ngIf="show"
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+  (click)="onClose()"
+>
+  <div
+    class="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Modal Header -->
+    <div class="flex justify-between items-center p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
+      <h2 class="text-2xl font-bold text-gray-900">{{ modalTitle }}</h2>
+      <button
+        (click)="onClose()"
+        class="text-gray-400 hover:text-gray-600 transition-colors"
+        type="button"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 6 6 18M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <form (ngSubmit)="onSubmit()" class="p-6 space-y-6">
+      <!-- Información Básica -->
+      <div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 16v-4"></path>
+            <path d="M12 8h.01"></path>
+          </svg>
+          Información Básica
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Razón Social -->
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Razón Social *
+            </label>
+            <input
+              type="text"
+              [(ngModel)]="formData.razon_social"
+              name="razon_social"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Ej: ACME Corporation S.A."
+            />
+          </div>
+
+          <!-- Tipo de Entidad -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Tipo de Entidad *
+            </label>
+            <select
+              [(ngModel)]="formData.tipo_entidad"
+              name="tipo_entidad"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="fisica">Persona Física</option>
+              <option value="juridica">Persona Jurídica</option>
+            </select>
+          </div>
+
+          <!-- CUIT -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              CUIT *
+            </label>
+            <input
+              type="text"
+              [(ngModel)]="formData.cuit"
+              name="cuit"
+              required
+              (blur)="validateCUIT(); formatCuitDisplay()"
+              maxlength="13"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
+              placeholder="20-12345678-9"
+              [class.border-red-500]="cuitError"
+            />
+            <p *ngIf="cuitError" class="mt-1 text-xs text-red-600">{{ cuitError }}</p>
+          </div>
+
+          <!-- Rubro -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Rubro *
+            </label>
+            <select
+              [(ngModel)]="formData.rubro"
+              name="rubro"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">Seleccione un rubro</option>
+              <option *ngFor="let rubro of rubrosDisponibles" [value]="rubro">
+                {{ rubro }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Condición IVA -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Condición IVA
+            </label>
+            <select
+              [(ngModel)]="formData.condicion_iva"
+              name="condicion_iva"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option [value]="undefined">Seleccione una condición</option>
+              <option *ngFor="let condicion of condicionesIVA" [value]="condicion">
+                {{ getCondicionIVALabel(condicion) }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información de Contacto -->
+      <div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+          </svg>
+          Contacto
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Email -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
+            <input
+              type="email"
+              [(ngModel)]="formData.email_general"
+              name="email_general"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="contacto@empresa.com"
+            />
+          </div>
+
+          <!-- Teléfono -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Teléfono
+            </label>
+            <input
+              type="tel"
+              [(ngModel)]="formData.telefono"
+              name="telefono"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="+54 11 1234-5678"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección Avanzada (Collapsible) -->
+      <div>
+        <button
+          type="button"
+          (click)="toggleAdvanced()"
+          class="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            [class.rotate-180]="showAdvanced"
+            class="transition-transform"
+          >
+            <path d="m6 9 6 6 6-6"></path>
+          </svg>
+          {{ showAdvanced ? 'Ocultar' : 'Mostrar' }} información adicional
+        </button>
+
+        <div *ngIf="showAdvanced" class="mt-4 space-y-4">
+          <!-- Ubicación -->
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              Ubicación
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Domicilio -->
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Domicilio
+                </label>
+                <input
+                  type="text"
+                  [(ngModel)]="formData.domicilio"
+                  name="domicilio"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Av. Corrientes 1234"
+                />
+              </div>
+
+              <!-- Localidad -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Localidad
+                </label>
+                <input
+                  type="text"
+                  [(ngModel)]="formData.localidad"
+                  name="localidad"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="CABA"
+                />
+              </div>
+
+              <!-- Provincia -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Provincia
+                </label>
+                <input
+                  type="text"
+                  [(ngModel)]="formData.provincia"
+                  name="provincia"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Buenos Aires"
+                />
+              </div>
+
+              <!-- Código Postal -->
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Código Postal
+                </label>
+                <input
+                  type="text"
+                  [(ngModel)]="formData.cod_postal"
+                  name="cod_postal"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="C1000"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Observaciones -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Observaciones
+            </label>
+            <textarea
+              [(ngModel)]="formData.observaciones"
+              name="observaciones"
+              rows="3"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Notas adicionales sobre el proveedor..."
+            ></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estado -->
+      <div class="flex items-center gap-2 p-4 bg-gray-50 rounded-lg">
+        <input
+          type="checkbox"
+          [(ngModel)]="formData.activo"
+          name="activo"
+          id="activo"
+          class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+        />
+        <label for="activo" class="text-sm text-gray-700 font-medium">
+          Proveedor activo
+        </label>
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="error" class="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+        {{ error }}
+      </div>
+
+      <!-- Actions -->
+      <div class="flex gap-3 pt-4 border-t border-gray-200">
+        <button
+          type="button"
+          (click)="onClose()"
+          [disabled]="loading"
+          class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          [disabled]="loading || !!cuitError"
+          class="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          <svg *ngIf="loading" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          {{ loading ? 'Guardando...' : (isEditMode ? 'Actualizar' : 'Crear Proveedor') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
