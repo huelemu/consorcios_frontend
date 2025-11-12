@@ -22,6 +22,9 @@ import { AuthService } from '../../../../auth/auth.service';
   styleUrls: ['./personas-page.component.scss']
 })
 export class PersonasPageComponent implements OnInit {
+  // Exponer Math al template
+  Math = Math;
+
   // Vista activa ('list' o 'cards')
   activeView: 'list' | 'cards' = 'list';
 

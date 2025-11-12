@@ -26,13 +26,14 @@ export class UnidadesPageComponent implements OnInit {
   
   unidades: UnidadFuncional[] = [];
   consorcios: Consorcio[] = [];
+  stats: UnidadesStats | null = null;
   loading = false;
   loadingConsorcios = false;
   error: string | null = null;
 
   // Vista: 'grid' o 'list'
   viewMode: 'grid' | 'list' = 'grid';
-  
+
   // Filtros colapsables
   showFilters = true;
 
@@ -64,6 +65,7 @@ export class UnidadesPageComponent implements OnInit {
   ngOnInit(): void {
     this.loadConsorcios();
     this.loadUnidades();
+    this.loadStats();
   }
 
   toggleView(): void {
@@ -117,15 +119,15 @@ export class UnidadesPageComponent implements OnInit {
     });
   }
 
-  getEstadisticas(): UnidadesStats {
-    const stats: UnidadesStats = {
-      total: this.unidades.length,
-      ocupadas: this.unidades.filter(u => u.estado === 'ocupado').length,
-      vacantes: this.unidades.filter(u => u.estado === 'vacante').length,
-      mantenimiento: this.unidades.filter(u => u.estado === 'mantenimiento').length,
-      conTickets: this.unidades.filter(u => (u.tickets_count || 0) > 0).length
-    };
-    return stats;
+  loadStats(): void {
+    this.unidadesService.getStats().subscribe({
+      next: (stats) => {
+        this.stats = stats;
+      },
+      error: (err) => {
+        console.error('Error al cargar estadísticas:', err);
+      }
+    });
   }
 
   onFiltersChange(newFilters: UnidadFilters): void {

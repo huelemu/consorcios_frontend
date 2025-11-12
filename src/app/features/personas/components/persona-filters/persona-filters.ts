@@ -20,6 +20,9 @@ export class PersonaFiltersComponent implements OnInit, OnDestroy {
   private searchSubject = new Subject<string>();
   private searchSubscription?: Subscription;
 
+  // Control de visibilidad de filtros
+  showFilters = true;
+
   // Valores locales del formulario
   searchTerm = '';
   tipoPersona: 'fisica' | 'juridica' | '' = '';
@@ -132,6 +135,13 @@ export class PersonaFiltersComponent implements OnInit, OnDestroy {
   toggleSortOrder(): void {
     this.sortOrder = this.sortOrder === 'ASC' ? 'DESC' : 'ASC';
     this.emitFilters();
+  }
+
+  /**
+   * Alterna la visibilidad de los filtros
+   */
+  toggleFilters(): void {
+    this.showFilters = !this.showFilters;
   }
 
   /**

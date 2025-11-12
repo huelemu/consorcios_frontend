@@ -15,7 +15,7 @@ export class ProveedorFiltersComponent {
   @Output() filtersChange = new EventEmitter<ProveedorFilters>();
 
   rubrosComunes = RUBROS_COMUNES;
-  showFilters = false;
+  showFilters = true;
 
   onSearchChange(search: string): void {
     this.emitFilters({ search });
@@ -40,6 +40,14 @@ export class ProveedorFiltersComponent {
       activo: undefined
     };
     this.filtersChange.emit(this.filters);
+  }
+
+  hasActiveFilters(): boolean {
+    return !!(
+      this.filters.search ||
+      this.filters.rubro ||
+      this.filters.activo !== undefined
+    );
   }
 
   private emitFilters(changes: Partial<ProveedorFilters>): void {
