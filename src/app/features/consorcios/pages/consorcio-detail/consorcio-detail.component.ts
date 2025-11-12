@@ -4,18 +4,22 @@ import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ConsorciosService } from '../../services/consorcios.service';
 import { AuthService } from '../../../../auth/auth.service';
-import { 
+import {
   Consorcio,
   ESTADO_LABELS,
   ESTADO_COLORS,
   ESTADO_ICONS
 } from '../../models/consorcio.model';
-import { 
+import {
+  UnidadFuncional,
   ESTADO_UNIDAD_LABELS,
-  ESTADO_UNIDAD_COLORS 
+  ESTADO_UNIDAD_COLORS
 } from '../../../unidades/models/unidad.model';
 import { TicketFormComponent } from '../../../tickets/components/ticket-form/ticket-form.component';
 import { UnidadesBulkCreateComponent } from '../../../unidades/components/unidades-bulk-create/unidades-bulk-create.component';
+import { UnidadCardComponent } from '../../../unidades/components/unidad-card/unidad-card.component';
+import { UnidadListComponent } from '../../../unidades/components/unidad-list/unidad-list.component';
+import { UnidadFormComponent } from '../../../unidades/components/unidad-form/unidad-form.component';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -24,7 +28,9 @@ import Swal from 'sweetalert2';
   imports: [
     CommonModule,
     RouterModule,
-    UnidadesBulkCreateComponent
+    UnidadesBulkCreateComponent,
+    UnidadCardComponent,
+    UnidadListComponent
   ],
   templateUrl: './consorcio-detail.component.html',
   styleUrls: ['./consorcio-detail.component.scss']
@@ -34,9 +40,12 @@ export class ConsorcioDetailComponent implements OnInit {
   consorcio: Consorcio | null = null;
   loading = true;
   error: string | null = null;
-  
+
   mostrarBulkCreate = false;
   showDeleteModal = false;
+
+  // Vista de unidades: 'grid' o 'list'
+  viewMode: 'grid' | 'list' = 'grid';
 
   // Permisos
   canEdit = false;
@@ -239,7 +248,7 @@ export class ConsorcioDetailComponent implements OnInit {
       console.error('No hay consorcio cargado');
       return;
     }
-    
+
     const dialogRef = this.dialog.open(TicketFormComponent, {
       width: '900px',
       maxHeight: '90vh',
@@ -256,6 +265,43 @@ export class ConsorcioDetailComponent implements OnInit {
       if (ticket) {
         console.log('✅ Ticket creado:', ticket);
         this.loadConsorcio();
+      }
+    });
+  }
+
+  // Métodos para manejar eventos de Unidades
+  toggleViewMode(): void {
+    this.viewMode = this.viewMode === 'grid' ? 'list' : 'grid';
+  }
+
+  onVerUnidad(unidad: UnidadFuncional | any): void {
+    this.router.navigate(['/unidades', unidad.id]);
+  }
+
+  onEditarUnidad(unidad: UnidadFuncional | any): void {
+    this.router.navigate(['/unidades', unidad.id, 'editar']);
+  }
+
+  onEliminarUnidad(unidad: UnidadFuncional | any): void {
+    Swal.fire({
+      title: '¿Eliminar unidad?',
+      text: `¿Estás seguro de que deseas eliminar la unidad "${unidad.codigo}"?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Aquí iría la lógica de eliminación cuando esté disponible el servicio
+        Swal.fire(
+          'Eliminado',
+          'La unidad ha sido eliminada correctamente',
+          'success'
+        ).then(() => {
+          this.loadConsorcio();
+        });
       }
     });
   }

@@ -268,9 +268,35 @@
 
     <!-- Unidades Funcionales -->
     <div class="rounded-xl bg-white p-6 shadow-sm">
-      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
         <h2 class="text-lg font-semibold text-gray-900">Unidades Funcionales</h2>
         <div class="flex flex-wrap gap-2">
+          <!-- Toggle Grid/List -->
+          <div *ngIf="hasUnidades()" class="inline-flex rounded-lg border border-gray-300 p-1">
+            <button
+              (click)="viewMode = 'grid'"
+              [class]="viewMode === 'grid' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'"
+              class="px-3 py-2 text-sm font-medium rounded-md transition-all flex items-center gap-2"
+              title="Vista Grid"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+              </svg>
+              <span class="hidden sm:inline">Grid</span>
+            </button>
+            <button
+              (click)="viewMode = 'list'"
+              [class]="viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'"
+              class="px-3 py-2 text-sm font-medium rounded-md transition-all flex items-center gap-2"
+              title="Vista Lista"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+              </svg>
+              <span class="hidden sm:inline">Lista</span>
+            </button>
+          </div>
+
           <button
             (click)="gestionarUnidades()"
             class="flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700 transition"
@@ -280,26 +306,25 @@
         </div>
       </div>
 
-      <!-- Lista de unidades -->
-      <div *ngIf="hasUnidades()" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div
+      <!-- Vista Grid (Tarjetas) -->
+      <div *ngIf="hasUnidades() && viewMode === 'grid'" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <app-unidad-card
           *ngFor="let unidad of consorcio.unidades"
-          (click)="verUnidad(unidad.id)"
-          class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-sm transition cursor-pointer"
-        >
-          <div class="flex items-start justify-between mb-2">
-            <div>
-              <p class="font-semibold text-gray-900">{{ unidad.codigo }}</p>
-              <p *ngIf="unidad.piso" class="text-sm text-gray-500">Piso {{ unidad.piso }}</p>
-            </div>
-            <span 
-              [ngClass]="getUnidadEstadoClass(unidad.estado)"
-              class="px-2 py-1 rounded-full text-xs font-medium border"
-            >
-              {{ getUnidadEstadoLabel(unidad.estado) }}
-            </span>
-          </div>
-        </div>
+          [unidad]="unidad"
+          (onView)="onVerUnidad($event)"
+          (onEdit)="onEditarUnidad($event)"
+          (onDelete)="onEliminarUnidad($event)"
+        ></app-unidad-card>
+      </div>
+
+      <!-- Vista Lista (Tabla) -->
+      <div *ngIf="hasUnidades() && viewMode === 'list'">
+        <app-unidad-list
+          [unidades]="consorcio.unidades || []"
+          (onView)="onVerUnidad($event)"
+          (onEdit)="onEditarUnidad($event)"
+          (onDelete)="onEliminarUnidad($event)"
+        ></app-unidad-list>
       </div>
 
       <!-- Sin unidades -->

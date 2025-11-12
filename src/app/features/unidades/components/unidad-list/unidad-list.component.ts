@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UnidadFuncional } from '../../models/unidad.model';
+import { UnidadBasic } from '../../../consorcios/models/consorcio.model';
 
 @Component({
   selector: 'app-unidad-list',
@@ -34,10 +35,10 @@ import { UnidadFuncional } from '../../models/unidad.model';
               <div class="text-sm text-gray-900">{{ unidad.consorcio?.nombre || '-' }}</div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">{{ unidad.piso }}</div>
+              <div class="text-sm text-gray-900">{{ unidad.piso || '-' }}</div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">{{ unidad.superficie }} m²</div>
+              <div class="text-sm text-gray-900">{{ unidad.superficie ? (unidad.superficie + ' m²') : '-' }}</div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
               <span [class]="'px-2 py-1 text-xs font-medium rounded-full ' + getEstadoBadge(unidad.estado)">
@@ -64,12 +65,12 @@ import { UnidadFuncional } from '../../models/unidad.model';
   `
 })
 export class UnidadListComponent {
-  @Input() unidades: UnidadFuncional[] = [];
-  @Output() onView = new EventEmitter<UnidadFuncional>();
-  @Output() onEdit = new EventEmitter<UnidadFuncional>();
-  @Output() onDelete = new EventEmitter<UnidadFuncional>();
+  @Input() unidades: (UnidadFuncional | UnidadBasic)[] = [];
+  @Output() onView = new EventEmitter<UnidadFuncional | UnidadBasic>();
+  @Output() onEdit = new EventEmitter<UnidadFuncional | UnidadBasic>();
+  @Output() onDelete = new EventEmitter<UnidadFuncional | UnidadBasic>();
 
-  getRowClass(unidad: UnidadFuncional): string {
+  getRowClass(unidad: UnidadFuncional | UnidadBasic): string {
     return unidad.tickets_count && unidad.tickets_count > 0 
       ? 'bg-orange-50 border-l-4 border-orange-400' 
       : '';

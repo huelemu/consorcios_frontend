@@ -148,17 +148,17 @@ export class UnidadesPageComponent implements OnInit {
     this.showFormModal = true;
   }
 
-  onViewUnidad(unidad: UnidadFuncional): void {
+  onViewUnidad(unidad: UnidadFuncional | any): void {
     this.router.navigate(['/unidades', unidad.id]);
   }
 
-  onEditUnidad(unidad: UnidadFuncional): void {
+  onEditUnidad(unidad: UnidadFuncional | any): void {
     // Usar modal
-    this.editingUnidad = unidad;
+    this.editingUnidad = unidad as UnidadFuncional;
     this.showFormModal = true;
   }
 
-  onDeleteUnidad(unidad: UnidadFuncional): void {
+  onDeleteUnidad(unidad: UnidadFuncional | any): void {
     if (confirm(`¿Estás seguro de que deseas eliminar la unidad ${unidad.codigo}?`)) {
       this.unidadesService.deleteUnidad(unidad.id).subscribe({
         next: () => {
