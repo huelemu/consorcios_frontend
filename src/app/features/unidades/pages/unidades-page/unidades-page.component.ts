@@ -26,10 +26,18 @@ export class UnidadesPageComponent implements OnInit {
   
   unidades: UnidadFuncional[] = [];
   consorcios: Consorcio[] = [];
-  stats: UnidadesStats | null = null;
+  stats: UnidadesStats = {
+    total: 0,
+    ocupadas: 0,
+    vacantes: 0,
+    mantenimiento: 0,
+    conTickets: 0
+  };
   loading = false;
   loadingConsorcios = false;
+  loadingStats = false;
   error: string | null = null;
+  statsError: string | null = null;
 
   // Vista: 'grid' o 'list'
   viewMode: 'grid' | 'list' = 'grid';
@@ -120,12 +128,26 @@ export class UnidadesPageComponent implements OnInit {
   }
 
   loadStats(): void {
+    this.loadingStats = true;
+    this.statsError = null;
+
     this.unidadesService.getStats().subscribe({
       next: (stats) => {
         this.stats = stats;
+        this.loadingStats = false;
       },
       error: (err) => {
         console.error('Error al cargar estadísticas:', err);
+        this.statsError = 'No se pudieron cargar las estadísticas';
+        // Mantener las estadísticas en 0 en caso de error
+        this.stats = {
+          total: 0,
+          ocupadas: 0,
+          vacantes: 0,
+          mantenimiento: 0,
+          conTickets: 0
+        };
+        this.loadingStats = false;
       }
     });
   }
@@ -134,6 +156,8 @@ export class UnidadesPageComponent implements OnInit {
     this.filters = { ...this.filters, ...newFilters };
     this.currentPage = 1;
     this.loadUnidades();
+    // Recargar estadísticas cuando cambian los filtros
+    this.loadStats();
   }
 
   onPageChange(page: number): void {
@@ -205,5 +229,6 @@ export class UnidadesPageComponent implements OnInit {
   refresh(): void {
     this.loadConsorcios();
     this.loadUnidades();
+    this.loadStats();
   }
 }
