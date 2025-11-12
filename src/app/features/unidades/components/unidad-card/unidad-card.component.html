@@ -71,7 +71,7 @@
       </div>
 
       <!-- Superficie -->
-      <div class="flex items-center gap-2 text-sm">
+      <div *ngIf="unidad.superficie" class="flex items-center gap-2 text-sm">
         <div class="flex items-center justify-center w-8 h-8 bg-purple-100 rounded-lg">
           <span class="text-lg">📐</span>
         </div>
@@ -82,7 +82,7 @@
       </div>
 
       <!-- Participación -->
-      <div class="flex items-center gap-2 text-sm col-span-2">
+      <div *ngIf="unidad.porcentaje_participacion" class="flex items-center gap-2 text-sm col-span-2">
         <div class="flex items-center justify-center w-8 h-8 bg-green-100 rounded-lg">
           <span class="text-lg">📊</span>
         </div>

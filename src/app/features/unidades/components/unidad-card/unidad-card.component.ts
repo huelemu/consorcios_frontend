@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UnidadFuncional } from '../../models/unidad.model';
+import { UnidadBasic } from '../../../consorcios/models/consorcio.model';
 
 @Component({
   selector: 'app-unidad-card',
@@ -9,11 +10,11 @@ import { UnidadFuncional } from '../../models/unidad.model';
   templateUrl: './unidad-card.component.html'
 })
 export class UnidadCardComponent {
-  
-  @Input() unidad!: UnidadFuncional;
-  @Output() onView = new EventEmitter<UnidadFuncional>();
-  @Output() onEdit = new EventEmitter<UnidadFuncional>();
-  @Output() onDelete = new EventEmitter<UnidadFuncional>();
+
+  @Input() unidad!: UnidadFuncional | UnidadBasic;
+  @Output() onView = new EventEmitter<UnidadFuncional | UnidadBasic>();
+  @Output() onEdit = new EventEmitter<UnidadFuncional | UnidadBasic>();
+  @Output() onDelete = new EventEmitter<UnidadFuncional | UnidadBasic>();
 
   getEstadoBadgeClass(): string {
     switch (this.unidad.estado) {

@@ -59,6 +59,27 @@ export interface UnidadBasic {
   codigo: string;
   piso?: string;
   estado: 'ocupado' | 'vacante' | 'mantenimiento';
+  // Campos adicionales para compatibilidad con UnidadFuncional
+  consorcio_id?: number;
+  superficie?: number;
+  porcentaje_participacion?: number;
+  tickets_count?: number;
+  consorcio?: {
+    id: number;
+    nombre: string;
+    direccion?: string;
+    estado?: string;
+  };
+  personas?: Array<{
+    id: number;
+    nombre: string;
+    apellido: string;
+    email: string;
+    telefono: string;
+    rol_unidad: 'propietario' | 'inquilino' | 'responsable' | 'otro';
+    fecha_desde?: string;
+    fecha_hasta?: string | null;
+  }>;
 }
 
 /**
