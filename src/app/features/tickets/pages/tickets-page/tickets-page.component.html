@@ -2,17 +2,63 @@
   <!-- Header -->
   <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
     <div>
-      <h1 class="text-3xl font-bold text-gray-900">Tickets</h1>
-      <p class="text-gray-600 mt-1">Gestión de reclamos y solicitudes por unidad funcional</p>
+      <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+        <span class="text-4xl">🎫</span>
+        Tickets
+      </h1>
+      <p class="text-gray-600 mt-2">Gestión de reclamos y solicitudes por unidad funcional</p>
     </div>
-    <button
-      (click)="openCreateDialog()"
-      class="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 shadow-md hover:shadow-lg flex items-center gap-2">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-      </svg>
-      Nuevo Ticket
-    </button>
+
+    <div class="flex items-center gap-3">
+      <!-- Toggle Vista -->
+      <div class="flex items-center gap-2 bg-white rounded-lg shadow-sm border border-gray-200 p-1">
+        <button
+          (click)="setView('cards')"
+          [class]="activeView === 'cards'
+            ? 'bg-cyan-600 text-white'
+            : 'text-gray-600 hover:text-gray-900'"
+          class="p-2 rounded transition-colors"
+          title="Vista de tarjetas">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+          </svg>
+        </button>
+
+        <button
+          (click)="setView('list')"
+          [class]="activeView === 'list'
+            ? 'bg-cyan-600 text-white'
+            : 'text-gray-600 hover:text-gray-900'"
+          class="p-2 rounded transition-colors"
+          title="Vista de lista">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+          </svg>
+        </button>
+
+        <button
+          (click)="setView('kanban')"
+          [class]="activeView === 'kanban'
+            ? 'bg-cyan-600 text-white'
+            : 'text-gray-600 hover:text-gray-900'"
+          class="p-2 rounded transition-colors"
+          title="Vista Kanban">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Botón Nuevo -->
+      <button
+        (click)="openCreateDialog()"
+        class="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Nuevo Ticket
+      </button>
+    </div>
   </div>
 
   <!-- Estadísticas -->
@@ -89,29 +135,30 @@
   </div>
 
   <!-- Filtros Colapsables -->
-  <div class="bg-white rounded-xl shadow-sm mb-6">
+  <div class="bg-white rounded-xl shadow-sm mb-6 p-6">
     <!-- Header de Filtros -->
-    <button
-      (click)="showFilters = !showFilters"
-      class="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors rounded-t-xl">
-      <div class="flex items-center gap-2">
-        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
         </svg>
-        <span class="font-medium text-gray-900">Filtros de Búsqueda</span>
-      </div>
-      <svg
-        class="w-5 h-5 text-gray-600 transition-transform duration-200"
-        [class.rotate-180]="showFilters"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-      </svg>
-    </button>
+        Filtros de Búsqueda
+      </h3>
+
+      <button
+        (click)="showFilters = !showFilters"
+        class="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 transition-colors">
+        <svg class="w-4 h-4 transition-transform"
+             [class.rotate-180]="!showFilters"
+             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+        </svg>
+        {{ showFilters ? 'Ocultar' : 'Mostrar' }} filtros
+      </button>
+    </div>
 
     <!-- Contenido de Filtros -->
-    <div *ngIf="showFilters" class="px-6 pb-6 border-t border-gray-100">
+    <div *ngIf="showFilters">
       <form [formGroup]="filtersForm" class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
         <!-- Búsqueda -->
         <div class="md:col-span-2">
@@ -179,56 +226,30 @@
       </form>
 
       <!-- Botón limpiar filtros -->
-      <div class="mt-4 flex justify-end" *ngIf="filtersForm.value.search || filtersForm.value.estado || filtersForm.value.prioridad || filtersForm.value.tipo">
+      <div class="mt-4 flex items-center justify-end">
         <button
+          *ngIf="filtersForm.value.search || filtersForm.value.estado || filtersForm.value.prioridad || filtersForm.value.tipo"
           (click)="limpiarFiltros()"
-          class="text-sm text-cyan-600 hover:text-cyan-700 font-medium flex items-center gap-1">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
-          Limpiar filtros
+          Limpiar Filtros
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Selector de Vista -->
-  <div class="flex justify-end mb-6">
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-1 flex items-center gap-1">
-      <button
-        (click)="setView('list')"
-        [class.bg-cyan-600]="activeView === 'list'"
-        [class.text-white]="activeView === 'list'"
-        [class.text-gray-600]="activeView !== 'list'"
-        class="px-3 py-2 rounded-md transition-colors flex items-center gap-2">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-        <span class="text-sm font-medium hidden md:inline">Lista</span>
-      </button>
-      <button
-        (click)="setView('cards')"
-        [class.bg-cyan-600]="activeView === 'cards'"
-        [class.text-white]="activeView === 'cards'"
-        [class.text-gray-600]="activeView !== 'cards'"
-        class="px-3 py-2 rounded-md transition-colors flex items-center gap-2">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-        </svg>
-        <span class="text-sm font-medium hidden md:inline">Tarjetas</span>
-      </button>
-      <button
-        (click)="setView('kanban')"
-        [class.bg-cyan-600]="activeView === 'kanban'"
-        [class.text-white]="activeView === 'kanban'"
-        [class.text-gray-600]="activeView !== 'kanban'"
-        class="px-3 py-2 rounded-md transition-colors flex items-center gap-2">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
-        </svg>
-        <span class="text-sm font-medium hidden md:inline">Kanban</span>
-      </button>
-    </div>
+  <!-- Controles del Kanban (solo visible en vista Kanban) -->
+  <div *ngIf="activeView === 'kanban'" class="flex justify-end mb-4">
+    <button
+      (click)="showCerradosColumn = !showCerradosColumn"
+      class="text-sm px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors flex items-center gap-2">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="showCerradosColumn ? 'M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21' : 'M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z'" />
+      </svg>
+      {{ showCerradosColumn ? 'Ocultar' : 'Mostrar' }} Cerrados
+    </button>
   </div>
 
   <!-- Loading State -->
@@ -241,9 +262,11 @@
     
     <!-- VISTA KANBAN -->
     <div *ngIf="activeView === 'kanban'" class="flex gap-4 overflow-x-auto pb-4">
-      
+
       <!-- Columna ABIERTO -->
-      <div class="flex-shrink-0 w-80 bg-green-50 rounded-lg p-4 border-2 border-green-200"
+      <div class="flex-shrink-0 bg-green-50 rounded-lg p-4 border-2 border-green-200 transition-all"
+           [class.w-80]="getTicketsByEstado('abierto').length > 0"
+           [class.w-64]="getTicketsByEstado('abierto').length === 0"
            (dragover)="onDragOver($event)"
            (drop)="onDrop($event, 'abierto')">
         <h3 class="font-semibold text-green-800 mb-3 flex items-center justify-between">
@@ -273,7 +296,9 @@
       </div>
 
       <!-- Columna EN PROCESO -->
-      <div class="flex-shrink-0 w-80 bg-yellow-50 rounded-lg p-4 border-2 border-yellow-200"
+      <div class="flex-shrink-0 bg-yellow-50 rounded-lg p-4 border-2 border-yellow-200 transition-all"
+           [class.w-80]="getTicketsByEstado('en_proceso').length > 0"
+           [class.w-64]="getTicketsByEstado('en_proceso').length === 0"
            (dragover)="onDragOver($event)"
            (drop)="onDrop($event, 'en_proceso')">
         <h3 class="font-semibold text-yellow-800 mb-3 flex items-center justify-between">
@@ -303,7 +328,9 @@
       </div>
 
       <!-- Columna PENDIENTE -->
-      <div class="flex-shrink-0 w-80 bg-orange-50 rounded-lg p-4 border-2 border-orange-200"
+      <div class="flex-shrink-0 bg-orange-50 rounded-lg p-4 border-2 border-orange-200 transition-all"
+           [class.w-80]="getTicketsByEstado('pendiente').length > 0"
+           [class.w-64]="getTicketsByEstado('pendiente').length === 0"
            (dragover)="onDragOver($event)"
            (drop)="onDrop($event, 'pendiente')">
         <h3 class="font-semibold text-orange-800 mb-3 flex items-center justify-between">
@@ -333,7 +360,9 @@
       </div>
 
       <!-- Columna RESUELTO -->
-      <div class="flex-shrink-0 w-80 bg-blue-50 rounded-lg p-4 border-2 border-blue-200"
+      <div class="flex-shrink-0 bg-blue-50 rounded-lg p-4 border-2 border-blue-200 transition-all"
+           [class.w-80]="getTicketsByEstado('resuelto').length > 0"
+           [class.w-64]="getTicketsByEstado('resuelto').length === 0"
            (dragover)="onDragOver($event)"
            (drop)="onDrop($event, 'resuelto')">
         <h3 class="font-semibold text-blue-800 mb-3 flex items-center justify-between">
@@ -358,8 +387,11 @@
         </div>
       </div>
 
-      <!-- Columna CERRADO -->
-      <div class="flex-shrink-0 w-80 bg-gray-50 rounded-lg p-4 border-2 border-gray-300"
+      <!-- Columna CERRADO (ocultable) -->
+      <div *ngIf="showCerradosColumn"
+           class="flex-shrink-0 bg-gray-50 rounded-lg p-4 border-2 border-gray-300 transition-all"
+           [class.w-80]="getTicketsByEstado('cerrado').length > 0"
+           [class.w-64]="getTicketsByEstado('cerrado').length === 0"
            (dragover)="onDragOver($event)"
            (drop)="onDrop($event, 'cerrado')">
         <h3 class="font-semibold text-gray-800 mb-3 flex items-center justify-between">
