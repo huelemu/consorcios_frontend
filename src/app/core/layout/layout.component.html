@@ -304,8 +304,11 @@
 </div>
 
 <!-- Overlay para cerrar el menú al hacer click fuera -->
-<div 
-  *ngIf="userMenuOpen" 
+<div
+  *ngIf="userMenuOpen"
   (click)="closeUserMenu()"
   class="fixed inset-0 z-40"
 ></div>
+
+<!-- Toast Notifications -->
+<app-toast></app-toast>

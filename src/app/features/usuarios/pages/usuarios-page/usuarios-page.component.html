@@ -358,3 +358,11 @@
   (close)="closeModal()"
   (save)="onSaveUsuario($event)"
 ></app-usuario-form-modal>
+
+<!-- Modal de roles -->
+<app-usuario-roles-modal
+  *ngIf="isRolesModalOpen && selectedUsuario"
+  [usuario]="selectedUsuario"
+  (close)="closeRolesModal()"
+  (rolesUpdated)="onRolesUpdated()"
+></app-usuario-roles-modal>

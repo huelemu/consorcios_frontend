@@ -3,17 +3,20 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsuariosService } from '../../services/usuarios.service';
 import { PersonasService } from '../../../personas/services/personas.service';
-import { 
-  Usuario, 
-  UsuarioFilters, 
-  CreateUsuarioDto, 
+import {
+  Usuario,
+  UsuarioFilters,
+  CreateUsuarioDto,
   UpdateUsuarioDto,
   RolGlobal,
-  ROL_LABELS 
+  ROL_LABELS
 } from '../../models/usuario.model';
 import { UsuariosListComponent } from '../../components/usuarios-list/usuarios-list.component';
 import { UsuariosCardsComponent } from '../../components/usuarios-cards/usuarios-cards.component';
 import { UsuarioFormModalComponent } from '../../components/usuario-form-modal/usuario-form-modal.component';
+import { UsuarioRolesModalComponent } from '../../components/usuario-roles-modal/usuario-roles-modal.component';
+import { ConfirmModalService } from '../../../../core/confirm-modal/confirm-modal.service';
+import { ToastService } from '../../../../core/toast/toast.service';
 
 @Component({
   selector: 'app-usuarios-page',
@@ -23,7 +26,8 @@ import { UsuarioFormModalComponent } from '../../components/usuario-form-modal/u
     FormsModule,
     UsuariosListComponent,
     UsuariosCardsComponent,
-    UsuarioFormModalComponent
+    UsuarioFormModalComponent,
+    UsuarioRolesModalComponent
   ],
   templateUrl: './usuarios-page.component.html',
   styles: [`
@@ -64,6 +68,7 @@ export class UsuariosPageComponent implements OnInit {
 
   // Modal
   isModalOpen = false;
+  isRolesModalOpen = false;
   selectedUsuario: Usuario | null = null;
 
   // Roles disponibles
@@ -80,7 +85,9 @@ export class UsuariosPageComponent implements OnInit {
 
   constructor(
     private usuariosService: UsuariosService,
-    private personasService: PersonasService
+    private personasService: PersonasService,
+    private confirmService: ConfirmModalService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -199,11 +206,11 @@ export class UsuariosPageComponent implements OnInit {
         this.closeModal();
         this.loadUsuarios();
         this.loadPersonasDisponibles();
-        alert('Usuario creado exitosamente');
+        this.toastService.success('Usuario creado exitosamente');
       },
       error: (err) => {
         console.error('Error al crear usuario:', err);
-        alert('Error al crear el usuario');
+        this.toastService.error('Error al crear el usuario');
       }
     });
   }
@@ -213,58 +220,87 @@ export class UsuariosPageComponent implements OnInit {
       next: () => {
         this.closeModal();
         this.loadUsuarios();
-        alert('Usuario actualizado exitosamente');
+        this.toastService.success('Usuario actualizado exitosamente');
       },
       error: (err) => {
         console.error('Error al actualizar usuario:', err);
-        alert('Error al actualizar el usuario');
+        this.toastService.error('Error al actualizar el usuario');
       }
     });
   }
 
-  onDeleteUsuario(id: number): void {
+  async onDeleteUsuario(id: number): Promise<void> {
+    const confirmed = await this.confirmService.confirmDelete(
+      '¿Está seguro de que desea eliminar este usuario? Esta acción no se puede deshacer.'
+    );
+
+    if (!confirmed) return;
+
     this.usuariosService.deleteUsuario(id).subscribe({
       next: () => {
         this.loadUsuarios();
-        alert('Usuario eliminado exitosamente');
+        this.toastService.success('Usuario eliminado exitosamente');
       },
       error: (err) => {
         console.error('Error al eliminar usuario:', err);
-        alert('Error al eliminar el usuario');
+        this.toastService.error('Error al eliminar el usuario');
       }
     });
   }
 
-  onToggleActive(usuario: Usuario): void {
+  async onToggleActive(usuario: Usuario): Promise<void> {
+    const confirmed = usuario.activo
+      ? await this.confirmService.confirmDeactivate(usuario.persona?.nombre || usuario.email)
+      : await this.confirmService.confirmActivate(usuario.persona?.nombre || usuario.email);
+
+    if (!confirmed) return;
+
     const action = usuario.activo ? 'desactivarUsuario' : 'activarUsuario';
-    
+
     this.usuariosService[action](usuario.id).subscribe({
       next: () => {
         this.loadUsuarios();
-        const message = usuario.activo ? 'Usuario desactivado' : 'Usuario activado';
-        alert(message);
+        const message = usuario.activo ? 'Usuario desactivado exitosamente' : 'Usuario activado exitosamente';
+        this.toastService.success(message);
       },
       error: (err) => {
         console.error('Error al cambiar estado:', err);
-        alert('Error al cambiar el estado');
+        this.toastService.error('Error al cambiar el estado del usuario');
       }
     });
   }
 
-  onResetPassword(usuario: Usuario): void {
+  async onResetPassword(usuario: Usuario): Promise<void> {
+    const confirmed = await this.confirmService.confirmResetPassword(usuario.email);
+
+    if (!confirmed) return;
+
     this.usuariosService.resetearPassword(usuario.id).subscribe({
       next: (response) => {
-        alert(response.message || 'Email enviado');
+        this.toastService.success(
+          response.message || 'Email enviado exitosamente',
+          'Contraseña reseteada'
+        );
       },
       error: (err) => {
         console.error('Error al resetear password:', err);
-        alert('Error al enviar email');
+        this.toastService.error('No se pudo enviar el email de recuperación');
       }
     });
   }
 
   onViewRoles(usuario: Usuario): void {
-    alert('Funcionalidad en desarrollo');
+    this.selectedUsuario = usuario;
+    this.isRolesModalOpen = true;
+  }
+
+  closeRolesModal(): void {
+    this.isRolesModalOpen = false;
+    this.selectedUsuario = null;
+  }
+
+  onRolesUpdated(): void {
+    this.loadUsuarios();
   }
 
   getPageRange(): number[] {
