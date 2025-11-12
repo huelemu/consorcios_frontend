@@ -1,0 +1,164 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm animate-fadeIn"
+     (click)="cerrarModal()">
+  <div class="bg-white rounded-xl shadow-2xl max-w-3xl w-full mx-4 max-h-[90vh] flex flex-col transform transition-all animate-slideIn"
+       (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <app-modal-header
+      [title]="'Roles de ' + (usuario.persona?.nombre || usuario.email)"
+      icon="shield"
+      module="usuario"
+      (close)="cerrarModal()">
+    </app-modal-header>
+
+    <!-- Body -->
+    <div class="flex-1 overflow-y-auto p-6">
+      <!-- Usuario Info Card -->
+      <div class="bg-gradient-to-r from-violet-50 to-purple-50 rounded-lg p-4 mb-6 border border-violet-200">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+            {{ (usuario.persona?.nombre || usuario.email).charAt(0).toUpperCase() }}
+          </div>
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold text-gray-900">
+              {{ usuario.persona?.nombre || usuario.username || 'Sin nombre' }}
+              {{ usuario.persona?.apellido || '' }}
+            </h3>
+            <p class="text-sm text-gray-600">{{ usuario.email }}</p>
+            <div class="mt-1">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-800">
+                Rol Global: {{ getRolLabel(usuario.rol_global) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="loading" class="flex justify-center py-8">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600"></div>
+      </div>
+
+      <!-- Roles List -->
+      <div *ngIf="!loading">
+        <div class="flex items-center justify-between mb-4">
+          <h4 class="text-lg font-semibold text-gray-900">Roles Específicos</h4>
+          <button type="button"
+                  (click)="toggleAddForm()"
+                  class="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors duration-200 flex items-center gap-2 text-sm font-medium shadow-md">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path *ngIf="!showAddForm" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              <path *ngIf="showAddForm" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            {{ showAddForm ? 'Cancelar' : 'Asignar Rol' }}
+          </button>
+        </div>
+
+        <!-- Add Role Form -->
+        <div *ngIf="showAddForm" class="bg-blue-50 rounded-lg p-4 mb-4 border border-blue-200">
+          <form [formGroup]="addRoleForm" (ngSubmit)="onAddRole()">
+            <div class="space-y-3">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Rol</label>
+                <select formControlName="rol_id"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+                  <option value="">Seleccionar rol...</option>
+                  <option value="1">Administrador de Consorcio</option>
+                  <option value="2">Administrador de Edificio</option>
+                  <option value="3">Propietario</option>
+                  <option value="4">Inquilino</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Consorcio (opcional)</label>
+                <input type="number"
+                       formControlName="consorcio_id"
+                       placeholder="ID del consorcio"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Unidad (opcional)</label>
+                <input type="number"
+                       formControlName="unidad_id"
+                       placeholder="ID de la unidad"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+              </div>
+
+              <button type="submit"
+                      [disabled]="addRoleForm.invalid"
+                      class="w-full px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200 font-medium">
+                Asignar Rol
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Roles Cards -->
+        <div *ngIf="roles.length > 0" class="space-y-3">
+          <div *ngFor="let rol of roles"
+               class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-start justify-between">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+                    {{ rol.rol?.nombre || 'Rol sin nombre' }}
+                  </span>
+                  <span *ngIf="rol.activo"
+                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Activo
+                  </span>
+                  <span *ngIf="!rol.activo"
+                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                    Inactivo
+                  </span>
+                </div>
+
+                <p class="text-sm text-gray-600">{{ rol.rol?.descripcion || 'Sin descripción' }}</p>
+
+                <div class="mt-2 flex items-center gap-2 text-xs text-gray-500">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span>{{ getContextText(rol) }}</span>
+                </div>
+              </div>
+
+              <button type="button"
+                      (click)="removeRole(rol.id)"
+                      class="ml-4 p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="roles.length === 0 && !showAddForm"
+             class="text-center py-12">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No hay roles específicos asignados</h3>
+          <p class="mt-1 text-sm text-gray-500">Comience asignando un rol con contexto específico.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="p-6 bg-gray-50 border-t border-gray-200 rounded-b-xl">
+      <button type="button"
+              (click)="cerrarModal()"
+              class="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium">
+        Cerrar
+      </button>
+    </div>
+  </div>
+</div>
