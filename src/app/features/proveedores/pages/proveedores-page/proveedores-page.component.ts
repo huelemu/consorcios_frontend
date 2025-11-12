@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ProveedoresListComponent } from '../../components/proveedores-list/proveedores-list';
 import { ProveedoresCardsComponent } from '../../components/proveedores-cards/proveedores-cards';
 import { ProveedorFiltersComponent } from '../../components/proveedor-filters/proveedor-filters';
+import { ProveedorFormModalComponent } from '../../components/proveedor-form-modal/proveedor-form-modal.component';
 import { ProveedoresService } from '../../services/proveedores.service';
 import { Proveedor, ProveedorFilters, ProveedoresStats } from '../../models/proveedor.model';
 
@@ -13,7 +14,8 @@ import { Proveedor, ProveedorFilters, ProveedoresStats } from '../../models/prov
     CommonModule,
     ProveedoresListComponent,
     ProveedoresCardsComponent,
-    ProveedorFiltersComponent
+    ProveedorFiltersComponent,
+    ProveedorFormModalComponent
   ],
   templateUrl: './proveedores-page.component.html',
   styleUrls: ['./proveedores-page.component.scss']
@@ -26,6 +28,10 @@ export class ProveedoresPageComponent implements OnInit {
 
   loading = false;
   error: string | null = null;
+
+  // Modal state
+  showFormModal = false;
+  selectedProveedor: Proveedor | null = null;
 
   currentPage = 1;
   limit = 12;
@@ -107,8 +113,25 @@ export class ProveedoresPageComponent implements OnInit {
     this.loadProveedores();
   }
 
+  openCreateModal(): void {
+    this.selectedProveedor = null;
+    this.showFormModal = true;
+  }
+
   onEditProveedor(proveedor: Proveedor): void {
-    console.log('Editar proveedor:', proveedor);
+    this.selectedProveedor = proveedor;
+    this.showFormModal = true;
+  }
+
+  closeFormModal(): void {
+    this.showFormModal = false;
+    this.selectedProveedor = null;
+  }
+
+  onProveedorSaved(proveedor: Proveedor): void {
+    console.log('Proveedor guardado:', proveedor);
+    this.loadProveedores();
+    this.loadStats();
   }
 
   onDeleteProveedor(id: number): void {
