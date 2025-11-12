@@ -1,99 +1,47 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, forkJoin } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-interface Consorcio {
-  id: number;
-  nombre: string;
-  direccion: string;
-  ciudad?: string;
-  provincia?: string;
-  unidadesFuncionales: number;
-  cantidadPersonas: number;
-  ticketsTotal: number;
-  ticketsPendientes: number;
-  estado: string;
-}
-
-interface ResumenGeneral {
+export interface Estadisticas {
   totalConsorcios: number;
   totalUnidades: number;
+  totalUsuarios: number;
   totalPersonas: number;
+  totalProveedores: number;
   totalTicketsPendientes: number;
 }
 
-@Injectable({ providedIn: 'root' })
+export interface ConsorcioConTickets {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  ticketsPendientes: number;
+  ticketsAbiertos: number;
+  ticketsEnProceso: number;
+  unidadesAfectadas: number;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
 export class DashboardService {
-  private apiUrl = environment.apiUrl;
+  private apiUrl = `${environment.apiUrl}/dashboard`;
 
   constructor(private http: HttpClient) {}
 
-  getConsorcios(): Observable<any[]> {
-  return this.http.get<any>(`${this.apiUrl}/consorcios`).pipe(
-    map((res) => {
-      // Si viene { rows: [...] }, extraemos los datos
-      if (Array.isArray(res)) return res;
-      if (res && Array.isArray(res.rows)) return res.rows;
-      if (res && Array.isArray(res.data)) return res.data;
-      // fallback vacío
-      return [];
-    })
-  );
-}
+  /**
+   * Obtiene las estadísticas generales del sistema
+   */
+  getEstadisticas(): Observable<Estadisticas> {
+    return this.http.get<Estadisticas>(`${this.apiUrl}/stats`);
+  }
 
-getUnidades(): Observable<any[]> {
-  return this.http.get<any>(`${this.apiUrl}/unidades`).pipe(
-    map((res) => (Array.isArray(res) ? res : res.rows || res.data || []))
-  );
-}
-
-getPersonas(): Observable<any[]> {
-  return this.http.get<any>(`${this.apiUrl}/personas`).pipe(
-    map((res) => (Array.isArray(res) ? res : res.rows || res.data || []))
-  );
-}
-
-getTickets(): Observable<any[]> {
-  return this.http.get<any>(`${this.apiUrl}/tickets`).pipe(
-    map((res) => (Array.isArray(res) ? res : res.rows || res.data || []))
-  );
-}
-
-
-  getDatosDashboard(): Observable<{ consorcios: Consorcio[]; resumen: ResumenGeneral }> {
-    return forkJoin({
-      consorcios: this.getConsorcios(),
-      unidades: this.getUnidades(),
-      personas: this.getPersonas(),
-      tickets: this.getTickets(),
-    }).pipe(
-      map(({ consorcios, unidades, personas, tickets }) => {
-        const consorciosCompletos = consorcios.map(c => {
-          const unidadesConsorcio = unidades.filter(u => u.consorcio_id === c.id);
-          const personasConsorcio = personas.filter(p => p.consorcio_id === c.id);
-          const ticketsConsorcio = tickets.filter(t => t.consorcio_id === c.id);
-          const ticketsPendientes = ticketsConsorcio.filter(t => t.estado !== 'cerrado').length;
-
-          return {
-            ...c,
-            unidadesFuncionales: unidadesConsorcio.length,
-            cantidadPersonas: personasConsorcio.length,
-            ticketsTotal: ticketsConsorcio.length,
-            ticketsPendientes,
-          };
-        });
-
-        const resumen: ResumenGeneral = {
-          totalConsorcios: consorciosCompletos.length,
-          totalUnidades: unidades.length,
-          totalPersonas: personas.length,
-          totalTicketsPendientes: tickets.filter(t => t.estado !== 'cerrado').length,
-        };
-
-        return { consorcios: consorciosCompletos, resumen };
-      })
-    );
+  /**
+   * Obtiene la lista de consorcios con tickets pendientes
+   * ordenados por cantidad (mayor a menor)
+   */
+  getTicketsPendientes(): Observable<ConsorcioConTickets[]> {
+    return this.http.get<ConsorcioConTickets[]>(`${this.apiUrl}/tickets-pendientes`);
   }
 }

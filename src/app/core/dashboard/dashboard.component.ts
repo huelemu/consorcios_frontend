@@ -1,27 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { DashboardService } from '../../core/services/dashboard.service';
-
-interface Consorcio {
-  id: number;
-  nombre: string;
-  direccion: string;
-  ciudad?: string;
-  provincia?: string;
-  unidadesFuncionales: number;
-  cantidadPersonas: number;
-  ticketsTotal: number;
-  ticketsPendientes: number;
-  estado: string;
-}
-
-interface ResumenGeneral {
-  totalConsorcios: number;
-  totalUnidades: number;
-  totalPersonas: number;
-  totalTicketsPendientes: number;
-}
+import { DashboardService, Estadisticas, ConsorcioConTickets } from '../services/dashboard.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -31,63 +12,75 @@ interface ResumenGeneral {
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
-  consorcios: Consorcio[] = [];
-  resumen: ResumenGeneral = {
+  estadisticas: Estadisticas = {
     totalConsorcios: 0,
     totalUnidades: 0,
+    totalUsuarios: 0,
     totalPersonas: 0,
+    totalProveedores: 0,
     totalTicketsPendientes: 0
   };
+  
+  consorciosConTickets: ConsorcioConTickets[] = [];
   loading = true;
+  error = false;
 
-  constructor(private router: Router, private dashboardService: DashboardService) {}
+  constructor(
+    private router: Router,
+    private dashboardService: DashboardService
+  ) {}
 
   ngOnInit(): void {
     this.cargarDatos();
   }
 
+  /**
+   * Carga las estadísticas y tickets pendientes desde el backend
+   */
   cargarDatos(): void {
     this.loading = true;
-    this.dashboardService.getDatosDashboard().subscribe({
-      next: ({ consorcios, resumen }) => {
-        this.consorcios = this.ordenarConsorcios(consorcios);
-        this.resumen = resumen;
+    this.error = false;
+    
+    forkJoin({
+      estadisticas: this.dashboardService.getEstadisticas(),
+      tickets: this.dashboardService.getTicketsPendientes()
+    }).subscribe({
+      next: (data) => {
+        this.estadisticas = data.estadisticas;
+        this.consorciosConTickets = data.tickets;
         this.loading = false;
       },
-      error: (err) => {
-        console.error('Error cargando dashboard:', err);
+      error: (error) => {
+        console.error('Error cargando datos del dashboard:', error);
         this.loading = false;
+        this.error = true;
       }
     });
   }
 
-  ordenarConsorcios(consorcios: Consorcio[]): Consorcio[] {
-    return consorcios.sort((a, b) => {
-      if (a.ticketsPendientes > 0 && b.ticketsPendientes === 0) return -1;
-      if (a.ticketsPendientes === 0 && b.ticketsPendientes > 0) return 1;
-      if (a.ticketsPendientes > 0 && b.ticketsPendientes > 0)
-        return b.ticketsPendientes - a.ticketsPendientes;
-      return a.nombre.localeCompare(b.nombre);
-    });
-  }
-
-  tienePendientes(consorcio: Consorcio): boolean {
-    return consorcio.ticketsPendientes > 0;
-  }
-
+  /**
+   * Navega al detalle del consorcio
+   */
   verDetalle(consorcioId: number): void {
+    console.log('Navegar a consorcio:', consorcioId);
     this.router.navigate(['/consorcios', consorcioId]);
   }
 
-  getDireccionCompleta(consorcio: Consorcio): string {
-    const partes = [consorcio.direccion];
-    if (consorcio.ciudad) partes.push(consorcio.ciudad);
-    return partes.join(', ');
+  /**
+   * Navega a la vista de tickets filtrada por el consorcio
+   */
+  verTickets(consorcioId: number, event: Event): void {
+    event.stopPropagation();
+    console.log('Ver tickets del consorcio:', consorcioId);
+    this.router.navigate(['/tickets'], { queryParams: { consorcio: consorcioId } });
   }
 
-  getTextoAlerta(cantidad: number): string {
-    return cantidad === 1 
-      ? '¡1 ticket pendiente!' 
-      : `¡${cantidad} tickets pendientes!`;
+  /**
+   * Obtiene el color del badge según cantidad de tickets
+   */
+  getBadgeColor(cantidad: number): string {
+    if (cantidad >= 5) return 'bg-red-100 text-red-800 border-red-300';
+    if (cantidad >= 3) return 'bg-orange-100 text-orange-800 border-orange-300';
+    return 'bg-yellow-100 text-yellow-800 border-yellow-300';
   }
 }

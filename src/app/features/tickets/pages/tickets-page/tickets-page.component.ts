@@ -22,7 +22,7 @@ export class TicketsPageComponent implements OnInit {
   private ticketsService = inject(TicketsService);
   private authService = inject(AuthService);
 
-  activeView: 'list' | 'cards' | 'kanban' = 'kanban'; // Por defecto Kanban
+  activeView: 'list' | 'cards' | 'kanban' = 'kanban';
   showFilters = true;
   isLoading = false;
 
@@ -37,7 +37,6 @@ export class TicketsPageComponent implements OnInit {
     cerrados: 0,
   };
 
-  // Para drag & drop
   draggedTicket: Ticket | null = null;
 
   filtersForm = this.fb.group({
@@ -77,12 +76,53 @@ export class TicketsPageComponent implements OnInit {
     this.stats.cerrados = this.tickets.filter((t) => t.estado === 'cerrado' || t.estado === 'resuelto').length;
   }
 
-  toggleFilters(): void {
-    this.showFilters = !this.showFilters;
+  limpiarFiltros(): void {
+    this.filtersForm.reset({
+      search: '',
+      estado: '',
+      prioridad: '',
+      tipo: '',
+    });
+    this.loadTickets();
   }
 
   setView(view: 'list' | 'cards' | 'kanban'): void {
     this.activeView = view;
+  }
+
+  // ========================================
+  // HELPERS DE VISUALIZACIÓN
+  // ========================================
+  getEstadoClass(estado: string): string {
+    const map: Record<string, string> = {
+      abierto: 'bg-green-100 text-green-700 border-green-200',
+      en_proceso: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+      pendiente: 'bg-orange-100 text-orange-700 border-orange-200',
+      resuelto: 'bg-blue-100 text-blue-700 border-blue-200',
+      cerrado: 'bg-gray-100 text-gray-700 border-gray-200',
+    };
+    return map[estado] || 'bg-gray-100 text-gray-700 border-gray-200';
+  }
+
+  getEstadoLabel(estado: string): string {
+    const map: Record<string, string> = {
+      abierto: 'Abierto',
+      en_proceso: 'En Proceso',
+      pendiente: 'Pendiente',
+      resuelto: 'Resuelto',
+      cerrado: 'Cerrado',
+    };
+    return map[estado] || estado;
+  }
+
+  getPrioridadColor(prioridad: string): string {
+    const map: Record<string, string> = {
+      baja: 'text-gray-600',
+      media: 'text-yellow-600',
+      alta: 'text-orange-600',
+      critica: 'text-red-600',
+    };
+    return map[prioridad] || 'text-gray-600';
   }
 
   // ========================================
@@ -99,7 +139,7 @@ export class TicketsPageComponent implements OnInit {
     this.draggedTicket = ticket;
     if (event.dataTransfer) {
       event.dataTransfer.effectAllowed = 'move';
-      event.dataTransfer.setData('text/html', ''); // Necesario para Firefox
+      event.dataTransfer.setData('text/html', '');
     }
   }
 
@@ -122,40 +162,20 @@ export class TicketsPageComponent implements OnInit {
       return;
     }
 
-    console.log('🔄 Cambiando estado:', {
-      ticketId: this.draggedTicket.id,
-      desde: estadoAnterior,
-      hacia: nuevoEstado
-    });
-
-    // Obtener userId
     const user = JSON.parse(localStorage.getItem('user') || 'null');
     const userId = user?.id;
 
-    // Actualizar estado en backend
     this.ticketsService.updateTicketEstado(this.draggedTicket.id, nuevoEstado, userId)
       .subscribe({
-        next: (response) => {
-          console.log('✅ Response del backend:', response);
-          console.log(`✅ Ticket #${this.draggedTicket?.id} movido de ${estadoAnterior} a ${nuevoEstado}`);
-          
-          // Actualizar estado local
+        next: () => {
           if (this.draggedTicket) {
             this.draggedTicket.estado = nuevoEstado as any;
           }
-          
           this.updateStats();
           this.draggedTicket = null;
         },
         error: (err) => {
-          console.error('❌ Error completo:', err);
-          console.error('❌ Error status:', err.status);
-          console.error('❌ Error message:', err.message);
-          console.error('❌ Error body:', err.error);
-          
-          // Comentado temporalmente para debug
-          // alert('Error al cambiar el estado del ticket');
-          
+          console.error('Error al cambiar el estado del ticket:', err);
           this.draggedTicket = null;
         }
       });
@@ -169,10 +189,9 @@ export class TicketsPageComponent implements OnInit {
     const userId = currentUser?.id || 1;
 
     const dialogRef = this.dialog.open(TicketFormComponent, {
-      width: '95vw',
-      maxWidth: '1200px',
-      height: '90vh',
-      panelClass: 'dialog-fullscreen',
+      width: '720px',
+      maxWidth: '95vw',
+      panelClass: 'custom-dialog-container',
       data: { userId },
     });
 

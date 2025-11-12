@@ -1,8 +1,11 @@
-<!-- Contenido puro de MatDialog: sin overlay custom -->
-<div class="w-[720px] max-w-[95vw]">
+<!-- Contenido puro de MatDialog -->
+<div class="w-full max-w-2xl">
   <!-- Header -->
-  <div class="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 rounded-t-2xl -mx-6 -mt-6 flex items-center justify-between">
-    <h2 class="text-2xl font-bold text-white">
+  <div class="sticky top-0 bg-gradient-to-r from-cyan-600 to-blue-600 px-6 py-4 -mx-6 -mt-6 flex items-center justify-between rounded-t-lg">
+    <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+      </svg>
       <ng-container *ngIf="!createdTicket; else tituloCreado">Nuevo Ticket</ng-container>
       <ng-template #tituloCreado>Ticket Creado</ng-template>
     </h2>
@@ -16,10 +19,17 @@
   <div class="p-6">
     <!-- Estado post-creación -->
     <div *ngIf="createdTicket" class="bg-green-50 border-l-4 border-green-500 p-6 rounded-lg mb-6">
-      <h3 class="text-lg font-semibold text-green-800 mb-2">✅ Ticket creado correctamente</h3>
-      <p class="text-green-700 mb-4">Número de Ticket:
-        <span class="font-bold">#{{ createdTicket.id }}</span>
-      </p>
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold text-green-800">Ticket creado correctamente</h3>
+          <p class="text-green-700">Número de Ticket: <span class="font-bold">#{{ createdTicket.id }}</span></p>
+        </div>
+      </div>
       <div class="flex flex-col sm:flex-row gap-3">
         <button
           class="flex-1 px-5 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition-colors"
@@ -27,7 +37,7 @@
           Cerrar
         </button>
         <button
-          class="flex-1 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+          class="flex-1 px-5 py-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg font-medium transition-colors"
           (click)="openEdit(createdTicket)">
           Ver / Editar Ticket
         </button>
@@ -35,12 +45,18 @@
     </div>
 
     <!-- Errores -->
-    <div *ngIf="error && !createdTicket" class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded">
-      <p class="text-red-700">{{ error }}</p>
+    <div *ngIf="error && !createdTicket" class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-lg">
+      <div class="flex items-center">
+        <svg class="w-5 h-5 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p class="text-red-700">{{ error }}</p>
+      </div>
     </div>
 
     <!-- Formulario -->
-    <form *ngIf="!createdTicket" #ticketForm="ngForm" (ngSubmit)="onSubmit(ticketForm)" class="space-y-6">
+    <form *ngIf="!createdTicket" #ticketForm="ngForm" (ngSubmit)="onSubmit(ticketForm)" class="space-y-5">
+      
       <!-- Consorcio -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -51,48 +67,69 @@
           [(ngModel)]="ticket.consorcio_id"
           (change)="onConsorcioChange()"
           required
-          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+          #consorcioInput="ngModel"
+          [class.border-red-500]="consorcioInput.invalid && consorcioInput.touched"
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition">
           <option [ngValue]="0">Selecciona un consorcio</option>
-          <option *ngFor="let c of consorcios" [ngValue]="c.id">{{ c.nombre }}</option>
+          <option *ngFor="let c of consorcios" [ngValue]="c.id">
+            {{ c.nombre }}{{ c.codigo_ext ? ' (' + c.codigo_ext + ')' : '' }}
+          </option>
         </select>
+        <p *ngIf="consorcioInput.invalid && consorcioInput.touched" class="mt-1 text-sm text-red-500">
+          Debes seleccionar un consorcio
+        </p>
       </div>
 
       <!-- Unidad -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Unidad</label>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Unidad Funcional <span class="text-gray-400">(opcional)</span>
+        </label>
         <select
           name="unidad_id"
           [(ngModel)]="ticket.unidad_id"
-          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
-          <option [ngValue]="0">Ninguna</option>
+          [disabled]="!ticket.consorcio_id || ticket.consorcio_id === 0 || unidades.length === 0"
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition disabled:bg-gray-100 disabled:cursor-not-allowed">
+          <option [ngValue]="0">Ninguna (ticket general del consorcio)</option>
           <option *ngFor="let u of unidades" [ngValue]="u.id">
-            {{ u.nombre || ('UF ' + u.id) }}
+            {{ u.codigo || u.nombre || ('UF ' + u.id) }}
           </option>
         </select>
+        <p *ngIf="ticket.consorcio_id && ticket.consorcio_id !== 0 && unidades.length === 0" class="mt-1 text-sm text-gray-500">
+          Este consorcio no tiene unidades funcionales cargadas
+        </p>
       </div>
 
       <!-- Tipo / Prioridad -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Tipo *</label>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Tipo <span class="text-red-500">*</span>
+          </label>
           <select
             name="tipo"
             [(ngModel)]="ticket.tipo"
             required
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+            #tipoInput="ngModel"
+            [class.border-red-500]="tipoInput.invalid && tipoInput.touched"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition">
             <option [ngValue]="''">Selecciona tipo</option>
             <option *ngFor="let t of tiposDisponibles" [ngValue]="t.value">{{ t.label }}</option>
           </select>
+          <p *ngIf="tipoInput.invalid && tipoInput.touched" class="mt-1 text-sm text-red-500">
+            Debes seleccionar un tipo
+          </p>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Prioridad *</label>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Prioridad <span class="text-red-500">*</span>
+          </label>
           <select
             name="prioridad"
             [(ngModel)]="ticket.prioridad"
             required
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
-            <option [ngValue]="''">Selecciona prioridad</option>
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition">
             <option *ngFor="let p of prioridadesDisponibles" [ngValue]="p.value">{{ p.label }}</option>
           </select>
         </div>
@@ -100,40 +137,73 @@
 
       <!-- Título -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Título *</label>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Título <span class="text-red-500">*</span>
+        </label>
         <input
           type="text"
           name="titulo"
           [(ngModel)]="ticket.titulo"
           required
-          placeholder="Ej: Fuga de agua en hall"
-          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
+          minlength="5"
+          maxlength="200"
+          #tituloInput="ngModel"
+          [class.border-red-500]="tituloInput.invalid && tituloInput.touched"
+          placeholder="Ej: Fuga de agua en hall de entrada"
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition" />
+        <div class="flex justify-between items-center mt-1">
+          <p *ngIf="tituloInput.invalid && tituloInput.touched" class="text-sm text-red-500">
+            El título debe tener al menos 5 caracteres
+          </p>
+          <p class="text-xs text-gray-500 ml-auto">
+            {{ ticket.titulo?.length || 0 }}/200
+          </p>
+        </div>
       </div>
 
       <!-- Descripción -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Descripción *</label>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Descripción <span class="text-red-500">*</span>
+        </label>
         <textarea
           name="descripcion"
           [(ngModel)]="ticket.descripcion"
-          rows="4"
+          rows="5"
           required
-          placeholder="Describe el problema..."
-          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"></textarea>
+          minlength="10"
+          maxlength="1000"
+          #descripcionInput="ngModel"
+          [class.border-red-500]="descripcionInput.invalid && descripcionInput.touched"
+          placeholder="Describe el problema o solicitud de forma detallada..."
+          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition resize-none"></textarea>
+        <div class="flex justify-between items-center mt-1">
+          <p *ngIf="descripcionInput.invalid && descripcionInput.touched" class="text-sm text-red-500">
+            La descripción debe tener al menos 10 caracteres
+          </p>
+          <p class="text-xs text-gray-500 ml-auto">
+            {{ ticket.descripcion?.length || 0 }}/1000
+          </p>
+        </div>
       </div>
 
       <!-- Botones -->
-      <div class="flex justify-end gap-3 pt-2">
-        <button type="button"
-                (click)="onClose()"
-                class="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition-colors">
+      <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+        <button
+          type="button"
+          (click)="onClose()"
+          class="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition-colors">
           Cancelar
         </button>
-        <button type="submit"
-                [disabled]="loading"
-                class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+        <button
+          type="submit"
+          [disabled]="loading || ticketForm.invalid"
+          class="px-6 py-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
           <span *ngIf="loading" class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></span>
-          <span>{{ loading ? 'Guardando...' : 'Crear Ticket' }}</span>
+          <svg *ngIf="!loading" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+          <span>{{ loading ? 'Creando...' : 'Crear Ticket' }}</span>
         </button>
       </div>
     </form>
