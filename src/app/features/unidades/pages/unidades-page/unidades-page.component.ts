@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { UnidadesService } from '../../services/unidades.service';
 import { ConsorciosService } from '../../../consorcios/services/consorcios.service';
 import { UnidadFilters, UnidadFuncional, UnidadesStats } from '../../models/unidad.model';
@@ -67,10 +67,12 @@ export class UnidadesPageComponent implements OnInit {
   constructor(
     private unidadesService: UnidadesService,
     private consorciosService: ConsorciosService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute 
   ) {}
 
   ngOnInit(): void {
+    this.loadQueryParams();
     this.loadConsorcios();
     this.loadUnidades();
     this.loadStats();
@@ -126,6 +128,14 @@ export class UnidadesPageComponent implements OnInit {
       }
     });
   }
+
+  private loadQueryParams(): void {
+    this.route.queryParams.subscribe(params => {
+      if (params['consorcio_id']) {
+        this.filters.consorcio_id = +params['consorcio_id'];
+      }
+        });
+      }
 
   loadStats(): void {
     this.loadingStats = true;
