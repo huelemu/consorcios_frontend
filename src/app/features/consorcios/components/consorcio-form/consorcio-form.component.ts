@@ -24,6 +24,7 @@ export class ConsorcioFormComponent implements OnInit {
   consorcioId: number | null = null;
   loading = false;
   loadingData = false;
+  isPageMode = false; // Detecta si está en modo página (ruta) vs modal
 
   constructor(
     private fb: FormBuilder,
@@ -34,7 +35,10 @@ export class ConsorcioFormComponent implements OnInit {
     private toastr: ToastrService,
     private appRef: ApplicationRef,
     private injector: EnvironmentInjector
-  ) {}
+  ) {
+    // Detectar si estamos en modo página (ruta directa) o modal
+    this.isPageMode = this.router.url.includes('/consorcios/');
+  }
 
   ngOnInit() {
     this.form = this.fb.group({
@@ -128,10 +132,15 @@ export class ConsorcioFormComponent implements OnInit {
   }
 
   onClose(): void {
-  // Si este form se usa en popup propio, simplemente ocultamos el modal:
-  const backdrop = document.querySelector('.modal-backdrop');
-  backdrop?.remove();
-}
+    if (this.isPageMode) {
+      // En modo página, navegar de regreso
+      this.router.navigate(['/consorcios']);
+    } else {
+      // En modo modal, cerrar el modal
+      const backdrop = document.querySelector('.modal-backdrop');
+      backdrop?.remove();
+    }
+  }
 
 onBackdropClick(event: MouseEvent): void {
   if ((event.target as HTMLElement).classList.contains('modal-backdrop')) {
