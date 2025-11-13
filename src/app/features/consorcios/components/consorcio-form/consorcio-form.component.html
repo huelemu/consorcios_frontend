@@ -14,7 +14,7 @@
     <div class="modal-header bg-gradient-to-r from-indigo-500 to-indigo-600 px-6 py-5 flex items-center justify-between">
       <h2 class="text-2xl font-bold text-white flex items-center gap-2">
         <mat-icon class="text-white">business</mat-icon>
-        Crear Consorcio
+        {{ isEditMode ? 'Editar Consorcio' : 'Crear Consorcio' }}
       </h2>
       <button
         (click)="onClose()"
@@ -27,12 +27,19 @@
 
     <!-- Formulario -->
     <div class="modal-body overflow-y-auto max-h-[calc(90vh-200px)] px-6 py-6">
-      <form [formGroup]="form" class="flex flex-col gap-4">
 
-      <div class="form-group">
-        <label class="font-semibold text-gray-700">Código Externo</label>
-        <input formControlName="codigo_ext" class="input" placeholder="" />
+      <!-- Loading Spinner -->
+      <div *ngIf="loadingData" class="flex justify-center items-center py-12">
+        <div class="h-12 w-12 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent"></div>
       </div>
+
+      <!-- Formulario -->
+      <form [formGroup]="form" class="flex flex-col gap-4" *ngIf="!loadingData">
+
+        <div class="form-group">
+          <label class="font-semibold text-gray-700">Código Externo</label>
+          <input formControlName="codigo_ext" class="input" placeholder="Código interno del edificio" />
+        </div>
 
         <div>
           <label class="font-semibold text-gray-700">Nombre del Consorcio *</label>
@@ -56,7 +63,23 @@
         </div>
 
         <div>
-          <label class="font-semibold text-gray-700">Responsable del edificio</label>
+          <label class="font-semibold text-gray-700">CUIT</label>
+          <input formControlName="cuit" class="input" placeholder="XX-XXXXXXXX-X" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="font-semibold text-gray-700">Teléfono de Contacto</label>
+            <input formControlName="telefono_contacto" class="input" placeholder="Ej. +54 11 1234-5678" />
+          </div>
+          <div>
+            <label class="font-semibold text-gray-700">Email de Contacto</label>
+            <input formControlName="email_contacto" type="email" class="input" placeholder="Ej. contacto@edificio.com" />
+          </div>
+        </div>
+
+        <div>
+          <label class="font-semibold text-gray-700">Responsable del Edificio</label>
           <div class="flex gap-2">
             <select formControlName="responsable_id" class="input flex-1">
               <option [ngValue]="null">Seleccione...</option>
@@ -64,8 +87,8 @@
                 {{ r.nombre }} {{ r.apellido }}
               </option>
             </select>
-            <button type="button" (click)="crearResponsableNuevo()" 
-              class="bg-indigo-500 text-white rounded-lg px-3 py-2 hover:bg-indigo-600">
+            <button type="button" (click)="crearResponsableNuevo()"
+              class="bg-indigo-500 text-white rounded-lg px-3 py-2 hover:bg-indigo-600 whitespace-nowrap">
               + Nuevo
             </button>
           </div>
@@ -76,8 +99,19 @@
 
     <!-- Footer -->
     <div class="modal-footer flex justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
-      <button (click)="onClose()" class="btn-secondary">Cancelar</button>
-      <button (click)="onSubmit()" class="btn-primary">Guardar</button>
+      <button
+        (click)="onClose()"
+        class="btn-secondary"
+        [disabled]="loading">
+        Cancelar
+      </button>
+      <button
+        (click)="onSubmit()"
+        class="btn-primary flex items-center gap-2"
+        [disabled]="loading || loadingData">
+        <div *ngIf="loading" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        <span>{{ isEditMode ? 'Actualizar' : 'Guardar' }}</span>
+      </button>
     </div>
   </div>
 </div>

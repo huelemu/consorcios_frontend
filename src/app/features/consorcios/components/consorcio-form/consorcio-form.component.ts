@@ -7,7 +7,8 @@ import { PersonaFormDialogComponent } from '../../../personas/components/persona
 import { MatIconModule } from '@angular/material/icon';
 import { ConsorciosService } from '../../services/consorcios.service';
 import { ToastrService } from 'ngx-toastr';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
+import { Consorcio, UpdateConsorcioDto, CreateConsorcioDto } from '../../models/consorcio.model';
 
 
 @Component({
@@ -20,6 +21,10 @@ import { Router } from '@angular/router';
 export class ConsorcioFormComponent implements OnInit {
   form!: FormGroup;
   responsables: any[] = [];
+  isEditMode = false;
+  consorcioId: number | null = null;
+  loading = false;
+  loadingData = false;
 
   constructor(
     private fb: FormBuilder,
@@ -27,6 +32,7 @@ export class ConsorcioFormComponent implements OnInit {
     private modalService: ModalService,
     private consorciosService: ConsorciosService,
     private router: Router,
+    private route: ActivatedRoute,
     private toastr: ToastrService
   ) {}
 
@@ -37,17 +43,59 @@ export class ConsorcioFormComponent implements OnInit {
       codigo_ext: [''],
       ciudad: [''],
       provincia: [''],
-      responsable_id: [null]
+      responsable_id: [null],
+      cuit: [''],
+      telefono_contacto: [''],
+      email_contacto: ['']
     });
 
     this.cargarResponsables();
+
+    // Verificar si estamos en modo edición
+    this.route.params.subscribe(params => {
+      if (params['id']) {
+        this.isEditMode = true;
+        this.consorcioId = +params['id'];
+        this.loadConsorcio();
+      }
+    });
   }
 
   cargarResponsables() {
-  this.personasService.getPersonas({ limit: 100 }).subscribe((res: any) => {
-    this.responsables = res.data; // porque la API devuelve { data: Persona[], pagination: ... }
-  });
-}
+    this.personasService.getPersonas({ limit: 100 }).subscribe((res: any) => {
+      this.responsables = res.data; // porque la API devuelve { data: Persona[], pagination: ... }
+    });
+  }
+
+  /**
+   * Cargar datos del consorcio para edición
+   */
+  loadConsorcio(): void {
+    if (!this.consorcioId) return;
+
+    this.loadingData = true;
+    this.consorciosService.getConsorcioById(this.consorcioId).subscribe({
+      next: (consorcio: Consorcio) => {
+        this.form.patchValue({
+          nombre: consorcio.nombre,
+          direccion: consorcio.direccion,
+          codigo_ext: consorcio.codigo_ext,
+          ciudad: consorcio.ciudad,
+          provincia: consorcio.provincia,
+          responsable_id: consorcio.responsable_id,
+          cuit: consorcio.cuit,
+          telefono_contacto: consorcio.telefono_contacto,
+          email_contacto: consorcio.email_contacto
+        });
+        this.loadingData = false;
+      },
+      error: (err) => {
+        console.error('Error al cargar consorcio:', err);
+        this.toastr.error('Error al cargar los datos del consorcio', 'Error');
+        this.loadingData = false;
+      }
+    });
+  }
 
   async crearResponsableNuevo() {
     const result = await this.modalService.open('Nueva Persona', PersonaFormDialogComponent, 'user');
@@ -72,34 +120,75 @@ onEscapeKey(event: KeyboardEvent): void {
   }
 }
 onSubmit(): void {
-  if (this.form.invalid) {
-    this.form.markAllAsTouched();
-    return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.toastr.warning('Por favor completa todos los campos obligatorios', 'Validación');
+      return;
+    }
+
+    this.loading = true;
+
+    if (this.isEditMode && this.consorcioId) {
+      this.updateConsorcio();
+    } else {
+      this.createConsorcio();
+    }
   }
 
-  const consorcioData = this.form.value;
+  /**
+   * Crear nuevo consorcio
+   */
+  createConsorcio(): void {
+    const consorcioData: CreateConsorcioDto = this.form.value;
 
-  this.consorciosService.createConsorcio(consorcioData).subscribe({
-    next: (res: any) => {
-      // Mostrar toast
-      this.toastr.success('Consorcio creado correctamente', 'Éxito');
-      const consorcioId = res?.data?.id;
-      // Cerrar el modal
-      this.onClose();
+    this.consorciosService.createConsorcio(consorcioData).subscribe({
+      next: (res: any) => {
+        this.toastr.success('Consorcio creado correctamente', 'Éxito');
+        const consorcioId = res?.data?.id;
+        this.loading = false;
+        this.onClose();
 
-      // Redirigir al detalle del consorcio
-  setTimeout(() => {
-    if (consorcioId) {
-      this.router.navigate(['/consorcios', consorcioId]);
-    } else {
-      this.router.navigate(['/consorcios']);
-    }
-  }, 500);
-},
-    error: (err) => {
-      console.error('Error al guardar el consorcio:', err);
-      this.toastr.error('Ocurrió un error al guardar el consorcio', 'Error');
-    },
-  });
-}
+        // Redirigir al detalle del consorcio
+        setTimeout(() => {
+          if (consorcioId) {
+            this.router.navigate(['/consorcios', consorcioId]);
+          } else {
+            this.router.navigate(['/consorcios']);
+          }
+        }, 500);
+      },
+      error: (err) => {
+        console.error('Error al crear el consorcio:', err);
+        this.toastr.error(err.error?.message || 'Ocurrió un error al crear el consorcio', 'Error');
+        this.loading = false;
+      }
+    });
+  }
+
+  /**
+   * Actualizar consorcio existente
+   */
+  updateConsorcio(): void {
+    if (!this.consorcioId) return;
+
+    const consorcioData: UpdateConsorcioDto = this.form.value;
+
+    this.consorciosService.updateConsorcio(this.consorcioId, consorcioData).subscribe({
+      next: (res: any) => {
+        this.toastr.success('Consorcio actualizado correctamente', 'Éxito');
+        this.loading = false;
+        this.onClose();
+
+        // Redirigir al detalle del consorcio
+        setTimeout(() => {
+          this.router.navigate(['/consorcios', this.consorcioId]);
+        }, 500);
+      },
+      error: (err) => {
+        console.error('Error al actualizar el consorcio:', err);
+        this.toastr.error(err.error?.message || 'Ocurrió un error al actualizar el consorcio', 'Error');
+        this.loading = false;
+      }
+    });
+  }
 }
