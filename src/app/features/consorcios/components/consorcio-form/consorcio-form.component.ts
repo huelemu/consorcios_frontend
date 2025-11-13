@@ -1,8 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ComponentRef, ApplicationRef, createComponent, EnvironmentInjector } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PersonasService } from '../../../personas/services/personas.service';
-import { ModalService } from '../../../../core/services/modal.service';
 import { PersonaFormDialogComponent } from '../../../personas/components/persona-form-dialog/persona-form-dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { ConsorciosService } from '../../services/consorcios.service';
@@ -29,11 +28,12 @@ export class ConsorcioFormComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private personasService: PersonasService,
-    private modalService: ModalService,
     private consorciosService: ConsorciosService,
     private router: Router,
     private route: ActivatedRoute,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private appRef: ApplicationRef,
+    private injector: EnvironmentInjector
   ) {}
 
   ngOnInit() {
@@ -97,9 +97,34 @@ export class ConsorcioFormComponent implements OnInit {
     });
   }
 
-  async crearResponsableNuevo() {
-    const result = await this.modalService.open('Nueva Persona', PersonaFormDialogComponent, 'user');
-    if (result === 'saved') this.cargarResponsables();
+  crearResponsableNuevo() {
+    // Crear el componente dinámicamente
+    const componentRef: ComponentRef<PersonaFormDialogComponent> = createComponent(
+      PersonaFormDialogComponent,
+      {
+        environmentInjector: this.injector
+      }
+    );
+
+    // Suscribirse a los eventos del modal
+    componentRef.instance.close.subscribe(() => {
+      this.closePersonaModal(componentRef);
+    });
+
+    componentRef.instance.saved.subscribe(() => {
+      this.closePersonaModal(componentRef);
+      this.cargarResponsables();
+      this.toastr.success('Persona creada correctamente', 'Éxito');
+    });
+
+    // Agregar al DOM
+    document.body.appendChild(componentRef.location.nativeElement);
+    this.appRef.attachView(componentRef.hostView);
+  }
+
+  private closePersonaModal(componentRef: ComponentRef<PersonaFormDialogComponent>) {
+    this.appRef.detachView(componentRef.hostView);
+    componentRef.destroy();
   }
 
   onClose(): void {
