@@ -72,7 +72,8 @@ export class UnidadesPageComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadQueryParams();
+    // Cargar filtros desde URL de forma síncrona ANTES de cargar datos
+    this.loadFiltersFromUrl();
     this.loadConsorcios();
     this.loadUnidades();
     this.loadStats();
@@ -129,13 +130,24 @@ export class UnidadesPageComponent implements OnInit {
     });
   }
 
-  private loadQueryParams(): void {
-    this.route.queryParams.subscribe(params => {
-      if (params['consorcio_id']) {
-        this.filters.consorcio_id = +params['consorcio_id'];
+  private loadFiltersFromUrl(): void {
+    // Leer parámetros de URL de forma síncrona
+    const params = this.route.snapshot.queryParams;
+
+    if (params['consorcio_id']) {
+      this.filters.consorcio_id = +params['consorcio_id'];
+    }
+
+    // También suscribirse para cambios futuros en la URL
+    this.route.queryParams.subscribe(queryParams => {
+      if (queryParams['consorcio_id'] && +queryParams['consorcio_id'] !== this.filters.consorcio_id) {
+        this.filters.consorcio_id = +queryParams['consorcio_id'];
+        this.currentPage = 1;
+        this.loadUnidades();
+        this.loadStats();
       }
-        });
-      }
+    });
+  }
 
   loadStats(): void {
     this.loadingStats = true;
