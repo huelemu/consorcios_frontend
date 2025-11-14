@@ -131,8 +131,8 @@ export class TicketEditDialogComponent implements OnInit, OnDestroy {
         if (!term || term.length < 2) {
           return [];
         }
-        // Buscar usuarios con rol admin_edificio
-        return this.usuariosService.getUsuarios({ search: term, rol_global: 'admin_edificio', limit: 10 });
+        // Buscar usuarios activos
+        return this.usuariosService.getUsuarios({ search: term, activo: true, limit: 10 });
       })
     ).subscribe({
       next: (response) => {
@@ -239,7 +239,8 @@ export class TicketEditDialogComponent implements OnInit, OnDestroy {
 
   // Cargar listas iniciales
   cargarEncargadosIniciales(): void {
-    this.usuariosService.getUsuarios({ rol_global: 'admin_edificio', limit: 15 }).subscribe({
+    // Buscar usuarios sin filtro de rol específico (mostrar todos los usuarios disponibles)
+    this.usuariosService.getUsuarios({ limit: 15, activo: true }).subscribe({
       next: (response) => {
         this.encargadosEncontrados = response.usuarios || [];
         this.mostrarResultadosEncargados = true;
