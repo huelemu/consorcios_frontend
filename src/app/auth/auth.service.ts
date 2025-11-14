@@ -14,6 +14,8 @@ export interface User {
   rol: string;
   picture?: string;
   primer_login?: boolean;
+  aprobado?: boolean; // Usuario aprobado por un administrador
+  activo?: boolean;   // Usuario activo en el sistema
 }
 
 export interface AuthResponse {
@@ -263,6 +265,31 @@ export class AuthService {
    */
   isAdmin(): boolean {
     return this.hasAnyRole(['admin_global', 'tenant_admin', 'admin_consorcio']);
+  }
+
+  /**
+   * Verifica si el usuario está aprobado
+   */
+  isApproved(): boolean {
+    const user = this.getCurrentUser();
+    // Si no tiene el campo aprobado, se considera aprobado por compatibilidad
+    return user?.aprobado !== false;
+  }
+
+  /**
+   * Verifica si el usuario está activo
+   */
+  isActive(): boolean {
+    const user = this.getCurrentUser();
+    return user?.activo !== false;
+  }
+
+  /**
+   * Verifica si el usuario puede acceder a la aplicación
+   * (debe estar aprobado Y activo)
+   */
+  canAccessApp(): boolean {
+    return this.isApproved() && this.isActive();
   }
 
   /**
