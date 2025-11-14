@@ -45,6 +45,14 @@ export class UnidadDetailComponent implements OnInit {
   // Modales
   showDeleteModal = false;
 
+  // Secciones colapsables
+  collapsedSections: { [key: string]: boolean } = {
+    tickets: false,     // Los tickets siempre visibles por defecto
+    info: false,        // Información general visible
+    consorcio: true,    // Consorcio colapsado por defecto
+    personas: true      // Personas colapsado por defecto
+  };
+
   // Constantes para el template
   readonly ESTADO_LABELS = ESTADO_UNIDAD_LABELS;
   readonly ESTADO_COLORS = ESTADO_UNIDAD_COLORS;
@@ -399,5 +407,12 @@ export class UnidadDetailComponent implements OnInit {
       critica: 'Crítica'
     };
     return labels[prioridad] || prioridad;
+  }
+
+  /**
+   * Toggle sección colapsable
+   */
+  toggleSection(section: string): void {
+    this.collapsedSections[section] = !this.collapsedSections[section];
   }
 }
