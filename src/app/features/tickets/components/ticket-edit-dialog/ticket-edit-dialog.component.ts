@@ -226,15 +226,58 @@ export class TicketEditDialogComponent implements OnInit, OnDestroy {
       asignadoRol: null,
       proveedorId: null
     });
+
+    // Cargar lista inicial según el tipo seleccionado
+    if (tipo === 'encargado') {
+      this.cargarEncargadosIniciales();
+    } else if (tipo === 'proveedor') {
+      this.cargarProveedoresIniciales();
+    } else if (tipo === 'persona') {
+      this.cargarPersonasIniciales();
+    }
+  }
+
+  // Cargar listas iniciales
+  cargarEncargadosIniciales(): void {
+    this.usuariosService.getUsuarios({ rol_global: 'admin_edificio', limit: 15 }).subscribe({
+      next: (response) => {
+        this.encargadosEncontrados = response.usuarios || [];
+        this.mostrarResultadosEncargados = true;
+      },
+      error: (err) => console.error('Error cargando encargados:', err)
+    });
+  }
+
+  cargarProveedoresIniciales(): void {
+    this.proveedoresService.getProveedores({ limit: 15, activo: true }).subscribe({
+      next: (response) => {
+        this.proveedoresEncontrados = response.data || [];
+        this.mostrarResultadosProveedores = true;
+      },
+      error: (err) => console.error('Error cargando proveedores:', err)
+    });
+  }
+
+  cargarPersonasIniciales(): void {
+    this.usuariosService.getUsuarios({ limit: 15 }).subscribe({
+      next: (response) => {
+        this.personasEncontradas = response.usuarios || [];
+        this.mostrarResultadosPersonas = true;
+      },
+      error: (err) => console.error('Error cargando personas:', err)
+    });
   }
 
   onEncargadoSearchInput(term: string): void {
     this.encargadoSearchTerm = term;
     if (term.length >= 2) {
       this.encargadoSearchSubject.next(term);
+    } else if (term.length === 0) {
+      // Si borra todo, volver a cargar lista inicial
+      this.cargarEncargadosIniciales();
     } else {
-      this.encargadosEncontrados = [];
-      this.mostrarResultadosEncargados = false;
+      // Si tiene 1 carácter, mantener la lista visible pero no buscar
+      this.mostrarResultadosEncargados = this.encargadosEncontrados.length > 0;
     }
   }
 
@@ -251,9 +294,12 @@ export class TicketEditDialogComponent implements OnInit, OnDestroy {
     this.personaSearchTerm = term;
     if (term.length >= 2) {
       this.personaSearchSubject.next(term);
+    } else if (term.length === 0) {
+      // Si borra todo, volver a cargar lista inicial
+      this.cargarPersonasIniciales();
     } else {
-      this.personasEncontradas = [];
-      this.mostrarResultadosPersonas = false;
+      // Si tiene 1 carácter, mantener la lista visible pero no buscar
+      this.mostrarResultadosPersonas = this.personasEncontradas.length > 0;
     }
   }
 
@@ -278,9 +324,12 @@ export class TicketEditDialogComponent implements OnInit, OnDestroy {
     this.proveedorSearchTerm = term;
     if (term.length >= 2) {
       this.proveedorSearchSubject.next(term);
+    } else if (term.length === 0) {
+      // Si borra todo, volver a cargar lista inicial
+      this.cargarProveedoresIniciales();
     } else {
-      this.proveedoresEncontrados = [];
-      this.mostrarResultadosProveedores = false;
+      // Si tiene 1 carácter, mantener la lista visible pero no buscar
+      this.mostrarResultadosProveedores = this.proveedoresEncontrados.length > 0;
     }
   }
 
