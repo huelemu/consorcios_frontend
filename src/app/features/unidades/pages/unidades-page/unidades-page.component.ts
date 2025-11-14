@@ -3,12 +3,15 @@ import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { UnidadesService } from '../../services/unidades.service';
 import { ConsorciosService } from '../../../consorcios/services/consorcios.service';
+import { AuthService } from '../../../../auth/auth.service';
 import { UnidadFilters, UnidadFuncional, UnidadesStats } from '../../models/unidad.model';
 import { Consorcio } from '../../../consorcios/models/consorcio.model';
 import { UnidadFiltersComponent } from '../../components/unidad-filters/unidad-filters.component';
 import { UnidadCardComponent } from '../../components/unidad-card/unidad-card.component';
 import { UnidadListComponent } from '../../components/unidad-list/unidad-list.component';
 import { UnidadFormComponent } from '../../components/unidad-form/unidad-form.component';
+import { MatDialog } from '@angular/material/dialog';
+import { TicketFormComponent } from '../../../tickets/components/ticket-form/ticket-form.component';
 
 @Component({
   selector: 'app-unidades-page',
@@ -67,8 +70,10 @@ export class UnidadesPageComponent implements OnInit {
   constructor(
     private unidadesService: UnidadesService,
     private consorciosService: ConsorciosService,
+    private authService: AuthService,
     private router: Router,
-    private route: ActivatedRoute 
+    private route: ActivatedRoute,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -252,5 +257,40 @@ export class UnidadesPageComponent implements OnInit {
     this.loadConsorcios();
     this.loadUnidades();
     this.loadStats();
+  }
+
+  /**
+   * Crear ticket para una unidad
+   */
+  onCreateTicket(unidad: UnidadFuncional | any): void {
+    const currentUser = this.authService.getCurrentUser();
+
+    if (!currentUser || !currentUser.id) {
+      alert('Debes iniciar sesión para crear un ticket.');
+      return;
+    }
+
+    const dialogData = {
+      userId: currentUser.id,
+      consorcioId: unidad.consorcio_id,
+      consorcioNombre: unidad.consorcio?.nombre,
+      unidadId: unidad.id,
+      unidadNombre: `${unidad.codigo} - Piso ${unidad.piso}`
+    };
+
+    const dialogRef = this.dialog.open(TicketFormComponent, {
+      width: '900px',
+      maxHeight: '90vh',
+      disableClose: false,
+      data: dialogData
+    });
+
+    dialogRef.afterClosed().subscribe((ticket) => {
+      if (ticket) {
+        console.log('✅ Ticket creado:', ticket);
+        this.loadUnidades();
+        this.loadStats();
+      }
+    });
   }
 }

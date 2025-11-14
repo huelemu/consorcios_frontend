@@ -2,13 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { UnidadesService } from '../../services/unidades.service';
+import { TicketsService } from '../../../tickets/services/tickets.service';
 import { AuthService } from '../../../../auth/auth.service';
-import { 
-  UnidadFuncional, 
-  ESTADO_UNIDAD_LABELS, 
+import {
+  UnidadFuncional,
+  ESTADO_UNIDAD_LABELS,
   ESTADO_UNIDAD_COLORS,
-  ESTADO_UNIDAD_ICONS 
+  ESTADO_UNIDAD_ICONS
 } from '../../models/unidad.model';
+import { Ticket } from '../../../tickets/models/ticket.model';
 import { MatDialog } from '@angular/material/dialog';
 import { TicketFormComponent } from '../../../tickets/components/ticket-form/ticket-form.component';
 
@@ -32,6 +34,10 @@ export class UnidadDetailComponent implements OnInit {
   loading = false;
   error: string | null = null;
 
+  // Tickets
+  tickets: Ticket[] = [];
+  loadingTickets = false;
+
   // Permisos
   canEdit = false;
   canDelete = false;
@@ -46,6 +52,7 @@ export class UnidadDetailComponent implements OnInit {
 
   constructor(
     private unidadesService: UnidadesService,
+    private ticketsService: TicketsService,
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
@@ -57,6 +64,7 @@ export class UnidadDetailComponent implements OnInit {
     this.getUnidadIdFromRoute();
     if (this.unidadId) {
       this.loadUnidad();
+      this.loadTickets();
     }
   }
 
@@ -231,43 +239,165 @@ export class UnidadDetailComponent implements OnInit {
    * Abre el modal para crear un nuevo ticket asociado a esta unidad
    */
   crearTicket(): void {
-  if (!this.unidad) {
-    console.error('No hay unidad cargada');
-    return;
-  }
-
-  // Obtener el usuario autenticado
-  const currentUser = this.authService.getCurrentUser();
-  console.log('🔍 Usuario autenticado:', currentUser);
-  console.log('🔍 ID del usuario:', currentUser?.id);
-
-  if (!currentUser || !currentUser.id) {
-    console.error('No hay usuario autenticado');
-    this.error = 'Debes iniciar sesión para crear un ticket.';
-    return;
-  }
-
-  const dialogData = {
-    userId: currentUser.id,
-    consorcioId: this.unidad.consorcio_id,
-    consorcioNombre: this.unidad.consorcio?.nombre,
-    unidadId: this.unidad.id,
-    unidadNombre: `${this.unidad.codigo} - Piso ${this.unidad.piso}`
-  };
-  console.log('📦 Datos que se pasarán al modal:', dialogData);
-
-  const dialogRef = this.dialog.open(TicketFormComponent, {
-    width: '900px',
-    maxHeight: '90vh',
-    disableClose: false,
-    data: dialogData
-  });
-
-  dialogRef.afterClosed().subscribe((ticket) => {
-    if (ticket) {
-      console.log('✅ Ticket creado:', ticket);
-      this.loadUnidad();
+    if (!this.unidad) {
+      console.error('No hay unidad cargada');
+      return;
     }
-  });
-}
+
+    // Obtener el usuario autenticado
+    const currentUser = this.authService.getCurrentUser();
+    console.log('🔍 Usuario autenticado:', currentUser);
+    console.log('🔍 ID del usuario:', currentUser?.id);
+
+    if (!currentUser || !currentUser.id) {
+      console.error('No hay usuario autenticado');
+      this.error = 'Debes iniciar sesión para crear un ticket.';
+      return;
+    }
+
+    const dialogData = {
+      userId: currentUser.id,
+      consorcioId: this.unidad.consorcio_id,
+      consorcioNombre: this.unidad.consorcio?.nombre,
+      unidadId: this.unidad.id,
+      unidadNombre: `${this.unidad.codigo} - Piso ${this.unidad.piso}`
+    };
+    console.log('📦 Datos que se pasarán al modal:', dialogData);
+
+    const dialogRef = this.dialog.open(TicketFormComponent, {
+      width: '900px',
+      maxHeight: '90vh',
+      disableClose: false,
+      data: dialogData
+    });
+
+    dialogRef.afterClosed().subscribe((ticket) => {
+      if (ticket) {
+        console.log('✅ Ticket creado:', ticket);
+        this.loadUnidad();
+        this.loadTickets();
+      }
+    });
+  }
+
+  /**
+   * Navegar a agregar persona a la unidad
+   */
+  agregarPersona(): void {
+    if (this.unidadId) {
+      this.router.navigate(['/personas/nueva'], {
+        queryParams: { unidadId: this.unidadId }
+      });
+    }
+  }
+
+  /**
+   * Ver expensas de la unidad
+   */
+  verExpensas(): void {
+    if (this.unidad?.consorcio_id) {
+      this.router.navigate(['/expensas'], {
+        queryParams: {
+          consorcioId: this.unidad.consorcio_id,
+          unidadId: this.unidadId
+        }
+      });
+    }
+  }
+
+  /**
+   * Cargar tickets de la unidad
+   */
+  loadTickets(): void {
+    if (!this.unidadId) return;
+
+    this.loadingTickets = true;
+    this.ticketsService.getTickets({ unidadId: this.unidadId }).subscribe({
+      next: (tickets) => {
+        this.tickets = tickets;
+        this.loadingTickets = false;
+      },
+      error: (err) => {
+        console.error('Error al cargar tickets:', err);
+        this.tickets = [];
+        this.loadingTickets = false;
+      }
+    });
+  }
+
+  /**
+   * Ver ticket
+   */
+  verTicket(ticketId: number): void {
+    this.router.navigate(['/tickets', ticketId]);
+  }
+
+  /**
+   * Obtener clase de estado del ticket
+   */
+  getEstadoTicketClass(estado: string): string {
+    const classes: { [key: string]: string } = {
+      abierto: 'bg-red-100 text-red-800',
+      en_proceso: 'bg-blue-100 text-blue-800',
+      pendiente: 'bg-yellow-100 text-yellow-800',
+      resuelto: 'bg-green-100 text-green-800',
+      cerrado: 'bg-gray-100 text-gray-800'
+    };
+    return classes[estado] || classes['abierto'];
+  }
+
+  /**
+   * Obtener label del estado del ticket
+   */
+  getEstadoTicketLabel(estado: string): string {
+    const labels: { [key: string]: string } = {
+      abierto: 'Abierto',
+      en_proceso: 'En Proceso',
+      pendiente: 'Pendiente',
+      resuelto: 'Resuelto',
+      cerrado: 'Cerrado'
+    };
+    return labels[estado] || estado;
+  }
+
+  /**
+   * Obtener label del tipo de ticket
+   */
+  getTipoTicketLabel(tipo: string): string {
+    const labels: { [key: string]: string } = {
+      mantenimiento: 'Mantenimiento',
+      reclamo: 'Reclamo',
+      limpieza: 'Limpieza',
+      administrativo: 'Administrativo',
+      mejora: 'Mejora',
+      otro: 'Otro'
+    };
+    return labels[tipo] || tipo;
+  }
+
+  /**
+   * Obtener clase de prioridad del ticket
+   */
+  getPrioridadTicketClass(prioridad: string): string {
+    const classes: { [key: string]: string } = {
+      baja: 'bg-gray-100 text-gray-800',
+      media: 'bg-blue-100 text-blue-800',
+      alta: 'bg-orange-100 text-orange-800',
+      critica: 'bg-red-100 text-red-800'
+    };
+    return classes[prioridad] || classes['media'];
+  }
+
+  /**
+   * Obtener label de prioridad del ticket
+   */
+  getPrioridadTicketLabel(prioridad: string): string {
+    const labels: { [key: string]: string } = {
+      baja: 'Baja',
+      media: 'Media',
+      alta: 'Alta',
+      critica: 'Crítica'
+    };
+    return labels[prioridad] || prioridad;
+  }
 }
