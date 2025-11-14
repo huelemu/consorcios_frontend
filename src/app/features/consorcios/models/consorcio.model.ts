@@ -90,6 +90,7 @@ export interface ConsorcioStats {
   unidadesOcupadas: number;
   unidadesVacantes?: number;
   superficieTotal?: number;
+  ticketsTotal?: number;
   ticketsPendientes?: number;
 }
 
@@ -130,6 +131,7 @@ export interface UpdateConsorcioDto {
  */
 export interface ConsorcioFilters {
   search?: string;
+  codigo_ext?: string;
   estado?: EstadoConsorcio;
   ciudad?: string;
   provincia?: string;
