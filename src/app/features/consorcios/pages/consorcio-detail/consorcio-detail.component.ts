@@ -249,11 +249,20 @@ export class ConsorcioDetailComponent implements OnInit {
       return;
     }
 
+    // Obtener el usuario autenticado
+    const currentUser = this.authService.currentUserValue;
+    if (!currentUser || !currentUser.id) {
+      console.error('No hay usuario autenticado');
+      this.error = 'Debes iniciar sesión para crear un ticket.';
+      return;
+    }
+
     const dialogRef = this.dialog.open(TicketFormComponent, {
       width: '900px',
       maxHeight: '90vh',
       disableClose: false,
       data: {
+        userId: currentUser.id,
         consorcioId: this.consorcio.id,
         consorcioNombre: this.consorcio.nombre,
         unidadId: null,
