@@ -134,12 +134,17 @@ export class ConsorciosListComponent implements OnInit {
     if (!params.provincia) delete params.provincia;
     if (!params.tiene_tickets_pendientes) delete params.tiene_tickets_pendientes;
 
+    // DEBUG: Verificar qué parámetros se están enviando
+    console.log('🔍 Filtros aplicados:', params);
+    console.log('📋 tiene_tickets_pendientes:', params.tiene_tickets_pendientes);
+
     this.consorciosService.getConsorcios(params).subscribe({
       next: (response) => {
         this.consorcios = response.data;
         this.totalItems = response.pagination.total;
         this.totalPages = response.pagination.totalPages;
         this.loading = false;
+        console.log('✅ Consorcios recibidos:', response.data.length);
       },
       error: (error) => {
         console.error('Error al cargar consorcios:', error);

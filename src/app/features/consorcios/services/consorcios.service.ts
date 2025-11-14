@@ -46,11 +46,16 @@ export class ConsorciosService {
       if (filters.responsable_id) params = params.set('responsable_id', filters.responsable_id.toString());
       // Solo enviar el parámetro si es true
       if (filters.tiene_tickets_pendientes === true) {
+        console.log('🎯 Agregando filtro tiene_tickets_pendientes=true al request HTTP');
         params = params.set('tiene_tickets_pendientes', 'true');
       }
       if (filters.sortBy) params = params.set('sortBy', filters.sortBy);
       if (filters.sortOrder) params = params.set('sortOrder', filters.sortOrder);
     }
+
+    // DEBUG: Ver qué parámetros HTTP se van a enviar
+    console.log('🌐 Parámetros HTTP a enviar:', params.toString());
+    console.log('🌐 URL completa:', `${this.apiUrl}?${params.toString()}`);
 
     return this.http.get<ConsorciosResponse>(this.apiUrl, { params });
   }
