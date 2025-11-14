@@ -250,7 +250,7 @@ export class ConsorcioDetailComponent implements OnInit {
     }
 
     // Obtener el usuario autenticado
-    const currentUser = this.authService.currentUserValue;
+    const currentUser = this.authService.getCurrentUser();
     if (!currentUser || !currentUser.id) {
       console.error('No hay usuario autenticado');
       this.error = 'Debes iniciar sesión para crear un ticket.';

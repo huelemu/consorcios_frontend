@@ -237,7 +237,7 @@ export class UnidadDetailComponent implements OnInit {
   }
 
   // Obtener el usuario autenticado
-  const currentUser = this.authService.currentUserValue;
+  const currentUser = this.authService.getCurrentUser();
   console.log('🔍 Usuario autenticado:', currentUser);
   console.log('🔍 ID del usuario:', currentUser?.id);
 
