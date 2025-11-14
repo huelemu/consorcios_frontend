@@ -19,8 +19,8 @@
           <div class="flex items-center gap-2 bg-white rounded-lg shadow-sm border border-gray-200 p-1">
             <button
               (click)="viewMode = 'grid'"
-              [class]="viewMode === 'grid' 
-                ? 'bg-blue-600 text-white' 
+              [class]="viewMode === 'grid'
+                ? 'bg-blue-600 text-white'
                 : 'text-gray-600 hover:text-gray-900'"
               class="p-2 rounded transition-colors"
               title="Vista de tarjetas">
@@ -28,11 +28,11 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
               </svg>
             </button>
-            
+
             <button
               (click)="viewMode = 'list'"
-              [class]="viewMode === 'list' 
-                ? 'bg-blue-600 text-white' 
+              [class]="viewMode === 'list'
+                ? 'bg-blue-600 text-white'
                 : 'text-gray-600 hover:text-gray-900'"
               class="p-2 rounded transition-colors"
               title="Vista de lista">
@@ -230,7 +230,7 @@
     </div>
 
     <!-- ===== VISTA GRID (Tarjetas) ===== -->
-    <div *ngIf="viewMode === 'grid' && !loading && !error && unidades.length > 0" 
+    <div *ngIf="viewMode === 'grid' && !loading && !error && unidades.length > 0"
          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
       <app-unidad-card
         *ngFor="let unidad of unidades"
@@ -239,6 +239,7 @@
         (onView)="onViewUnidad($event)"
         (onEdit)="onEditUnidad($event)"
         (onDelete)="onDeleteUnidad($event)"
+        (onCreateTicket)="onCreateTicket($event)"
       ></app-unidad-card>
     </div>
 

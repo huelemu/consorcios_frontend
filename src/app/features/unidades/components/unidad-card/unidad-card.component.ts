@@ -15,6 +15,7 @@ export class UnidadCardComponent {
   @Output() onView = new EventEmitter<UnidadFuncional | UnidadBasic>();
   @Output() onEdit = new EventEmitter<UnidadFuncional | UnidadBasic>();
   @Output() onDelete = new EventEmitter<UnidadFuncional | UnidadBasic>();
+  @Output() onCreateTicket = new EventEmitter<UnidadFuncional | UnidadBasic>();
 
   getEstadoBadgeClass(): string {
     switch (this.unidad.estado) {
