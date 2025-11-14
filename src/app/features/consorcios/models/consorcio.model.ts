@@ -90,7 +90,6 @@ export interface ConsorcioStats {
   unidadesOcupadas: number;
   unidadesVacantes?: number;
   superficieTotal?: number;
-  ticketsTotal?: number;
   ticketsPendientes?: number;
 }
 
@@ -136,7 +135,7 @@ export interface ConsorcioFilters {
   ciudad?: string;
   provincia?: string;
   responsable_id?: number;
-  conTicketsPendientes?: boolean;
+  tiene_tickets_pendientes?: boolean;
   page?: number;
   limit?: number;
   sortBy?: 'nombre' | 'ciudad' | 'creado_en';
