@@ -14,7 +14,7 @@ import { Persona } from '../../../personas/models/persona.model';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
-type TipoAsignacion = 'sin_asignar' | 'persona' | 'proveedor';
+type TipoAsignacion = 'sin_asignar' | 'encargado' | 'proveedor' | 'persona';
 
 @Component({
   selector: 'app-ticket-edit-dialog',
@@ -34,6 +34,21 @@ export class TicketEditDialogComponent implements OnInit, OnDestroy {
   // Control de asignación
   tipoAsignacion: TipoAsignacion = 'sin_asignar';
 
+  // Opciones de tipo de asignación
+  tiposAsignacion = [
+    { value: 'sin_asignar', label: 'Sin asignar', icon: '🚫' },
+    { value: 'encargado', label: 'Encargado de edificio', icon: '👷' },
+    { value: 'proveedor', label: 'Proveedor', icon: '🔧' },
+    { value: 'persona', label: 'Persona/Usuario', icon: '👤' }
+  ];
+
+  // Búsqueda de encargados
+  encargadosEncontrados: Usuario[] = [];
+  encargadoSearchSubject = new Subject<string>();
+  encargadoSearchTerm = '';
+  encargadoSeleccionado: Usuario | null = null;
+  mostrarResultadosEncargados = false;
+
   // Búsqueda de personas/usuarios
   personasEncontradas: (Usuario | Persona)[] = [];
   personaSearchSubject = new Subject<string>();
@@ -47,14 +62,6 @@ export class TicketEditDialogComponent implements OnInit, OnDestroy {
   proveedorSearchTerm = '';
   proveedorSeleccionado: Proveedor | null = null;
   mostrarResultadosProveedores = false;
-
-  // Roles según el tipo de asignación
-  rolesPersona = [
-    { value: 'encargado', label: 'Encargado' },
-    { value: 'admin_consorcio', label: 'Admin Consorcio' },
-    { value: 'propietario', label: 'Propietario' },
-    { value: 'otro', label: 'Otro' }
-  ];
 
   private subscriptions = new Subscription();
 
@@ -81,18 +88,22 @@ export class TicketEditDialogComponent implements OnInit, OnDestroy {
     if (this.ticket.proveedorId) {
       this.tipoAsignacion = 'proveedor';
       // Cargar el proveedor si existe
-      if (this.ticket.proveedorId) {
-        this.proveedoresService.getProveedorById(this.ticket.proveedorId).subscribe({
-          next: (proveedor) => {
-            this.proveedorSeleccionado = proveedor;
-            this.proveedorSearchTerm = proveedor.razon_social;
-          },
-          error: (err) => console.error('Error cargando proveedor:', err)
-        });
-      }
+      this.proveedoresService.getProveedorById(this.ticket.proveedorId).subscribe({
+        next: (proveedor) => {
+          this.proveedorSeleccionado = proveedor;
+          this.proveedorSearchTerm = proveedor.razon_social;
+        },
+        error: (err) => console.error('Error cargando proveedor:', err)
+      });
     } else if (this.ticket.asignadoAId || this.ticket.asignadoANombre) {
-      this.tipoAsignacion = 'persona';
-      this.personaSearchTerm = this.ticket.asignadoANombre || '';
+      // Determinar si es encargado o persona genérica
+      if (this.ticket.asignadoRol === 'encargado' || this.ticket.asignadoRol === 'admin_edificio') {
+        this.tipoAsignacion = 'encargado';
+        this.encargadoSearchTerm = this.ticket.asignadoANombre || '';
+      } else {
+        this.tipoAsignacion = 'persona';
+        this.personaSearchTerm = this.ticket.asignadoANombre || '';
+      }
     } else {
       this.tipoAsignacion = 'sin_asignar';
     }
@@ -112,6 +123,25 @@ export class TicketEditDialogComponent implements OnInit, OnDestroy {
   }
 
   private setupSearchListeners(): void {
+    // Búsqueda de encargados con debounce
+    const encargadoSub = this.encargadoSearchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(term => {
+        if (!term || term.length < 2) {
+          return [];
+        }
+        // Buscar usuarios con rol admin_edificio
+        return this.usuariosService.getUsuarios({ search: term, rol_global: 'admin_edificio', limit: 10 });
+      })
+    ).subscribe({
+      next: (response) => {
+        this.encargadosEncontrados = response.usuarios || [];
+        this.mostrarResultadosEncargados = this.encargadosEncontrados.length > 0;
+      },
+      error: (err) => console.error('Error buscando encargados:', err)
+    });
+
     // Búsqueda de personas con debounce
     const personaSub = this.personaSearchSubject.pipe(
       debounceTime(300),
@@ -149,6 +179,7 @@ export class TicketEditDialogComponent implements OnInit, OnDestroy {
       error: (err) => console.error('Error buscando proveedores:', err)
     });
 
+    this.subscriptions.add(encargadoSub);
     this.subscriptions.add(personaSub);
     this.subscriptions.add(proveedorSub);
   }
@@ -171,16 +202,21 @@ export class TicketEditDialogComponent implements OnInit, OnDestroy {
   }
 
   // Métodos de asignación
-  onTipoAsignacionChange(tipo: TipoAsignacion): void {
+  onTipoAsignacionChange(event: Event): void {
+    const tipo = (event.target as HTMLSelectElement).value as TipoAsignacion;
     this.tipoAsignacion = tipo;
 
     // Limpiar valores al cambiar
+    this.encargadoSeleccionado = null;
     this.personaSeleccionada = null;
     this.proveedorSeleccionado = null;
+    this.encargadoSearchTerm = '';
     this.personaSearchTerm = '';
     this.proveedorSearchTerm = '';
+    this.encargadosEncontrados = [];
     this.personasEncontradas = [];
     this.proveedoresEncontrados = [];
+    this.mostrarResultadosEncargados = false;
     this.mostrarResultadosPersonas = false;
     this.mostrarResultadosProveedores = false;
 
@@ -190,6 +226,25 @@ export class TicketEditDialogComponent implements OnInit, OnDestroy {
       asignadoRol: null,
       proveedorId: null
     });
+  }
+
+  onEncargadoSearchInput(term: string): void {
+    this.encargadoSearchTerm = term;
+    if (term.length >= 2) {
+      this.encargadoSearchSubject.next(term);
+    } else {
+      this.encargadosEncontrados = [];
+      this.mostrarResultadosEncargados = false;
+    }
+  }
+
+  seleccionarEncargado(encargado: Usuario): void {
+    this.encargadoSeleccionado = encargado;
+    const nombreCompleto = encargado.persona
+      ? `${encargado.persona.nombre} ${encargado.persona.apellido}`
+      : encargado.username || '';
+    this.encargadoSearchTerm = nombreCompleto;
+    this.mostrarResultadosEncargados = false;
   }
 
   onPersonaSearchInput(term: string): void {
@@ -286,20 +341,35 @@ export class TicketEditDialogComponent implements OnInit, OnDestroy {
         asignacionData.proveedorId = null;
         asignacionCambio = true;
       }
+    } else if (this.tipoAsignacion === 'encargado') {
+      // Asignar a encargado
+      const encargadoId = this.encargadoSeleccionado?.id;
+      const encargadoNombre = this.encargadoSearchTerm.trim();
+
+      if (
+        encargadoNombre !== this.ticket.asignadoANombre ||
+        this.ticket.asignadoRol !== 'encargado' ||
+        this.ticket.proveedorId
+      ) {
+        asignacionData.asignadoAId = encargadoId || null;
+        asignacionData.asignadoANombre = encargadoNombre;
+        asignacionData.asignadoRol = 'encargado';
+        asignacionData.proveedorId = null;
+        asignacionCambio = true;
+      }
     } else if (this.tipoAsignacion === 'persona') {
-      // Asignar a persona
+      // Asignar a persona genérica
       const personaId = this.personaSeleccionada?.id;
       const personaNombre = this.personaSearchTerm.trim();
-      const rol = form.asignadoRol;
 
       if (
         personaNombre !== this.ticket.asignadoANombre ||
-        rol !== this.ticket.asignadoRol ||
+        this.ticket.asignadoRol === 'encargado' ||
         this.ticket.proveedorId
       ) {
         asignacionData.asignadoAId = personaId || null;
         asignacionData.asignadoANombre = personaNombre;
-        asignacionData.asignadoRol = rol;
+        asignacionData.asignadoRol = 'otro';
         asignacionData.proveedorId = null;
         asignacionCambio = true;
       }

@@ -102,82 +102,59 @@
             <span>Asignación</span>
           </label>
 
-          <!-- Radio buttons para tipo de asignación -->
-          <div class="space-y-2 mb-3">
-            <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
-              <input type="radio"
-                     name="tipoAsignacion"
-                     [checked]="tipoAsignacion === 'sin_asignar'"
-                     (change)="onTipoAsignacionChange('sin_asignar')"
-                     class="w-4 h-4 text-blue-600" />
-              <span class="text-sm text-gray-700">Sin asignar</span>
-            </label>
-
-            <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
-              <input type="radio"
-                     name="tipoAsignacion"
-                     [checked]="tipoAsignacion === 'persona'"
-                     (change)="onTipoAsignacionChange('persona')"
-                     class="w-4 h-4 text-blue-600" />
-              <span class="text-sm text-gray-700">Asignar a persona</span>
-            </label>
-
-            <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
-              <input type="radio"
-                     name="tipoAsignacion"
-                     [checked]="tipoAsignacion === 'proveedor'"
-                     (change)="onTipoAsignacionChange('proveedor')"
-                     class="w-4 h-4 text-blue-600" />
-              <span class="text-sm text-gray-700">Asignar a proveedor</span>
-            </label>
-          </div>
-
-          <!-- Búsqueda de Persona -->
-          <div *ngIf="tipoAsignacion === 'persona'" class="space-y-2">
-            <div class="relative">
-              <input type="text"
-                     [value]="personaSearchTerm"
-                     (input)="onPersonaSearchInput($any($event.target).value)"
-                     placeholder="🔍 Buscar persona o usuario..."
-                     class="w-full border rounded-md px-3 py-2 text-sm"
-                     autocomplete="off" />
-
-              <!-- Resultados de búsqueda de personas -->
-              <div *ngIf="mostrarResultadosPersonas && personasEncontradas.length > 0"
-                   class="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-48 overflow-y-auto">
-                <div *ngFor="let persona of personasEncontradas"
-                     (click)="seleccionarPersona(persona)"
-                     class="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b last:border-b-0">
-                  <div class="font-medium text-sm text-gray-900">{{ getPersonaNombre(persona) }}</div>
-                  <div class="text-xs text-gray-500">{{ getPersonaEmail(persona) }}</div>
-                </div>
-              </div>
-
-              <!-- Mensaje de búsqueda -->
-              <div *ngIf="personaSearchTerm.length > 0 && personaSearchTerm.length < 2"
-                   class="text-xs text-gray-400 mt-1">
-                Escribí al menos 2 caracteres para buscar
-              </div>
-            </div>
-
-            <!-- Selector de rol para persona -->
-            <select formControlName="asignadoRol"
-                    class="w-full border rounded-md px-3 py-2 text-sm">
-              <option [ngValue]="null">Seleccionar rol</option>
-              <option *ngFor="let rol of rolesPersona" [value]="rol.value">
-                {{ rol.label }}
+          <!-- Selector de tipo de asignación -->
+          <div class="mb-3">
+            <label class="text-xs text-gray-600 mb-1 block font-medium">Tipo de asignación</label>
+            <select [value]="tipoAsignacion"
+                    (change)="onTipoAsignacionChange($event)"
+                    class="w-full border-2 border-gray-300 rounded-lg px-3 py-2.5 text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all cursor-pointer">
+              <option *ngFor="let tipo of tiposAsignacion" [value]="tipo.value">
+                {{ tipo.icon }} {{ tipo.label }}
               </option>
             </select>
           </div>
 
+          <!-- Búsqueda de Encargado -->
+          <div *ngIf="tipoAsignacion === 'encargado'" class="space-y-2">
+            <label class="text-xs text-gray-600 mb-1 block">Buscar encargado</label>
+            <div class="relative">
+              <input type="text"
+                     [value]="encargadoSearchTerm"
+                     (input)="onEncargadoSearchInput($any($event.target).value)"
+                     placeholder="🔍 Buscar encargado de edificio..."
+                     class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                     autocomplete="off" />
+
+              <!-- Resultados de búsqueda de encargados -->
+              <div *ngIf="mostrarResultadosEncargados && encargadosEncontrados.length > 0"
+                   class="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-48 overflow-y-auto">
+                <div *ngFor="let encargado of encargadosEncontrados"
+                     (click)="seleccionarEncargado(encargado)"
+                     class="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b last:border-b-0">
+                  <div class="font-medium text-sm text-gray-900">
+                    {{ encargado.persona ? (encargado.persona.nombre + ' ' + encargado.persona.apellido) : encargado.username }}
+                  </div>
+                  <div class="text-xs text-gray-500">{{ encargado.email }}</div>
+                </div>
+              </div>
+
+              <!-- Mensaje de búsqueda -->
+              <div *ngIf="encargadoSearchTerm.length > 0 && encargadoSearchTerm.length < 2"
+                   class="text-xs text-gray-400 mt-1">
+                Escribí al menos 2 caracteres para buscar
+              </div>
+            </div>
+          </div>
+
           <!-- Búsqueda de Proveedor -->
           <div *ngIf="tipoAsignacion === 'proveedor'" class="space-y-2">
+            <label class="text-xs text-gray-600 mb-1 block">Buscar proveedor</label>
             <div class="relative">
               <input type="text"
                      [value]="proveedorSearchTerm"
                      (input)="onProveedorSearchInput($any($event.target).value)"
                      placeholder="🔍 Buscar proveedor..."
-                     class="w-full border rounded-md px-3 py-2 text-sm"
+                     class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
                      autocomplete="off" />
 
               <!-- Resultados de búsqueda de proveedores -->
@@ -193,6 +170,36 @@
 
               <!-- Mensaje de búsqueda -->
               <div *ngIf="proveedorSearchTerm.length > 0 && proveedorSearchTerm.length < 2"
+                   class="text-xs text-gray-400 mt-1">
+                Escribí al menos 2 caracteres para buscar
+              </div>
+            </div>
+          </div>
+
+          <!-- Búsqueda de Persona -->
+          <div *ngIf="tipoAsignacion === 'persona'" class="space-y-2">
+            <label class="text-xs text-gray-600 mb-1 block">Buscar persona o usuario</label>
+            <div class="relative">
+              <input type="text"
+                     [value]="personaSearchTerm"
+                     (input)="onPersonaSearchInput($any($event.target).value)"
+                     placeholder="🔍 Buscar persona o usuario..."
+                     class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                     autocomplete="off" />
+
+              <!-- Resultados de búsqueda de personas -->
+              <div *ngIf="mostrarResultadosPersonas && personasEncontradas.length > 0"
+                   class="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-48 overflow-y-auto">
+                <div *ngFor="let persona of personasEncontradas"
+                     (click)="seleccionarPersona(persona)"
+                     class="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b last:border-b-0">
+                  <div class="font-medium text-sm text-gray-900">{{ getPersonaNombre(persona) }}</div>
+                  <div class="text-xs text-gray-500">{{ getPersonaEmail(persona) }}</div>
+                </div>
+              </div>
+
+              <!-- Mensaje de búsqueda -->
+              <div *ngIf="personaSearchTerm.length > 0 && personaSearchTerm.length < 2"
                    class="text-xs text-gray-400 mt-1">
                 Escribí al menos 2 caracteres para buscar
               </div>
