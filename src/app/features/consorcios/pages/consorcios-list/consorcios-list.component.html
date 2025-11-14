@@ -232,8 +232,20 @@
           </select>
         </div>
 
+        <!-- Con Tickets Pendientes -->
+        <div class="flex items-center">
+          <label class="flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              [(ngModel)]="filters.conTicketsPendientes"
+              (change)="applyFilters()"
+              class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+            <span class="ml-2 text-sm font-medium text-gray-700">Con Tickets Pendientes</span>
+          </label>
+        </div>
+
         <!-- Botones de acción -->
-        <div class="md:col-span-2 flex items-end gap-3">
+        <div class="md:col-span-1 flex items-end gap-3">
           <button
             (click)="applyFilters()"
             class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors">
@@ -399,6 +411,7 @@
         <table class="w-full">
           <thead class="bg-gray-50 border-b border-gray-200">
             <tr>
+              <th class="px-4 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">ID</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   (click)="sortBy('nombre')">
                 <div class="flex items-center gap-2">
@@ -409,18 +422,7 @@
                   </svg>
                 </div>
               </th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">ID Externo</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Dirección</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                  (click)="sortBy('ciudad')">
-                <div class="flex items-center gap-2">
-                  <span>Ciudad</span>
-                  <svg *ngIf="filters.sortBy === 'ciudad'" class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          [attr.d]="filters.sortOrder === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'" />
-                  </svg>
-                </div>
-              </th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Responsable</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Unidades</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Tickets</th>
@@ -433,6 +435,11 @@
                 (click)="verDetalle(consorcio.id)"
                 class="hover:bg-gray-50 cursor-pointer transition-colors">
               
+              <!-- ID -->
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-700 font-mono">{{ consorcio.codigo_ext || '-' }}</div>
+              </td>
+
               <!-- Nombre -->
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center">
@@ -444,20 +451,12 @@
                 </div>
               </td>
 
-              <!-- ID Externo -->
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900 font-mono">{{ consorcio.codigo_ext || '-' }}</div>
-              </td>
-
               <!-- Dirección -->
               <td class="px-6 py-4">
                 <div class="text-sm text-gray-900">{{ consorcio.direccion || '-' }}</div>
-              </td>
-
-              <!-- Ciudad -->
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">{{ consorcio.ciudad || '-' }}</div>
-                <div *ngIf="consorcio.provincia" class="text-xs text-gray-500">{{ consorcio.provincia }}</div>
+                <div *ngIf="consorcio.ciudad || consorcio.provincia" class="text-xs text-gray-500">
+                  {{ consorcio.ciudad }}{{ consorcio.ciudad && consorcio.provincia ? ', ' : '' }}{{ consorcio.provincia }}
+                </div>
               </td>
 
               <!-- Responsable -->

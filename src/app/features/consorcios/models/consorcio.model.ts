@@ -136,6 +136,7 @@ export interface ConsorcioFilters {
   ciudad?: string;
   provincia?: string;
   responsable_id?: number;
+  conTicketsPendientes?: boolean;
   page?: number;
   limit?: number;
   sortBy?: 'nombre' | 'ciudad' | 'creado_en';
