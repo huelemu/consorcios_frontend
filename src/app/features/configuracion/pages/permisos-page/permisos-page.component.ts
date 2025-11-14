@@ -67,7 +67,7 @@ export class PermisosPageComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error cargando usuarios pendientes:', error);
-        this.toastService.showError('Error al cargar usuarios pendientes');
+        this.toastService.error('Error al cargar usuarios pendientes');
         this.loading = false;
       }
     });
@@ -98,12 +98,12 @@ export class PermisosPageComponent implements OnInit {
     this.loading = true;
     this.usuariosService.aprobarUsuario(usuario.id).subscribe({
       next: () => {
-        this.toastService.showSuccess(`Usuario ${usuario.email} aprobado exitosamente`);
+        this.toastService.success(`Usuario ${usuario.email} aprobado exitosamente`);
         this.cargarDatos();
       },
       error: (error) => {
         console.error('Error aprobando usuario:', error);
-        this.toastService.showError('Error al aprobar usuario');
+        this.toastService.error('Error al aprobar usuario');
         this.loading = false;
       }
     });
@@ -119,12 +119,12 @@ export class PermisosPageComponent implements OnInit {
     this.loading = true;
     this.usuariosService.rechazarUsuario(usuario.id, motivo).subscribe({
       next: () => {
-        this.toastService.showInfo(`Usuario ${usuario.email} rechazado`);
+        this.toastService.info(`Usuario ${usuario.email} rechazado`);
         this.cargarDatos();
       },
       error: (error) => {
         console.error('Error rechazando usuario:', error);
-        this.toastService.showError('Error al rechazar usuario');
+        this.toastService.error('Error al rechazar usuario');
         this.loading = false;
       }
     });
@@ -157,14 +157,14 @@ export class PermisosPageComponent implements OnInit {
     this.loading = true;
     this.usuariosService.cambiarRolGlobal(this.selectedUsuario.id, this.nuevoRol).subscribe({
       next: () => {
-        this.toastService.showSuccess('Rol actualizado exitosamente');
+        this.toastService.success('Rol actualizado exitosamente');
         this.notificationsService.notifyRoleChanged(this.ROL_LABELS[this.nuevoRol!]);
         this.cerrarModalRol();
         this.cargarDatos();
       },
       error: (error) => {
         console.error('Error cambiando rol:', error);
-        this.toastService.showError('Error al cambiar rol');
+        this.toastService.error('Error al cambiar rol');
         this.loading = false;
       }
     });
@@ -186,12 +186,12 @@ export class PermisosPageComponent implements OnInit {
 
     operacion.subscribe({
       next: () => {
-        this.toastService.showSuccess(`Usuario ${accion}do exitosamente`);
+        this.toastService.success(`Usuario ${accion}do exitosamente`);
         this.cargarDatos();
       },
       error: (error) => {
         console.error(`Error al ${accion} usuario:`, error);
-        this.toastService.showError(`Error al ${accion} usuario`);
+        this.toastService.error(`Error al ${accion} usuario`);
         this.loading = false;
       }
     });
