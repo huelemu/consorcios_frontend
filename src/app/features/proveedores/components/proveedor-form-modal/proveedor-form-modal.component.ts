@@ -52,8 +52,6 @@ export class ProveedorFormModalComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    console.log('🟢 Modal ngOnChanges:', changes);
-    console.log('🟢 show value:', this.show);
     if (changes['proveedor'] && this.proveedor) {
       this.loadProveedorData();
     } else if (changes['show'] && this.show && !this.proveedor) {

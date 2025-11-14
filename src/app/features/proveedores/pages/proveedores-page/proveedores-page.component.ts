@@ -114,10 +114,8 @@ export class ProveedoresPageComponent implements OnInit {
   }
 
   openCreateModal(): void {
-    console.log('🔵 openCreateModal() llamado');
     this.selectedProveedor = null;
     this.showFormModal = true;
-    console.log('🔵 showFormModal establecido en:', this.showFormModal);
   }
 
   onEditProveedor(proveedor: Proveedor): void {

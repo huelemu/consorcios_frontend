@@ -367,4 +367,12 @@
       </div>
     </div>
   </div>
+
+  <!-- Form Modal -->
+  <app-proveedor-form-modal
+    [show]="showFormModal"
+    [proveedor]="proveedor"
+    (close)="closeFormModal()"
+    (success)="onProveedorSaved($event)"
+  ></app-proveedor-form-modal>
 </div>

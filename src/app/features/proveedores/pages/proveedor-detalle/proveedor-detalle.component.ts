@@ -5,6 +5,7 @@ import { ProveedoresService } from '../../services/proveedores.service';
 import { Proveedor, formatCUIT, ESTADO_PROVEEDOR_COLORS, ESTADO_PROVEEDOR_ICONS } from '../../models/proveedor.model';
 import { ProveedorPersonasSectionComponent } from '../../components/proveedor-personas-section/proveedor-personas-section.component';
 import { ProveedorCuentasSectionComponent } from '../../components/proveedor-cuentas-section/proveedor-cuentas-section.component';
+import { ProveedorFormModalComponent } from '../../components/proveedor-form-modal/proveedor-form-modal.component';
 
 @Component({
   selector: 'app-proveedor-detalle',
@@ -13,7 +14,8 @@ import { ProveedorCuentasSectionComponent } from '../../components/proveedor-cue
     CommonModule,
     RouterModule,
     ProveedorPersonasSectionComponent,
-    ProveedorCuentasSectionComponent
+    ProveedorCuentasSectionComponent,
+    ProveedorFormModalComponent
   ],
   templateUrl: './proveedor-detalle.component.html',
   styleUrls: ['./proveedor-detalle.component.scss']
@@ -26,6 +28,9 @@ export class ProveedorDetalleComponent implements OnInit {
 
   // Tabs
   activeTab: 'informacion' | 'personas' | 'cuentas' = 'informacion';
+
+  // Modal state
+  showFormModal = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -96,8 +101,16 @@ export class ProveedorDetalleComponent implements OnInit {
   }
 
   onEdit(): void {
-    // TODO: Implementar modal de edición
-    console.log('Editar proveedor:', this.proveedor);
+    this.showFormModal = true;
+  }
+
+  closeFormModal(): void {
+    this.showFormModal = false;
+  }
+
+  onProveedorSaved(proveedor: Proveedor): void {
+    this.proveedor = proveedor;
+    this.showFormModal = false;
   }
 
   onToggleEstado(): void {
