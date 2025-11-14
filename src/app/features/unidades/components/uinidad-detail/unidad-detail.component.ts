@@ -238,23 +238,29 @@ export class UnidadDetailComponent implements OnInit {
 
   // Obtener el usuario autenticado
   const currentUser = this.authService.currentUserValue;
+  console.log('🔍 Usuario autenticado:', currentUser);
+  console.log('🔍 ID del usuario:', currentUser?.id);
+
   if (!currentUser || !currentUser.id) {
     console.error('No hay usuario autenticado');
     this.error = 'Debes iniciar sesión para crear un ticket.';
     return;
   }
 
+  const dialogData = {
+    userId: currentUser.id,
+    consorcioId: this.unidad.consorcio_id,
+    consorcioNombre: this.unidad.consorcio?.nombre,
+    unidadId: this.unidad.id,
+    unidadNombre: `${this.unidad.codigo} - Piso ${this.unidad.piso}`
+  };
+  console.log('📦 Datos que se pasarán al modal:', dialogData);
+
   const dialogRef = this.dialog.open(TicketFormComponent, {
     width: '900px',
     maxHeight: '90vh',
     disableClose: false,
-    data: {
-      userId: currentUser.id,
-      consorcioId: this.unidad.consorcio_id,
-      consorcioNombre: this.unidad.consorcio?.nombre,
-      unidadId: this.unidad.id,
-      unidadNombre: `${this.unidad.codigo} - Piso ${this.unidad.piso}`
-    }
+    data: dialogData
   });
 
   dialogRef.afterClosed().subscribe((ticket) => {

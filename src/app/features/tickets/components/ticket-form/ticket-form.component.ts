@@ -59,8 +59,12 @@ export class TicketFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    console.log('🔍 Datos recibidos en ticket-form:', this.data);
+    console.log('🔍 userId recibido:', this.data?.userId);
+
     this.ticket.creado_por = this.data?.userId || 1;
-    
+    console.log('✅ ticket.creado_por asignado:', this.ticket.creado_por);
+
     // Si viene consorcioId y unidadId desde el padre
     if (this.data?.consorcioId) {
       this.ticket.consorcio_id = this.data.consorcioId;
@@ -69,7 +73,7 @@ export class TicketFormComponent implements OnInit {
     if (this.data?.unidadId) {
       this.ticket.unidad_id = this.data.unidadId;
     }
-    
+
     this.loadConsorcios();
   }
 
