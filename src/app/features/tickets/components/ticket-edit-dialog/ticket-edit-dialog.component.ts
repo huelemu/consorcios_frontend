@@ -1,10 +1,20 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { Ticket } from '../../models/ticket.model';
 import { TicketsService } from '../../services/tickets.service';
 import { AuthService } from '../../../../auth/auth.service';
+import { UsuariosService } from '../../../usuarios/services/usuarios.service';
+import { ProveedoresService } from '../../../proveedores/services/proveedores.service';
+import { PersonasService } from '../../../personas/services/personas.service';
+import { Usuario } from '../../../usuarios/models/usuario.model';
+import { Proveedor } from '../../../proveedores/models/proveedor.model';
+import { Persona } from '../../../personas/models/persona.model';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+
+type TipoAsignacion = 'sin_asignar' | 'persona' | 'proveedor';
 
 @Component({
   selector: 'app-ticket-edit-dialog',
@@ -13,7 +23,7 @@ import { AuthService } from '../../../../auth/auth.service';
   templateUrl: './ticket-edit-dialog.component.html',
   styleUrls: ['./ticket-edit-dialog.component.scss'],
 })
-export class TicketEditDialogComponent implements OnInit {
+export class TicketEditDialogComponent implements OnInit, OnDestroy {
   ticket!: Ticket;
   historial: any[] = [];
   ticketForm!: FormGroup;
@@ -21,18 +31,71 @@ export class TicketEditDialogComponent implements OnInit {
   selectedFile: File | null = null;
   saving = false;
 
+  // Control de asignación
+  tipoAsignacion: TipoAsignacion = 'sin_asignar';
+
+  // Búsqueda de personas/usuarios
+  personasEncontradas: (Usuario | Persona)[] = [];
+  personaSearchSubject = new Subject<string>();
+  personaSearchTerm = '';
+  personaSeleccionada: Usuario | Persona | null = null;
+  mostrarResultadosPersonas = false;
+
+  // Búsqueda de proveedores
+  proveedoresEncontrados: Proveedor[] = [];
+  proveedorSearchSubject = new Subject<string>();
+  proveedorSearchTerm = '';
+  proveedorSeleccionado: Proveedor | null = null;
+  mostrarResultadosProveedores = false;
+
+  // Roles según el tipo de asignación
+  rolesPersona = [
+    { value: 'encargado', label: 'Encargado' },
+    { value: 'admin_consorcio', label: 'Admin Consorcio' },
+    { value: 'propietario', label: 'Propietario' },
+    { value: 'otro', label: 'Otro' }
+  ];
+
+  private subscriptions = new Subscription();
+
   constructor(
     private fb: FormBuilder,
     private ticketsService: TicketsService,
     private authService: AuthService,
+    private usuariosService: UsuariosService,
+    private proveedoresService: ProveedoresService,
+    private personasService: PersonasService,
     private dialogRef: MatDialogRef<TicketEditDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { ticket: Ticket }
   ) {}
 
   ngOnInit(): void {
     this.ticket = this.data.ticket;
+    this.determinarTipoAsignacion();
     this.initForm();
     this.loadHistorial();
+    this.setupSearchListeners();
+  }
+
+  private determinarTipoAsignacion(): void {
+    if (this.ticket.proveedorId) {
+      this.tipoAsignacion = 'proveedor';
+      // Cargar el proveedor si existe
+      if (this.ticket.proveedorId) {
+        this.proveedoresService.getProveedorById(this.ticket.proveedorId).subscribe({
+          next: (proveedor) => {
+            this.proveedorSeleccionado = proveedor;
+            this.proveedorSearchTerm = proveedor.razon_social;
+          },
+          error: (err) => console.error('Error cargando proveedor:', err)
+        });
+      }
+    } else if (this.ticket.asignadoAId || this.ticket.asignadoANombre) {
+      this.tipoAsignacion = 'persona';
+      this.personaSearchTerm = this.ticket.asignadoANombre || '';
+    } else {
+      this.tipoAsignacion = 'sin_asignar';
+    }
   }
 
   private initForm(): void {
@@ -46,6 +109,48 @@ export class TicketEditDialogComponent implements OnInit {
       comentario: ['', [Validators.required, Validators.minLength(5)]],
       comentarioInterno: [false]
     });
+  }
+
+  private setupSearchListeners(): void {
+    // Búsqueda de personas con debounce
+    const personaSub = this.personaSearchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(term => {
+        if (!term || term.length < 2) {
+          return [];
+        }
+        // Buscar en usuarios y personas
+        return this.usuariosService.buscarUsuarios(term);
+      })
+    ).subscribe({
+      next: (resultados) => {
+        this.personasEncontradas = resultados;
+        this.mostrarResultadosPersonas = resultados.length > 0;
+      },
+      error: (err) => console.error('Error buscando personas:', err)
+    });
+
+    // Búsqueda de proveedores con debounce
+    const proveedorSub = this.proveedorSearchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(term => {
+        if (!term || term.length < 2) {
+          return [];
+        }
+        return this.proveedoresService.getProveedores({ search: term, limit: 10 });
+      })
+    ).subscribe({
+      next: (response) => {
+        this.proveedoresEncontrados = response.data || [];
+        this.mostrarResultadosProveedores = this.proveedoresEncontrados.length > 0;
+      },
+      error: (err) => console.error('Error buscando proveedores:', err)
+    });
+
+    this.subscriptions.add(personaSub);
+    this.subscriptions.add(proveedorSub);
   }
 
   loadHistorial(): void {
@@ -63,6 +168,91 @@ export class TicketEditDialogComponent implements OnInit {
   onFileSelect(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.selectedFile = input.files?.[0] || null;
+  }
+
+  // Métodos de asignación
+  onTipoAsignacionChange(tipo: TipoAsignacion): void {
+    this.tipoAsignacion = tipo;
+
+    // Limpiar valores al cambiar
+    this.personaSeleccionada = null;
+    this.proveedorSeleccionado = null;
+    this.personaSearchTerm = '';
+    this.proveedorSearchTerm = '';
+    this.personasEncontradas = [];
+    this.proveedoresEncontrados = [];
+    this.mostrarResultadosPersonas = false;
+    this.mostrarResultadosProveedores = false;
+
+    // Resetear campos del formulario
+    this.ticketForm.patchValue({
+      asignadoANombre: '',
+      asignadoRol: null,
+      proveedorId: null
+    });
+  }
+
+  onPersonaSearchInput(term: string): void {
+    this.personaSearchTerm = term;
+    if (term.length >= 2) {
+      this.personaSearchSubject.next(term);
+    } else {
+      this.personasEncontradas = [];
+      this.mostrarResultadosPersonas = false;
+    }
+  }
+
+  seleccionarPersona(persona: Usuario | Persona): void {
+    this.personaSeleccionada = persona;
+
+    // Determinar el nombre según el tipo
+    let nombreCompleto = '';
+    if ('username' in persona && persona.persona) {
+      // Es un Usuario
+      nombreCompleto = `${persona.persona.nombre} ${persona.persona.apellido}`;
+    } else if ('nombre' in persona) {
+      // Es una Persona
+      nombreCompleto = `${persona.nombre} ${persona.apellido || ''}`.trim();
+    }
+
+    this.personaSearchTerm = nombreCompleto;
+    this.mostrarResultadosPersonas = false;
+  }
+
+  onProveedorSearchInput(term: string): void {
+    this.proveedorSearchTerm = term;
+    if (term.length >= 2) {
+      this.proveedorSearchSubject.next(term);
+    } else {
+      this.proveedoresEncontrados = [];
+      this.mostrarResultadosProveedores = false;
+    }
+  }
+
+  seleccionarProveedor(proveedor: Proveedor): void {
+    this.proveedorSeleccionado = proveedor;
+    this.proveedorSearchTerm = proveedor.razon_social;
+    this.mostrarResultadosProveedores = false;
+  }
+
+  getPersonaNombre(persona: Usuario | Persona): string {
+    if ('username' in persona && persona.persona) {
+      return `${persona.persona.nombre} ${persona.persona.apellido}`;
+    } else if ('nombre' in persona) {
+      return `${persona.nombre} ${persona.apellido || ''}`.trim();
+    }
+    return '';
+  }
+
+  getPersonaEmail(persona: Usuario | Persona): string {
+    // Verificar si es un Usuario (tiene username)
+    if ('username' in persona) {
+      const usuario = persona as Usuario;
+      return usuario.email || '';
+    }
+    // Es una Persona
+    const personaObj = persona as Persona;
+    return personaObj.email || '';
   }
 
   save(): void {
@@ -83,18 +273,52 @@ export class TicketEditDialogComponent implements OnInit {
       );
     }
 
-    // 2. Actualizar Asignación (si cambió)
-    if (
-      form.asignadoANombre !== this.ticket.asignadoANombre ||
-      form.asignadoRol !== this.ticket.asignadoRol ||
-      form.proveedorId !== this.ticket.proveedorId
-    ) {
+    // 2. Actualizar Asignación (según el tipo seleccionado)
+    const asignacionData: any = {};
+    let asignacionCambio = false;
+
+    if (this.tipoAsignacion === 'sin_asignar') {
+      // Limpiar asignación
+      if (this.ticket.asignadoAId || this.ticket.proveedorId) {
+        asignacionData.asignadoAId = null;
+        asignacionData.asignadoANombre = null;
+        asignacionData.asignadoRol = null;
+        asignacionData.proveedorId = null;
+        asignacionCambio = true;
+      }
+    } else if (this.tipoAsignacion === 'persona') {
+      // Asignar a persona
+      const personaId = this.personaSeleccionada?.id;
+      const personaNombre = this.personaSearchTerm.trim();
+      const rol = form.asignadoRol;
+
+      if (
+        personaNombre !== this.ticket.asignadoANombre ||
+        rol !== this.ticket.asignadoRol ||
+        this.ticket.proveedorId
+      ) {
+        asignacionData.asignadoAId = personaId || null;
+        asignacionData.asignadoANombre = personaNombre;
+        asignacionData.asignadoRol = rol;
+        asignacionData.proveedorId = null;
+        asignacionCambio = true;
+      }
+    } else if (this.tipoAsignacion === 'proveedor') {
+      // Asignar a proveedor
+      const proveedorId = this.proveedorSeleccionado?.id;
+
+      if (proveedorId !== this.ticket.proveedorId || this.ticket.asignadoAId) {
+        asignacionData.proveedorId = proveedorId;
+        asignacionData.asignadoAId = null;
+        asignacionData.asignadoANombre = null;
+        asignacionData.asignadoRol = 'proveedor';
+        asignacionCambio = true;
+      }
+    }
+
+    if (asignacionCambio) {
       updates.push(
-        this.ticketsService.updateTicketAsignacion(this.ticket.id, {
-          asignadoANombre: form.asignadoANombre,
-          asignadoRol: form.asignadoRol,
-          proveedorId: form.proveedorId
-        }).toPromise()
+        this.ticketsService.updateTicketAsignacion(this.ticket.id, asignacionData).toPromise()
       );
     }
 
@@ -155,5 +379,9 @@ export class TicketEditDialogComponent implements OnInit {
       dateStyle: 'short',
       timeStyle: 'short',
     }).format(d);
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 }

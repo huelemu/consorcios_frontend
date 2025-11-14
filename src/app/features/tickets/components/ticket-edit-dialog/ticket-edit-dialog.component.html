@@ -1,20 +1,23 @@
 <div class="flex flex-col h-full w-full bg-gray-50">
 
   <!-- HEADER -->
-  <div class="sticky top-0 z-10 bg-white border-b px-6 py-4 flex justify-between items-start shadow-sm">
+  <div class="sticky top-0 z-10 bg-gradient-to-r from-blue-50 to-white border-b px-6 py-4 flex justify-between items-start shadow-sm">
     <div>
-      <h2 class="text-xl font-bold text-gray-900">#{{ ticket.id }} - {{ ticket.titulo }}</h2>
-      <p class="text-sm text-gray-500">
-        {{ ticket.consorcioNombre }} · UF {{ ticket.unidadNombre }}
+      <h2 class="text-xl font-bold text-gray-900">
+        <span class="text-blue-600">#{{ ticket.id }}</span> - {{ ticket.titulo }}
+      </h2>
+      <p class="text-sm text-gray-600 mt-1">
+        🏢 {{ ticket.consorcioNombre }}
+        <span *ngIf="ticket.unidadNombre" class="ml-2">· 🏠 UF {{ ticket.unidadNombre }}</span>
       </p>
     </div>
-    <span class="px-3 py-1 text-xs rounded-full border font-medium"
+    <span class="px-4 py-1.5 text-xs rounded-full border font-semibold shadow-sm"
           [ngClass]="{
-            'bg-green-100 text-green-700 border-green-200': ticket.estado==='abierto',
-            'bg-yellow-100 text-yellow-700 border-yellow-200': ticket.estado==='en_proceso',
-            'bg-orange-100 text-orange-700 border-orange-200': ticket.estado==='pendiente',
-            'bg-blue-100 text-blue-700 border-blue-200': ticket.estado==='resuelto',
-            'bg-gray-100 text-gray-700 border-gray-200': ticket.estado==='cerrado'
+            'bg-green-100 text-green-700 border-green-300': ticket.estado==='abierto',
+            'bg-yellow-100 text-yellow-700 border-yellow-300': ticket.estado==='en_proceso',
+            'bg-orange-100 text-orange-700 border-orange-300': ticket.estado==='pendiente',
+            'bg-blue-100 text-blue-700 border-blue-300': ticket.estado==='resuelto',
+            'bg-gray-100 text-gray-700 border-gray-300': ticket.estado==='cerrado'
           }">
       {{ ticket.estado | titlecase }}
     </span>
@@ -34,21 +37,30 @@
         </div>
 
         <!-- NUEVO COMENTARIO (obligatorio) -->
-        <div class="rounded-xl border bg-red-50 p-4 shadow-sm">
-          <h3 class="font-semibold text-gray-800 mb-3">
-            💬 Agregar Comentario <span class="text-red-600">*</span>
+        <div class="rounded-xl border-2 border-red-200 bg-gradient-to-br from-red-50 to-white p-4 shadow-md">
+          <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+            <span class="text-lg">💬</span>
+            <span>Agregar Comentario</span>
+            <span class="text-red-600 font-bold">*</span>
+            <span class="ml-auto text-xs font-normal text-red-600 bg-red-100 px-2 py-1 rounded-full">
+              Obligatorio
+            </span>
           </h3>
-          <textarea formControlName="comentario" 
-                    rows="4" 
-                    placeholder="Describí los cambios realizados..."
-                    class="w-full border rounded-md px-3 py-2 text-sm resize-none mb-2"></textarea>
-          <label class="flex items-center gap-2 text-sm">
-            <input type="checkbox" formControlName="comentarioInterno" />
-            <span>Comentario interno (no visible para propietarios)</span>
+          <textarea formControlName="comentario"
+                    rows="4"
+                    placeholder="Describí los cambios realizados en este ticket..."
+                    class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm resize-none mb-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                    [class.border-red-500]="ticketForm.get('comentario')?.invalid && ticketForm.get('comentario')?.touched"></textarea>
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer hover:text-gray-900">
+            <input type="checkbox"
+                   formControlName="comentarioInterno"
+                   class="w-4 h-4 text-blue-600 rounded" />
+            <span>🔒 Comentario interno (no visible para propietarios)</span>
           </label>
-          <p *ngIf="ticketForm.get('comentario')?.invalid && ticketForm.get('comentario')?.touched" 
-             class="text-xs text-red-600 mt-1">
-            El comentario es obligatorio (mínimo 5 caracteres)
+          <p *ngIf="ticketForm.get('comentario')?.invalid && ticketForm.get('comentario')?.touched"
+             class="text-xs text-red-600 mt-2 flex items-center gap-1">
+            <span>⚠️</span>
+            <span>El comentario es obligatorio (mínimo 5 caracteres)</span>
           </p>
         </div>
 
@@ -72,54 +84,160 @@
       <div class="space-y-4">
         
         <!-- Estado -->
-        <div class="rounded-xl border bg-white p-4 shadow-sm">
-          <label class="block font-semibold text-gray-800 mb-2">⚙️ Estado</label>
-          <select formControlName="estado" 
-                  class="w-full border rounded-md px-3 py-2 text-sm">
+        <div class="rounded-xl border bg-white p-4 shadow-sm hover:shadow-md transition-shadow">
+          <label class="block font-semibold text-gray-800 mb-2 flex items-center gap-2">
+            <span class="text-lg">⚙️</span>
+            <span>Estado del Ticket</span>
+          </label>
+          <select formControlName="estado"
+                  class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all cursor-pointer">
             <option *ngFor="let e of estados" [ngValue]="e">{{ e | titlecase }}</option>
           </select>
         </div>
 
-        <!-- Asignación -->
-        <div class="rounded-xl border bg-white p-4 shadow-sm">
-          <label class="block font-semibold text-gray-800 mb-2">👤 Asignación</label>
-          <input formControlName="asignadoANombre" 
-                 placeholder="Nombre responsable" 
-                 class="w-full border rounded-md px-3 py-2 text-sm mb-2" />
-          <select formControlName="asignadoRol" 
-                  class="w-full border rounded-md px-3 py-2 text-sm mb-2">
-            <option [ngValue]="null">Seleccionar rol</option>
-            <option value="proveedor">Proveedor</option>
-            <option value="encargado">Encargado</option>
-            <option value="admin_consorcio">Admin Consorcio</option>
-            <option value="otro">Otro</option>
-          </select>
-          <input formControlName="proveedorId" 
-                 type="number" 
-                 placeholder="ID Proveedor (opcional)"
-                 class="w-full border rounded-md px-3 py-2 text-sm" />
+        <!-- Asignación Mejorada -->
+        <div class="rounded-xl border bg-white p-4 shadow-sm hover:shadow-md transition-shadow">
+          <label class="block font-semibold text-gray-800 mb-3 flex items-center gap-2">
+            <span class="text-lg">👤</span>
+            <span>Asignación</span>
+          </label>
+
+          <!-- Radio buttons para tipo de asignación -->
+          <div class="space-y-2 mb-3">
+            <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+              <input type="radio"
+                     name="tipoAsignacion"
+                     [checked]="tipoAsignacion === 'sin_asignar'"
+                     (change)="onTipoAsignacionChange('sin_asignar')"
+                     class="w-4 h-4 text-blue-600" />
+              <span class="text-sm text-gray-700">Sin asignar</span>
+            </label>
+
+            <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+              <input type="radio"
+                     name="tipoAsignacion"
+                     [checked]="tipoAsignacion === 'persona'"
+                     (change)="onTipoAsignacionChange('persona')"
+                     class="w-4 h-4 text-blue-600" />
+              <span class="text-sm text-gray-700">Asignar a persona</span>
+            </label>
+
+            <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+              <input type="radio"
+                     name="tipoAsignacion"
+                     [checked]="tipoAsignacion === 'proveedor'"
+                     (change)="onTipoAsignacionChange('proveedor')"
+                     class="w-4 h-4 text-blue-600" />
+              <span class="text-sm text-gray-700">Asignar a proveedor</span>
+            </label>
+          </div>
+
+          <!-- Búsqueda de Persona -->
+          <div *ngIf="tipoAsignacion === 'persona'" class="space-y-2">
+            <div class="relative">
+              <input type="text"
+                     [value]="personaSearchTerm"
+                     (input)="onPersonaSearchInput($any($event.target).value)"
+                     placeholder="🔍 Buscar persona o usuario..."
+                     class="w-full border rounded-md px-3 py-2 text-sm"
+                     autocomplete="off" />
+
+              <!-- Resultados de búsqueda de personas -->
+              <div *ngIf="mostrarResultadosPersonas && personasEncontradas.length > 0"
+                   class="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-48 overflow-y-auto">
+                <div *ngFor="let persona of personasEncontradas"
+                     (click)="seleccionarPersona(persona)"
+                     class="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b last:border-b-0">
+                  <div class="font-medium text-sm text-gray-900">{{ getPersonaNombre(persona) }}</div>
+                  <div class="text-xs text-gray-500">{{ getPersonaEmail(persona) }}</div>
+                </div>
+              </div>
+
+              <!-- Mensaje de búsqueda -->
+              <div *ngIf="personaSearchTerm.length > 0 && personaSearchTerm.length < 2"
+                   class="text-xs text-gray-400 mt-1">
+                Escribí al menos 2 caracteres para buscar
+              </div>
+            </div>
+
+            <!-- Selector de rol para persona -->
+            <select formControlName="asignadoRol"
+                    class="w-full border rounded-md px-3 py-2 text-sm">
+              <option [ngValue]="null">Seleccionar rol</option>
+              <option *ngFor="let rol of rolesPersona" [value]="rol.value">
+                {{ rol.label }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Búsqueda de Proveedor -->
+          <div *ngIf="tipoAsignacion === 'proveedor'" class="space-y-2">
+            <div class="relative">
+              <input type="text"
+                     [value]="proveedorSearchTerm"
+                     (input)="onProveedorSearchInput($any($event.target).value)"
+                     placeholder="🔍 Buscar proveedor..."
+                     class="w-full border rounded-md px-3 py-2 text-sm"
+                     autocomplete="off" />
+
+              <!-- Resultados de búsqueda de proveedores -->
+              <div *ngIf="mostrarResultadosProveedores && proveedoresEncontrados.length > 0"
+                   class="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-48 overflow-y-auto">
+                <div *ngFor="let proveedor of proveedoresEncontrados"
+                     (click)="seleccionarProveedor(proveedor)"
+                     class="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b last:border-b-0">
+                  <div class="font-medium text-sm text-gray-900">{{ proveedor.razon_social }}</div>
+                  <div class="text-xs text-gray-500">{{ proveedor.rubro }}</div>
+                </div>
+              </div>
+
+              <!-- Mensaje de búsqueda -->
+              <div *ngIf="proveedorSearchTerm.length > 0 && proveedorSearchTerm.length < 2"
+                   class="text-xs text-gray-400 mt-1">
+                Escribí al menos 2 caracteres para buscar
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <!-- Costos -->
-        <div class="rounded-xl border bg-white p-4 shadow-sm">
-          <label class="block font-semibold text-gray-800 mb-2">💰 Costos</label>
-          <input formControlName="estimacionCosto" 
-                 type="number" 
-                 placeholder="Costo estimado"
-                 class="w-full border rounded-md px-3 py-2 text-sm mb-2" />
-          <input formControlName="costoFinal" 
-                 type="number" 
-                 placeholder="Costo final"
-                 class="w-full border rounded-md px-3 py-2 text-sm" />
+        <div class="rounded-xl border bg-white p-4 shadow-sm hover:shadow-md transition-shadow">
+          <label class="block font-semibold text-gray-800 mb-3 flex items-center gap-2">
+            <span class="text-lg">💰</span>
+            <span>Costos</span>
+          </label>
+          <div class="space-y-2">
+            <div>
+              <label class="text-xs text-gray-600 mb-1 block">Estimación</label>
+              <input formControlName="estimacionCosto"
+                     type="number"
+                     placeholder="$ Costo estimado"
+                     class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" />
+            </div>
+            <div>
+              <label class="text-xs text-gray-600 mb-1 block">Costo Final</label>
+              <input formControlName="costoFinal"
+                     type="number"
+                     placeholder="$ Costo final"
+                     class="w-full border-2 border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all" />
+            </div>
+          </div>
         </div>
 
         <!-- Archivo -->
-        <div class="rounded-xl border bg-white p-4 shadow-sm">
-          <label class="block font-semibold text-gray-800 mb-2">📎 Adjuntar</label>
-          <input type="file" 
-                 (change)="onFileSelect($event)" 
-                 class="w-full text-sm" />
-          <p class="text-xs text-gray-400 mt-1">Máx 10MB</p>
+        <div class="rounded-xl border bg-white p-4 shadow-sm hover:shadow-md transition-shadow">
+          <label class="block font-semibold text-gray-800 mb-3 flex items-center gap-2">
+            <span class="text-lg">📎</span>
+            <span>Adjuntar Archivo</span>
+          </label>
+          <input type="file"
+                 (change)="onFileSelect($event)"
+                 class="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />
+          <p class="text-xs text-gray-500 mt-2 flex items-center gap-1">
+            <span>ℹ️</span>
+            <span>Máximo 10MB</span>
+          </p>
         </div>
 
       </div>
@@ -128,17 +246,20 @@
   </div>
 
   <!-- FOOTER -->
-  <div class="sticky bottom-0 z-10 bg-white border-t px-6 py-3 flex justify-between shadow-lg">
+  <div class="sticky bottom-0 z-10 bg-gradient-to-r from-gray-50 to-white border-t px-6 py-4 flex justify-between items-center shadow-lg">
     <button type="button"
-            (click)="close()" 
-            class="px-6 py-2 rounded-md border text-gray-700 hover:bg-gray-50">
-      ✖️ Cancelar
+            (click)="close()"
+            class="px-6 py-2.5 rounded-lg border-2 border-gray-300 text-gray-700 font-medium hover:bg-gray-50 hover:border-gray-400 transition-all flex items-center gap-2">
+      <span>✖️</span>
+      <span>Cancelar</span>
     </button>
     <button type="button"
             (click)="save()"
             [disabled]="ticketForm.invalid || saving"
-            class="px-6 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
-      {{ saving ? '⏳ Guardando...' : '💾 Guardar Cambios' }}
+            class="px-6 py-2.5 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg transition-all flex items-center gap-2">
+      <span *ngIf="!saving">💾</span>
+      <span *ngIf="saving" class="animate-spin">⏳</span>
+      <span>{{ saving ? 'Guardando...' : 'Guardar Cambios' }}</span>
     </button>
   </div>
 
