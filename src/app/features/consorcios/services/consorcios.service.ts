@@ -39,6 +39,7 @@ export class ConsorciosService {
       if (filters.page) params = params.set('page', filters.page.toString());
       if (filters.limit) params = params.set('limit', filters.limit.toString());
       if (filters.search) params = params.set('search', filters.search);
+      if (filters.codigo_ext) params = params.set('codigo_ext', filters.codigo_ext);
       if (filters.estado) params = params.set('estado', filters.estado);
       if (filters.ciudad) params = params.set('ciudad', filters.ciudad);
       if (filters.provincia) params = params.set('provincia', filters.provincia);

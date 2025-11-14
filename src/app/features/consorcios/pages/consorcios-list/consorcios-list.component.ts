@@ -48,6 +48,7 @@ export class ConsorciosListComponent implements OnInit {
   // Filtros
   filters: ConsorcioFilters = {
     search: '',
+    codigo_ext: '',
     estado: undefined,
     ciudad: '',
     provincia: '',
@@ -126,6 +127,7 @@ export class ConsorciosListComponent implements OnInit {
 
     // Limpiar filtros vacíos
     if (!params.search) delete params.search;
+    if (!params.codigo_ext) delete params.codigo_ext;
     if (!params.estado) delete params.estado;
     if (!params.ciudad) delete params.ciudad;
     if (!params.provincia) delete params.provincia;
@@ -159,6 +161,7 @@ export class ConsorciosListComponent implements OnInit {
   clearFilters(): void {
     this.filters = {
       search: '',
+      codigo_ext: '',
       estado: undefined,
       ciudad: '',
       provincia: '',
@@ -229,6 +232,16 @@ export class ConsorciosListComponent implements OnInit {
   editarConsorcio(id: number, event: Event): void {
     event.stopPropagation();
     this.router.navigate(['/consorcios', id, 'editar']);
+  }
+
+  /**
+   * Navegar al formulario de crear ticket para un consorcio
+   */
+  crearTicket(consorcio: Consorcio, event: Event): void {
+    event.stopPropagation();
+    this.router.navigate(['/tickets/nuevo'], {
+      queryParams: { consorcioId: consorcio.id }
+    });
   }
 
   /**
@@ -373,6 +386,7 @@ export class ConsorciosListComponent implements OnInit {
    */
   hasActiveFilters(): boolean {
     return !!(
+      this.filters.codigo_ext ||
       this.filters.estado ||
       this.filters.ciudad ||
       this.filters.provincia ||
