@@ -13,6 +13,7 @@ import {
 import { Ticket } from '../../../tickets/models/ticket.model';
 import { MatDialog } from '@angular/material/dialog';
 import { TicketFormComponent } from '../../../tickets/components/ticket-form/ticket-form.component';
+import { TicketEditDialogComponent } from '../../../tickets/components/ticket-edit-dialog/ticket-edit-dialog.component';
 
 /**
  * =========================================
@@ -344,31 +345,17 @@ export class UnidadDetailComponent implements OnInit {
       return;
     }
 
-    const currentUser = this.authService.getCurrentUser();
-    if (!currentUser || !currentUser.id) {
-      console.error('No hay usuario autenticado');
-      return;
-    }
-
-    // Abrir modal con datos del ticket para edición
-    const dialogRef = this.dialog.open(TicketFormComponent, {
+    // Abrir modal de edición completo
+    const dialogRef = this.dialog.open(TicketEditDialogComponent, {
       width: '900px',
       maxHeight: '90vh',
       disableClose: false,
-      data: {
-        ticketId: ticket.id,
-        userId: currentUser.id,
-        consorcioId: ticket.consorcioId,
-        consorcioNombre: ticket.consorcioNombre,
-        unidadId: ticket.unidadId,
-        unidadNombre: ticket.unidadNombre,
-        mode: 'edit'
-      }
+      data: { ticket: ticket }
     });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        console.log('✅ Ticket actualizado:', result);
+        console.log('✅ Ticket actualizado');
         this.loadTickets();
         this.loadUnidad();
       }
