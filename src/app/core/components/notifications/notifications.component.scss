@@ -1,0 +1,63 @@
+// Estilos para el componente de notificaciones
+
+:host {
+  display: block;
+}
+
+// Animación para el panel
+.absolute.right-0.mt-2 {
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Scroll suave
+.max-h-96 {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(156, 163, 175, 0.5);
+    border-radius: 3px;
+
+    &:hover {
+      background-color: rgba(156, 163, 175, 0.7);
+    }
+  }
+}
+
+// Animación del badge
+@keyframes pulse-badge {
+  0%, 100% {
+    transform: translate(50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(50%, -50%) scale(1.1);
+  }
+}
+
+.absolute.top-0.right-0 {
+  animation: pulse-badge 2s ease-in-out infinite;
+}
+
+// Efecto hover en notificaciones
+.hover\:bg-gray-50 {
+  transition: background-color 0.15s ease;
+}

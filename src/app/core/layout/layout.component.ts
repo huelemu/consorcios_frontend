@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AuthService, User } from '../../auth/auth.service';
 import { ToastComponent } from '../toast/toast.component';
+import { NotificationsComponent } from '../components/notifications/notifications.component';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, ToastComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, ToastComponent, NotificationsComponent],
   templateUrl: './layout.component.html',
   styleUrls: ['./layout.component.scss']
 })

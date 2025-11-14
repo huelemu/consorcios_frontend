@@ -27,20 +27,21 @@ export interface Usuario {
   password?: string; // No se devuelve desde el backend
   rol_global: RolGlobal;
   activo: boolean;
-  
+  aprobado: boolean; // Usuario aprobado por un administrador
+
   // OAuth
   google_id?: string | null;
   oauth_provider: OAuthProvider;
   email_verificado: boolean;
   primer_login: boolean;
-  
+
   // Invitación
   invitacion_token?: string | null;
   invitacion_expira?: Date | null;
-  
+
   // Timestamps
   fecha_creacion: Date;
-  
+
   // Relaciones
   persona?: PersonaBasic;
   roles?: UsuarioRol[];
@@ -147,6 +148,7 @@ export interface UsuarioFilters {
   search?: string;
   rol_global?: RolGlobal;
   activo?: boolean;
+  aprobado?: boolean; // Filtrar por usuarios aprobados/pendientes
   oauth_provider?: OAuthProvider;
   email_verificado?: boolean;
   page?: number;
@@ -173,6 +175,8 @@ export interface UsuarioStats {
   total: number;
   activos: number;
   inactivos: number;
+  aprobados: number;
+  pendientes: number; // Usuarios pendientes de aprobación
   porRol: {
     rol: RolGlobal;
     cantidad: number;

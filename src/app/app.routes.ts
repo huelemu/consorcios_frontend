@@ -21,15 +21,17 @@ import { ProveedoresPageComponent } from './features/proveedores/pages/proveedor
 import { ProveedorDetalleComponent } from './features/proveedores/pages/proveedor-detalle/proveedor-detalle.component';
 import { ConsorciosUploadComponent } from './features/consorcios/components/consorcios-upload/consorcios-upload.component';
 import { UnidadesBulkPageComponent } from './features/unidades/pages/unidades-bulk-page/unidades-bulk-page.component';
+import { PendienteAprobacionComponent } from './auth/pendiente-aprobacion/pendiente-aprobacion.component';
+import { PermisosPageComponent } from './features/configuracion/pages/permisos-page/permisos-page.component';
 
 
 export const appRoutes: Routes = [
   // ========================================
   // RUTAS PÚBLICAS (sin autenticación)
   // ========================================
-  { 
-    path: 'login', 
-    component: LoginComponent 
+  {
+    path: 'login',
+    component: LoginComponent
   },
   { 
     path: 'forgot-password', 
@@ -47,11 +49,18 @@ export const appRoutes: Routes = [
     path: 'privacy', 
     loadComponent: () => import('./legal/privacy-policy/privacy-policy.component').then(m => m.PrivacyPolicyComponent)
   },
-  { 
-    path: 'terms', 
+  {
+    path: 'terms',
     loadComponent: () => import('./legal/terms-of-service/terms-of-service.component').then(m => m.TermsOfServiceComponent)
   },
-  
+
+  // ========================================
+  // RUTA DE PENDIENTE DE APROBACIÓN
+  // ========================================
+  {
+    path: 'pendiente-aprobacion',
+    component: PendienteAprobacionComponent
+  },
 
 
   // ========================================
@@ -188,13 +197,26 @@ export const appRoutes: Routes = [
       // ========================================
       // USUARIOS
       // ========================================
-      { 
-        path: 'usuarios', 
-        component: UsuariosPageComponent, 
-        canActivate: [RoleGuard], 
+      {
+        path: 'usuarios',
+        component: UsuariosPageComponent,
+        canActivate: [RoleGuard],
         data: { roles: ['admin_global', 'tenant_admin', 'admin_consorcio'] }
       },
-      
+
+      // ========================================
+      // CONFIGURACIÓN - PERMISOS
+      // ========================================
+      {
+        path: 'configuracion/permisos',
+        component: PermisosPageComponent,
+        canActivate: [RoleGuard],
+        data: {
+          roles: ['admin_global', 'tenant_admin', 'admin_consorcio'],
+          title: 'Gestión de Permisos'
+        }
+      },
+
       // ========================================
       // PROVEEDORES
       // ========================================

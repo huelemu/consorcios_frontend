@@ -41,6 +41,7 @@ export class UsuariosService {
       if (filters.search) params = params.set('search', filters.search);
       if (filters.rol_global) params = params.set('rol_global', filters.rol_global);
       if (filters.activo !== undefined) params = params.set('activo', filters.activo.toString());
+      if (filters.aprobado !== undefined) params = params.set('aprobado', filters.aprobado.toString());
       if (filters.oauth_provider) params = params.set('oauth_provider', filters.oauth_provider);
       if (filters.email_verificado !== undefined) params = params.set('email_verificado', filters.email_verificado.toString());
       if (filters.page) params = params.set('page', filters.page.toString());
@@ -96,6 +97,31 @@ export class UsuariosService {
    */
   desactivarUsuario(id: number): Observable<Usuario> {
     return this.http.patch<Usuario>(`${this.apiUrl}/${id}/desactivar`, {});
+  }
+
+  // ========================================
+  // APROBACIÓN DE USUARIOS
+  // ========================================
+
+  /**
+   * Aprobar un usuario pendiente
+   */
+  aprobarUsuario(id: number): Observable<Usuario> {
+    return this.http.patch<Usuario>(`${this.apiUrl}/${id}/aprobar`, {});
+  }
+
+  /**
+   * Rechazar un usuario pendiente
+   */
+  rechazarUsuario(id: number, motivo?: string): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/${id}/rechazar`, { motivo });
+  }
+
+  /**
+   * Obtener usuarios pendientes de aprobación
+   */
+  getUsuariosPendientes(): Observable<Usuario[]> {
+    return this.http.get<Usuario[]>(`${this.apiUrl}/pendientes`);
   }
 
   // ========================================
