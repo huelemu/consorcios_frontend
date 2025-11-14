@@ -1,8 +1,11 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ProveedorPersona, PersonaBasic, RolPersonaProveedor, CreateProveedorPersonaDto, UpdateProveedorPersonaDto, getRolLabel, getRolColor, formatPersonaNombre, ROL_PERSONA_LABELS } from '../../models/proveedor.model';
+import { ProveedorPersona, RolPersonaProveedor, CreateProveedorPersonaDto, UpdateProveedorPersonaDto, getRolLabel, getRolColor, formatPersonaNombre, ROL_PERSONA_LABELS } from '../../models/proveedor.model';
 import { ProveedoresService } from '../../services/proveedores.service';
+import { PersonasService } from '../../../personas/services/personas.service';
+import { Persona, PersonaInput } from '../../../personas/models/persona.model';
+import { debounceTime, distinctUntilChanged, Subject, switchMap, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-proveedor-personas-section',
@@ -11,7 +14,7 @@ import { ProveedoresService } from '../../services/proveedores.service';
   templateUrl: './proveedor-personas-section.component.html',
   styleUrls: ['./proveedor-personas-section.component.css']
 })
-export class ProveedorPersonasSectionComponent implements OnInit {
+export class ProveedorPersonasSectionComponent implements OnInit, OnDestroy {
   @Input() proveedorId!: number;
   @Input() personas: ProveedorPersona[] = [];
   @Output() personasChanged = new EventEmitter<void>();
@@ -19,6 +22,7 @@ export class ProveedorPersonasSectionComponent implements OnInit {
   // Modal states
   showAddModal = false;
   showEditModal = false;
+  showCreatePersonaModal = false;
   selectedPersona: ProveedorPersona | null = null;
 
   // Form data
@@ -28,17 +32,87 @@ export class ProveedorPersonasSectionComponent implements OnInit {
     es_principal: false
   };
 
+  // Persona creation form
+  newPersonaForm: PersonaInput = {
+    nombre: '',
+    apellido: '',
+    documento: '',
+    email: '',
+    telefono: '',
+    direccion: '',
+    localidad: '',
+    provincia: '',
+    tipo_persona: 'fisica'
+  };
+
+  // Search
+  searchTerm = '';
+  searchResults: Persona[] = [];
+  searchLoading = false;
+  private searchSubject = new Subject<string>();
+  private destroy$ = new Subject<void>();
+
   // Available options
   rolesDisponibles = Object.keys(ROL_PERSONA_LABELS) as RolPersonaProveedor[];
-  personasDisponibles: PersonaBasic[] = [];
 
   loading = false;
   error: string | null = null;
 
-  constructor(private proveedoresService: ProveedoresService) {}
+  constructor(
+    private proveedoresService: ProveedoresService,
+    private personasService: PersonasService
+  ) {}
 
   ngOnInit() {
     this.loadPersonas();
+    this.setupSearch();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  setupSearch() {
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$),
+      switchMap(term => {
+        if (!term || term.length < 2) {
+          this.searchResults = [];
+          return [];
+        }
+        this.searchLoading = true;
+        return this.personasService.searchPersonas(term);
+      })
+    ).subscribe({
+      next: (results) => {
+        this.searchResults = results;
+        this.searchLoading = false;
+      },
+      error: (err) => {
+        console.error('Error searching personas:', err);
+        this.searchLoading = false;
+      }
+    });
+  }
+
+  onSearchChange(term: string) {
+    this.searchTerm = term;
+    this.searchSubject.next(term);
+  }
+
+  selectPersona(persona: Persona) {
+    this.formData.persona_id = persona.id;
+    this.searchTerm = this.personasService.getFullName(persona);
+    this.searchResults = [];
+  }
+
+  clearSearch() {
+    this.searchTerm = '';
+    this.formData.persona_id = undefined;
+    this.searchResults = [];
   }
 
   loadPersonas() {
@@ -62,6 +136,8 @@ export class ProveedorPersonasSectionComponent implements OnInit {
       desde: new Date().toISOString().split('T')[0],
       es_principal: false
     };
+    this.searchTerm = '';
+    this.searchResults = [];
     this.showAddModal = true;
   }
 
@@ -69,6 +145,59 @@ export class ProveedorPersonasSectionComponent implements OnInit {
     this.showAddModal = false;
     this.formData = {};
     this.error = null;
+    this.clearSearch();
+  }
+
+  openCreatePersonaModal() {
+    this.newPersonaForm = {
+      nombre: '',
+      apellido: '',
+      documento: '',
+      email: '',
+      telefono: '',
+      direccion: '',
+      localidad: '',
+      provincia: '',
+      tipo_persona: 'fisica'
+    };
+    this.showCreatePersonaModal = true;
+  }
+
+  closeCreatePersonaModal() {
+    this.showCreatePersonaModal = false;
+    this.newPersonaForm = {
+      nombre: '',
+      apellido: '',
+      documento: '',
+      email: '',
+      telefono: '',
+      direccion: '',
+      localidad: '',
+      provincia: '',
+      tipo_persona: 'fisica'
+    };
+  }
+
+  onCreatePersona() {
+    if (!this.newPersonaForm.nombre || !this.newPersonaForm.apellido) {
+      this.error = 'Nombre y apellido son requeridos';
+      return;
+    }
+
+    this.loading = true;
+    this.personasService.createPersona(this.newPersonaForm).subscribe({
+      next: (response) => {
+        const persona = response.data;
+        this.selectPersona(persona);
+        this.closeCreatePersonaModal();
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error creating persona:', err);
+        this.error = err.error?.message || 'Error al crear persona';
+        this.loading = false;
+      }
+    });
   }
 
   openEditModal(persona: ProveedorPersona) {

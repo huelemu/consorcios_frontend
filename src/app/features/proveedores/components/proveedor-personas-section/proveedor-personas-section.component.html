@@ -155,18 +155,91 @@
 
     <!-- Modal Body -->
     <form (ngSubmit)="onSubmitAdd()" class="p-6 space-y-4">
-      <!-- Persona Select (TODO: implement persona selector) -->
+      <!-- Persona Search/Select -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Persona *</label>
-        <input
-          type="number"
-          [(ngModel)]="formData.persona_id"
-          name="persona_id"
-          required
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="ID de persona (temporal)"
-        />
-        <p class="mt-1 text-xs text-gray-500">Por ahora ingrese el ID de la persona. Selector próximamente.</p>
+        <div class="relative">
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            (input)="onSearchChange(searchTerm)"
+            name="search"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Buscar por nombre, apellido o documento..."
+            autocomplete="off"
+          />
+          <button
+            *ngIf="searchTerm"
+            type="button"
+            (click)="clearSearch()"
+            class="absolute right-2 top-2.5 text-gray-400 hover:text-gray-600"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="m15 9-6 6"></path>
+              <path d="m9 9 6 6"></path>
+            </svg>
+          </button>
+
+          <!-- Search Results Dropdown -->
+          <div
+            *ngIf="searchResults.length > 0 && searchTerm"
+            class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+          >
+            <button
+              type="button"
+              *ngFor="let persona of searchResults"
+              (click)="selectPersona(persona)"
+              class="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
+            >
+              <div class="font-medium text-gray-900">
+                {{ persona.nombre }} {{ persona.apellido }}
+              </div>
+              <div class="text-sm text-gray-600 flex items-center gap-3 mt-1">
+                <span *ngIf="persona.documento">Doc: {{ persona.documento }}</span>
+                <span *ngIf="persona.email">{{ persona.email }}</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- Loading indicator -->
+          <div
+            *ngIf="searchLoading"
+            class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-3 text-center text-sm text-gray-600"
+          >
+            Buscando...
+          </div>
+
+          <!-- No results -->
+          <div
+            *ngIf="!searchLoading && searchTerm && searchTerm.length >= 2 && searchResults.length === 0"
+            class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-3 text-center text-sm text-gray-600"
+          >
+            No se encontraron personas
+          </div>
+        </div>
+
+        <!-- Create new persona button -->
+        <button
+          type="button"
+          (click)="openCreatePersonaModal()"
+          class="mt-2 w-full px-3 py-2 border-2 border-dashed border-gray-300 text-gray-600 rounded-lg hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-colors text-sm font-medium flex items-center justify-center gap-2"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M22 11h-6m3-3v6"></path>
+          </svg>
+          Crear Nueva Persona
+        </button>
+
+        <p *ngIf="formData.persona_id" class="mt-2 text-xs text-green-600 flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <path d="m9 11 3 3L22 4"></path>
+          </svg>
+          Persona seleccionada
+        </p>
       </div>
 
       <!-- Rol -->
@@ -348,6 +421,171 @@
           class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {{ loading ? 'Guardando...' : 'Guardar' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Create Persona Modal -->
+<div
+  *ngIf="showCreatePersonaModal"
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+  (click)="closeCreatePersonaModal()"
+>
+  <div
+    class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Modal Header -->
+    <div class="flex justify-between items-center p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
+      <h3 class="text-lg font-semibold text-gray-900">Crear Nueva Persona</h3>
+      <button (click)="closeCreatePersonaModal()" class="text-gray-400 hover:text-gray-600">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 6 6 18M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <form (ngSubmit)="onCreatePersona()" class="p-6 space-y-4">
+      <!-- Tipo de Persona -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Persona *</label>
+        <select
+          [(ngModel)]="newPersonaForm.tipo_persona"
+          name="tipo_persona"
+          required
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        >
+          <option value="fisica">Persona Física</option>
+          <option value="juridica">Persona Jurídica</option>
+        </select>
+      </div>
+
+      <!-- Nombre y Apellido -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+          <input
+            type="text"
+            [(ngModel)]="newPersonaForm.nombre"
+            name="nombre"
+            required
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Juan"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Apellido *</label>
+          <input
+            type="text"
+            [(ngModel)]="newPersonaForm.apellido"
+            name="apellido"
+            required
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Pérez"
+          />
+        </div>
+      </div>
+
+      <!-- Documento -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Documento</label>
+        <input
+          type="text"
+          [(ngModel)]="newPersonaForm.documento"
+          name="documento"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="12345678"
+        />
+      </div>
+
+      <!-- Email y Teléfono -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input
+            type="email"
+            [(ngModel)]="newPersonaForm.email"
+            name="email"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="juan@example.com"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+          <input
+            type="tel"
+            [(ngModel)]="newPersonaForm.telefono"
+            name="telefono"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="+54 11 1234-5678"
+          />
+        </div>
+      </div>
+
+      <!-- Dirección -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+        <input
+          type="text"
+          [(ngModel)]="newPersonaForm.direccion"
+          name="direccion"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="Av. Corrientes 1234"
+        />
+      </div>
+
+      <!-- Localidad y Provincia -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Localidad</label>
+          <input
+            type="text"
+            [(ngModel)]="newPersonaForm.localidad"
+            name="localidad"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="CABA"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Provincia</label>
+          <input
+            type="text"
+            [(ngModel)]="newPersonaForm.provincia"
+            name="provincia"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Buenos Aires"
+          />
+        </div>
+      </div>
+
+      <!-- Error -->
+      <div *ngIf="error" class="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+        {{ error }}
+      </div>
+
+      <!-- Actions -->
+      <div class="flex gap-3 pt-4 border-t border-gray-200">
+        <button
+          type="button"
+          (click)="closeCreatePersonaModal()"
+          [disabled]="loading"
+          class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          [disabled]="loading"
+          class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          <svg *ngIf="loading" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          {{ loading ? 'Creando...' : 'Crear Persona' }}
         </button>
       </div>
     </form>
