@@ -334,10 +334,56 @@ export class UnidadDetailComponent implements OnInit {
   }
 
   /**
-   * Ver ticket
+   * Ver/Editar ticket - Abre el modal de edición
    */
   verTicket(ticketId: number): void {
-    this.router.navigate(['/tickets', ticketId]);
+    // Buscar el ticket en la lista
+    const ticket = this.tickets.find(t => t.id === ticketId);
+    if (!ticket) {
+      console.error('Ticket no encontrado:', ticketId);
+      return;
+    }
+
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser || !currentUser.id) {
+      console.error('No hay usuario autenticado');
+      return;
+    }
+
+    // Abrir modal con datos del ticket para edición
+    const dialogRef = this.dialog.open(TicketFormComponent, {
+      width: '900px',
+      maxHeight: '90vh',
+      disableClose: false,
+      data: {
+        ticketId: ticket.id,
+        userId: currentUser.id,
+        consorcioId: ticket.consorcioId,
+        consorcioNombre: ticket.consorcioNombre,
+        unidadId: ticket.unidadId,
+        unidadNombre: ticket.unidadNombre,
+        mode: 'edit'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        console.log('✅ Ticket actualizado:', result);
+        this.loadTickets();
+        this.loadUnidad();
+      }
+    });
+  }
+
+  /**
+   * Obtener cantidad de tickets pendientes (abiertos, en proceso, pendientes)
+   */
+  getTicketsPendientes(): number {
+    return this.tickets.filter(t =>
+      t.estado === 'abierto' ||
+      t.estado === 'en_proceso' ||
+      t.estado === 'pendiente'
+    ).length;
   }
 
   /**
