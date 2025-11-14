@@ -52,6 +52,7 @@ export class ConsorciosListComponent implements OnInit {
     estado: undefined,
     ciudad: '',
     provincia: '',
+    conTicketsPendientes: false,
     sortBy: 'nombre',
     sortOrder: 'asc'
   };
@@ -131,6 +132,7 @@ export class ConsorciosListComponent implements OnInit {
     if (!params.estado) delete params.estado;
     if (!params.ciudad) delete params.ciudad;
     if (!params.provincia) delete params.provincia;
+    if (!params.conTicketsPendientes) delete params.conTicketsPendientes;
 
     this.consorciosService.getConsorcios(params).subscribe({
       next: (response) => {
@@ -165,6 +167,7 @@ export class ConsorciosListComponent implements OnInit {
       estado: undefined,
       ciudad: '',
       provincia: '',
+      conTicketsPendientes: false,
       sortBy: 'nombre',
       sortOrder: 'asc'
     };
@@ -390,7 +393,8 @@ export class ConsorciosListComponent implements OnInit {
       this.filters.estado ||
       this.filters.ciudad ||
       this.filters.provincia ||
-      this.filters.responsable_id
+      this.filters.responsable_id ||
+      this.filters.conTicketsPendientes
     );
   }
 }

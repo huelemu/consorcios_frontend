@@ -44,6 +44,7 @@ export class ConsorciosService {
       if (filters.ciudad) params = params.set('ciudad', filters.ciudad);
       if (filters.provincia) params = params.set('provincia', filters.provincia);
       if (filters.responsable_id) params = params.set('responsable_id', filters.responsable_id.toString());
+      if (filters.conTicketsPendientes) params = params.set('conTicketsPendientes', 'true');
       if (filters.sortBy) params = params.set('sortBy', filters.sortBy);
       if (filters.sortOrder) params = params.set('sortOrder', filters.sortOrder);
     }
