@@ -4,6 +4,8 @@ import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/rou
 import { AuthService, User } from '../../auth/auth.service';
 import { ToastComponent } from '../toast/toast.component';
 import { NotificationsComponent } from '../components/notifications/notifications.component';
+import { UsuariosService } from '../../features/usuarios/services/usuarios.service';
+import { NotificationsService } from '../services/notifications.service';
 
 @Component({
   selector: 'app-layout',
@@ -20,7 +22,9 @@ export class LayoutComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private usuariosService: UsuariosService,
+    private notificationsService: NotificationsService
   ) {
     this.checkScreenSize();
   }
@@ -28,6 +32,11 @@ export class LayoutComponent implements OnInit {
   ngOnInit() {
     this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
+
+      // Si es admin, verificar usuarios pendientes
+      if (user && this.authService.isAdmin()) {
+        this.verificarUsuariosPendientes();
+      }
     });
   }
 
@@ -102,6 +111,52 @@ navigateTo(route: string): void {
   this.router.navigate([route]);
   this.closeUserMenu();
 }
+
+  /**
+   * Verificar si hay usuarios pendientes de aprobación
+   * Solo para administradores
+   */
+  private verificarUsuariosPendientes(): void {
+    this.usuariosService.getUsuariosPendientes().subscribe({
+      next: (usuarios) => {
+        if (usuarios && usuarios.length > 0) {
+          // Crear una notificación por cada usuario pendiente (máximo 5)
+          const usuariosANotificar = usuarios.slice(0, 5);
+
+          usuariosANotificar.forEach(usuario => {
+            const nombre = usuario.persona
+              ? `${usuario.persona.nombre} ${usuario.persona.apellido}`.trim()
+              : usuario.email;
+
+            this.notificationsService.notifyNewUserPending(
+              nombre,
+              usuario.email,
+              usuario.id
+            );
+          });
+
+          // Si hay más de 5, agregar una notificación general
+          if (usuarios.length > 5) {
+            this.notificationsService.add({
+              type: 'action',
+              priority: 'high',
+              title: `${usuarios.length} usuarios pendientes de aprobación`,
+              message: 'Hay múltiples usuarios esperando aprobación. Revisa la sección de Gestión de Permisos.',
+              actionRequired: true,
+              actionText: 'Ver todos',
+              actionRoute: '/configuracion/permisos',
+              icon: '📋'
+            });
+          }
+        }
+      },
+      error: (error) => {
+        // Si hay error (por ejemplo, endpoint no implementado), silenciosamente ignorar
+        console.debug('No se pudieron cargar usuarios pendientes:', error);
+      }
+    });
+  }
+
   // Obtener rol formateado
   getRoleDisplay(): string {
     if (!this.currentUser?.rol) return 'Usuario';
