@@ -26,103 +26,27 @@
       </div>
     </div>
 
-    <!-- Navigation -->
+    <!-- Navigation - DINÁMICO basado en módulos del usuario -->
     <nav class="flex-1 p-3 space-y-1 text-sm overflow-y-auto">
+      <!-- Renderizar solo los módulos que el usuario puede ver -->
       <a
-        routerLink="/dashboard"
+        *ngFor="let modulo of modulosUsuario"
+        [routerLink]="modulo.ruta"
         routerLinkActive="bg-blue-100 text-blue-700 font-medium"
         [class.justify-center]="!sidebarOpen && !isMobileView"
         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors"
-        [title]="!sidebarOpen && !isMobileView ? 'Dashboard' : ''"
+        [title]="!sidebarOpen && !isMobileView ? modulo.nombre : ''"
         (click)="closeSidebarOnMobile()"
       >
-        <span class="text-lg">📊</span>
-        <span *ngIf="sidebarOpen || isMobileView">Dashboard</span>
+        <span class="text-lg">{{ getModuloIcon(modulo.icono) }}</span>
+        <span *ngIf="sidebarOpen || isMobileView">{{ modulo.nombre }}</span>
       </a>
 
-      <a
-        routerLink="/consorcios"
-        routerLinkActive="bg-blue-100 text-blue-700 font-medium"
-        [class.justify-center]="!sidebarOpen && !isMobileView"
-        class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors"
-        [title]="!sidebarOpen && !isMobileView ? 'Consorcios' : ''"
-        (click)="closeSidebarOnMobile()"
-      >
-        <span class="text-lg">🏠</span>
-        <span *ngIf="sidebarOpen || isMobileView">Consorcios</span>
-      </a>
-
-      <a
-        routerLink="/unidades"
-        routerLinkActive="bg-blue-100 text-blue-700 font-medium"
-        [class.justify-center]="!sidebarOpen && !isMobileView"
-        class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors"
-        [title]="!sidebarOpen && !isMobileView ? 'Unidades' : ''"
-        (click)="closeSidebarOnMobile()"
-      >
-        <span class="text-lg">🏢</span>
-        <span *ngIf="sidebarOpen || isMobileView">Unidades</span>
-      </a>
-
-      <a
-        routerLink="/usuarios"
-        routerLinkActive="bg-blue-100 text-blue-700 font-medium"
-        [class.justify-center]="!sidebarOpen && !isMobileView"
-        class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors"
-        [title]="!sidebarOpen && !isMobileView ? 'Usuarios' : ''"
-        (click)="closeSidebarOnMobile()"
-      >
-        <span class="text-lg">👤</span>
-        <span *ngIf="sidebarOpen || isMobileView">Usuarios</span>
-      </a>
-
-      <a
-        routerLink="/personas"
-        routerLinkActive="bg-blue-100 text-blue-700 font-medium"
-        [class.justify-center]="!sidebarOpen && !isMobileView"
-        class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors"
-        [title]="!sidebarOpen && !isMobileView ? 'Personas' : ''"
-        (click)="closeSidebarOnMobile()"
-      >
-        <span class="text-lg">🧍</span>
-        <span *ngIf="sidebarOpen || isMobileView">Personas</span>
-      </a>
-
-      <a
-        routerLink="/proveedores"
-        routerLinkActive="bg-blue-100 text-blue-700 font-medium"
-        [class.justify-center]="!sidebarOpen && !isMobileView"
-        class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors"
-        [title]="!sidebarOpen && !isMobileView ? 'Proveedores' : ''"
-        (click)="closeSidebarOnMobile()"
-      >
-        <span class="text-lg">🔧</span>
-        <span *ngIf="sidebarOpen || isMobileView">Proveedores</span>
-      </a>
-
-      <a
-        routerLink="/expensas"
-        routerLinkActive="bg-blue-100 text-blue-700 font-medium"
-        [class.justify-center]="!sidebarOpen && !isMobileView"
-        class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors"
-        [title]="!sidebarOpen && !isMobileView ? 'Expensas' : ''"
-        (click)="closeSidebarOnMobile()"
-      >
-        <span class="text-lg">💰</span>
-        <span *ngIf="sidebarOpen || isMobileView">Expensas</span>
-      </a>
-
-      <a
-        routerLink="/tickets"
-        routerLinkActive="bg-blue-100 text-blue-700 font-medium"
-        [class.justify-center]="!sidebarOpen && !isMobileView"
-        class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors"
-        [title]="!sidebarOpen && !isMobileView ? 'Tickets' : ''"
-        (click)="closeSidebarOnMobile()"
-      >
-        <span class="text-lg">🎟️</span>
-        <span *ngIf="sidebarOpen || isMobileView">Tickets</span>
-      </a>
+      <!-- Mensaje si no hay módulos cargados -->
+      <div *ngIf="modulosUsuario.length === 0" class="px-3 py-2 text-gray-400 text-center text-xs">
+        <span *ngIf="sidebarOpen || isMobileView">Cargando módulos...</span>
+        <span *ngIf="!sidebarOpen && !isMobileView">...</span>
+      </div>
     </nav>
   </aside>
 
