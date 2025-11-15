@@ -19,6 +19,13 @@ export class PermisosPageComponent implements OnInit {
   loading = false;
   selectedTab: 'pendientes' | 'todos' = 'pendientes';
 
+  // Debug info
+  debugInfo = {
+    endpointCalled: false,
+    endpointResponse: null as any,
+    endpointError: null as any
+  };
+
   // Para el modal de cambio de rol
   showRoleModal = false;
   selectedUsuario: Usuario | null = null;
@@ -60,14 +67,37 @@ export class PermisosPageComponent implements OnInit {
    */
   cargarUsuariosPendientes(): void {
     this.loading = true;
+    this.debugInfo.endpointCalled = true;
+
+    console.log('🔍 [DEBUG] Llamando a getUsuariosPendientes()...');
+
     this.usuariosService.getUsuariosPendientes().subscribe({
       next: (usuarios) => {
+        console.log('✅ [DEBUG] Respuesta recibida:', usuarios);
+        console.log('📊 [DEBUG] Cantidad de usuarios pendientes:', usuarios?.length || 0);
+
+        this.debugInfo.endpointResponse = usuarios;
         this.usuariosPendientes = usuarios;
         this.loading = false;
+
+        if (!usuarios || usuarios.length === 0) {
+          console.warn('⚠️ [DEBUG] No hay usuarios pendientes O el endpoint no está funcionando correctamente');
+        }
       },
       error: (error) => {
-        console.error('Error cargando usuarios pendientes:', error);
-        this.toastService.error('Error al cargar usuarios pendientes');
+        console.error('❌ [DEBUG] Error cargando usuarios pendientes:', error);
+        console.error('❌ [DEBUG] Status:', error.status);
+        console.error('❌ [DEBUG] Message:', error.message);
+        console.error('❌ [DEBUG] URL:', error.url);
+
+        this.debugInfo.endpointError = {
+          status: error.status,
+          message: error.message,
+          url: error.url,
+          error: error.error
+        };
+
+        this.toastService.error('Error al cargar usuarios pendientes. Revisa la consola.');
         this.loading = false;
       }
     });
@@ -77,12 +107,25 @@ export class PermisosPageComponent implements OnInit {
    * Cargar todos los usuarios
    */
   cargarTodosUsuarios(): void {
+    console.log('🔍 [DEBUG] Llamando a getUsuarios()...');
+
     this.usuariosService.getUsuarios({ limit: 100 }).subscribe({
       next: (response) => {
+        console.log('✅ [DEBUG] Todos los usuarios:', response);
+        console.log('📊 [DEBUG] Total usuarios:', response.total);
+
         this.todosUsuarios = response.usuarios;
+
+        // Verificar si alguno tiene aprobado = false
+        const pendientesEnLista = response.usuarios.filter(u => u.aprobado === false);
+        console.log('📋 [DEBUG] Usuarios con aprobado=false en la lista completa:', pendientesEnLista.length);
+
+        if (pendientesEnLista.length > 0) {
+          console.log('🎯 [DEBUG] Usuarios pendientes encontrados:', pendientesEnLista);
+        }
       },
       error: (error) => {
-        console.error('Error cargando usuarios:', error);
+        console.error('❌ [DEBUG] Error cargando usuarios:', error);
       }
     });
   }
@@ -212,5 +255,20 @@ export class PermisosPageComponent implements OnInit {
    */
   cambiarTab(tab: 'pendientes' | 'todos'): void {
     this.selectedTab = tab;
+  }
+
+  /**
+   * Mostrar información de debug
+   */
+  mostrarDebugInfo(): void {
+    console.group('🐛 DEBUG INFO');
+    console.log('Endpoint llamado:', this.debugInfo.endpointCalled);
+    console.log('Respuesta:', this.debugInfo.endpointResponse);
+    console.log('Error:', this.debugInfo.endpointError);
+    console.log('Usuarios pendientes:', this.usuariosPendientes);
+    console.log('Todos los usuarios:', this.todosUsuarios);
+    console.groupEnd();
+
+    alert('Revisa la consola del navegador (F12) para ver la información de debug');
   }
 }
