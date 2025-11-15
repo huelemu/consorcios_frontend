@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import {
   Usuario,
@@ -121,7 +122,21 @@ export class UsuariosService {
    * Obtener usuarios pendientes de aprobación
    */
   getUsuariosPendientes(): Observable<Usuario[]> {
-    return this.http.get<Usuario[]>(`${this.apiUrl}/pendientes`);
+    return this.http.get<any>(`${this.apiUrl}/pendientes`).pipe(
+      map(response => {
+        // El backend puede devolver {success, usuarios, total} o directamente el array
+        if (response && response.usuarios && Array.isArray(response.usuarios)) {
+          return response.usuarios;
+        }
+        // Si es un array directo, devolverlo tal cual
+        if (Array.isArray(response)) {
+          return response;
+        }
+        // Si no es ninguno de los dos, devolver array vacío
+        console.warn('Respuesta inesperada del endpoint /pendientes:', response);
+        return [];
+      })
+    );
   }
 
   // ========================================
