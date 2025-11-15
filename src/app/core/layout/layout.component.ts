@@ -6,6 +6,8 @@ import { ToastComponent } from '../toast/toast.component';
 import { NotificationsComponent } from '../components/notifications/notifications.component';
 import { UsuariosService } from '../../features/usuarios/services/usuarios.service';
 import { NotificationsService } from '../services/notifications.service';
+import { ModulosService } from '../services/modulos.service';
+import { ModuloConPermisos } from '../models/modulo.interface';
 
 @Component({
   selector: 'app-layout',
@@ -19,12 +21,14 @@ export class LayoutComponent implements OnInit {
   userMenuOpen = false;
   currentUser: User | null = null;
   isMobileView = false;
+  modulosUsuario: ModuloConPermisos[] = [];
 
   constructor(
     private authService: AuthService,
     private router: Router,
     private usuariosService: UsuariosService,
-    private notificationsService: NotificationsService
+    private notificationsService: NotificationsService,
+    private modulosService: ModulosService
   ) {
     this.checkScreenSize();
   }
@@ -37,6 +41,14 @@ export class LayoutComponent implements OnInit {
       if (user && this.authService.isAdmin()) {
         this.verificarUsuariosPendientes();
       }
+    });
+
+    // Cargar módulos del usuario
+    this.cargarModulos();
+
+    // Suscribirse a cambios en los módulos
+    this.modulosService.modulos$.subscribe(modulos => {
+      this.modulosUsuario = modulos;
     });
   }
 
@@ -160,7 +172,7 @@ navigateTo(route: string): void {
   // Obtener rol formateado
   getRoleDisplay(): string {
     if (!this.currentUser?.rol) return 'Usuario';
-    
+
     const roleMap: { [key: string]: string } = {
       'admin_global': 'Administrador Global',
       'tenant_admin': 'Admin de Tenant',
@@ -172,5 +184,52 @@ navigateTo(route: string): void {
     };
 
     return roleMap[this.currentUser.rol] || this.currentUser.rol;
+  }
+
+  /**
+   * Cargar módulos del usuario
+   */
+  private cargarModulos(): void {
+    // Primero intentar cargar desde storage (para persistencia)
+    this.modulosService.cargarModulosDesdeStorage();
+    const modulosEnStorage = this.modulosService.getModulosActuales();
+
+    if (modulosEnStorage.length > 0) {
+      this.modulosUsuario = modulosEnStorage;
+    }
+
+    // Luego cargar desde el backend para tener la versión más actualizada
+    this.modulosService.getMisModulos().subscribe({
+      next: (response) => {
+        // Los módulos ya se actualizan automáticamente en el servicio
+        console.log('Módulos cargados:', response.count);
+      },
+      error: (error) => {
+        console.error('Error al cargar módulos:', error);
+        // Si hay error pero tenemos módulos en storage, seguir usándolos
+        if (modulosEnStorage.length > 0) {
+          console.log('Usando módulos del storage');
+        }
+      }
+    });
+  }
+
+  /**
+   * Obtener el emoji del icono del módulo
+   * Mapeo de iconos del backend a emojis del frontend
+   */
+  getModuloIcon(icono: string): string {
+    const iconMap: { [key: string]: string } = {
+      'dashboard': '📊',
+      'building': '🏠',
+      'apartment': '🏢',
+      'people': '🧍',
+      'person': '👤',
+      'store': '🔧',
+      'receipt': '💰',
+      'support': '🎟️'
+    };
+
+    return iconMap[icono] || '📌';
   }
 }

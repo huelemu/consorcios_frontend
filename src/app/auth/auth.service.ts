@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { Observable, BehaviorSubject, tap } from 'rxjs';
+import { Observable, BehaviorSubject, tap, switchMap } from 'rxjs';
 import { Router } from '@angular/router';
 
 export interface User {
@@ -48,7 +48,9 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private router: Router
-  ) {}
+  ) {
+    // Nota: ModulosService se inyectará más adelante para evitar dependencias circulares
+  }
 
   /**
    * Registro de usuario local
@@ -66,6 +68,7 @@ export class AuthService {
 
   /**
    * Login local (email/password)
+   * Nota: Los módulos se cargan automáticamente en el AuthGuard o en el LoginComponent
    */
   login(credentials: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login`, credentials)
@@ -80,6 +83,7 @@ export class AuthService {
 
   /**
    * Login con Google OAuth
+   * Nota: Los módulos se cargan automáticamente en el AuthGuard o en el LoginComponent
    */
   googleLogin(credential: string): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/google`, { credential })
@@ -143,6 +147,7 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('user_modules'); // Limpiar módulos
     this.currentUserSubject.next(null);
     this.router.navigate(['/login']);
   }
