@@ -347,8 +347,9 @@ export class UnidadDetailComponent implements OnInit {
 
     // Abrir modal de edición completo
     const dialogRef = this.dialog.open(TicketEditDialogComponent, {
-      width: '900px',
-      maxHeight: '90vh',
+      width: '95vw',
+      height: '90vh',
+      maxWidth: 'none',
       disableClose: false,
       data: { ticket: ticket }
     });
