@@ -35,21 +35,26 @@ export class ModulosService {
   private transformarModulos(modulos: Modulo[]): ModuloConPermisos[] {
     return modulos
       .filter(m => m.activo && m.modulo_roles && m.modulo_roles.length > 0)
-      .map(modulo => ({
-        id: modulo.id,
-        nombre: modulo.nombre,
-        clave: modulo.clave,
-        icono: modulo.icono,
-        ruta: modulo.ruta,
-        orden: modulo.orden,
-        requiere_consorcio: modulo.requiere_consorcio,
-        permisos: {
-          ver: modulo.modulo_roles[0].puede_ver,
-          crear: modulo.modulo_roles[0].puede_crear,
-          editar: modulo.modulo_roles[0].puede_editar,
-          eliminar: modulo.modulo_roles[0].puede_eliminar
-        }
-      }))
+      .map(modulo => {
+        // Después del filter, sabemos que modulo_roles existe
+        const permisos = modulo.modulo_roles![0];
+
+        return {
+          id: modulo.id,
+          nombre: modulo.nombre,
+          clave: modulo.clave,
+          icono: modulo.icono,
+          ruta: modulo.ruta,
+          orden: modulo.orden,
+          requiere_consorcio: modulo.requiere_consorcio,
+          permisos: {
+            ver: permisos.puede_ver,
+            crear: permisos.puede_crear,
+            editar: permisos.puede_editar,
+            eliminar: permisos.puede_eliminar
+          }
+        };
+      })
       .filter(m => m.permisos.ver) // Solo módulos que el usuario puede ver
       .sort((a, b) => a.orden - b.orden); // Ordenar por campo "orden"
   }
